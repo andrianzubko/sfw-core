@@ -1,0 +1,27 @@
+{
+    "name": "andrianzubko/sfw-core",
+    "description": "Simplest framework",
+    "type": "library",
+    "license": "GPL-3.0-or-later",
+    "autoload": {
+        "psr-4": {
+            "AZ\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Andrian Zubko",
+            "email": "ondr@mail.ru"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "mrclay/jsmin-php": "^2.4",
+        "phpmailer/phpmailer": "^v6.8",
+        "phpunit/phpunit": "^10.2",
+        "andrianzubko/sfw-databaser": "^0",
+        "andrianzubko/sfw-paginator": "^0",
+        "andrianzubko/sfw-templater": "^0",
+        "andrianzubko/sfw-simple-cacher": "^0"
+    }
+}

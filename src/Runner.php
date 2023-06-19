@@ -104,7 +104,7 @@ abstract class Runner extends Base
         // }}}
         // {{{ additional environment
 
-        $this->additional();
+        $this->environment();
 
         // }}}
         // {{{ go to routed enty point if runned not under test suite.
@@ -125,5 +125,5 @@ abstract class Runner extends Base
     /**
      * Placeholder for additional environment.
      */
-    protected function additional(): void {}
+    protected function environment(): void {}
 }

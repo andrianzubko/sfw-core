@@ -3,9 +3,9 @@
 namespace SFW;
 
 /**
- * Simplest framework.
+ * Simplest framework runner.
  */
-final class Runner extends Base
+abstract class Runner extends Base
 {
     /**
      * Initializing environment and routing to starting point.
@@ -96,21 +96,29 @@ final class Runner extends Base
 
         self::$e['system']['os'] = $this->detector()->os;
 
-        self::$e['system']['point'] = (new \App\Router())->get();
+        // }}}
+        // {{{ additional parameters
+
+        $this->additional();
 
         // }}}
-        // {{{ going to entry point if runned not under test suite
+        // {{{ routing and calling specified enty point if runned not under test suite.
+
+        self::$e['system']['point'] = $point = (new \App\Router())->get();
 
         if ($_SERVER['REMOTE_ADDR'] !== '0.0.0.0') {
-            $point = self::$e['system']['point'];
-
             if ($point === false || !class_exists("\\App\\Point\\$point")) {
                 $this->abend()->errorPage(404);
             }
 
-            (new ("\\App\\Point\\$point")())->main();
+            new ("\\App\\Point\\$point")();
         }
 
         // }}}
     }
+
+    /**
+     * Additional parameters.
+     */
+    abstract protected function additional(): void;
 }

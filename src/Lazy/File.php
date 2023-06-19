@@ -5,7 +5,7 @@ namespace SFW\Lazy;
 /**
  * Files functions.
  */
-class File extends \App\Lazy
+class File extends \SFW\Lazy
 {
     /**
      * File removing.

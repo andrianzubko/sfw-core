@@ -5,7 +5,7 @@ namespace SFW\Lazy;
 /**
  * Output control.
  */
-class Out extends \App\Lazy
+class Out extends \SFW\Lazy
 {
     /**
      * Mime types for compess via gzip.

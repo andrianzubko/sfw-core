@@ -5,7 +5,7 @@ namespace SFW\Lazy;
 /**
  * Text functions.
  */
-class Text extends \App\Lazy
+class Text extends \SFW\Lazy
 {
     /**
      * UTF-8 spaces for trim.

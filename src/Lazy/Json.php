@@ -5,7 +5,7 @@ namespace SFW\Lazy;
 /**
  * Json functions.
  */
-class Json extends \App\Lazy
+class Json extends \SFW\Lazy
 {
     /**
      * Decoding some json fields in array. Very comfortably for DB results.

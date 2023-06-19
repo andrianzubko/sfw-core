@@ -5,7 +5,7 @@ namespace SFW\Lazy;
 /**
  * Number functions.
  */
-class Number extends \App\Lazy
+class Number extends \SFW\Lazy
 {
     /**
      * Getting number from anything.

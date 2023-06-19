@@ -5,7 +5,7 @@ namespace SFW\Lazy;
 /**
  * Dir functions.
  */
-class Dir extends \App\Lazy
+class Dir extends \SFW\Lazy
 {
     /**
      * For temporary directory.

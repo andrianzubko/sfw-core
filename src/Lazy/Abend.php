@@ -5,7 +5,7 @@ namespace SFW\Lazy;
 /**
  * ABnormal END.
  */
-class Abend extends \App\Lazy
+class Abend extends \SFW\Lazy
 {
     /**
      * Log error and show error page 500.

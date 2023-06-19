@@ -5,7 +5,7 @@ namespace SFW\Lazy;
 /**
  * Templater.
  */
-class Templater extends \App\Lazy
+class Templater extends \SFW\Lazy
 {
     /**
      * Add more properties to this array from constructor in nested class.

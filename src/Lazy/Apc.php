@@ -5,7 +5,7 @@ namespace SFW\Lazy;
 /**
  * APC cache.
  */
-class Apc extends \App\Lazy
+class Apc extends \SFW\Lazy
 {
     /**
      * APC cache module instance.

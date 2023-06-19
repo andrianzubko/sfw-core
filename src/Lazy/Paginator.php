@@ -5,7 +5,7 @@ namespace SFW\Lazy;
 /**
  * Paginal navigation.
  */
-class Paginator extends \App\Lazy
+class Paginator extends \SFW\Lazy
 {
     /**
      * Paginal navigation calculation and return as array.

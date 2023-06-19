@@ -5,7 +5,7 @@ namespace SFW\Lazy;
 /**
  * Notifier.
  */
-class Notifier extends \App\Lazy
+class Notifier extends \SFW\Lazy
 {
     /**
      * Default structure.
@@ -49,8 +49,10 @@ class Notifier extends \App\Lazy
     /**
      * Preparing notify with auto cleaner at transaction fails.
      */
-    public function prepare(\App\Notify $notify): void
+    public function prepare(string $name, ...$arguments): void
     {
+        $notify = new ("App\\Notify\\$name")(...$arguments);
+
         $notify->prepare();
 
         $this->notifies[] = &$notify;

@@ -44,12 +44,12 @@ abstract class Base extends \stdClass
             $class = "SFW\\Lazy\\$Name";
         }
 
-        if ($arguments) {
-            return new $class(...$arguments);
+        $lazy = (new $class(...$arguments))->getInstance();
+
+        if (!$arguments) {
+            self::$lazies[$name] = $lazy;
         }
 
-        self::$lazies[$name] = (new $class())->getInstance();
-
-        return self::$lazies[$name];
+        return $lazy;
     }
 }

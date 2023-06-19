@@ -5,7 +5,7 @@ namespace SFW\Lazy;
 /**
  * JS and CSS merger.
  */
-class Merger extends \App\Lazy
+class Merger extends \SFW\Lazy
 {
     /**
      * Javascript directories.

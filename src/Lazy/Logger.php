@@ -5,7 +5,7 @@ namespace SFW\Lazy;
 /**
  * Logger.
  */
-class Logger extends \App\Lazy
+class Logger extends \SFW\Lazy
 {
     /**
      * Logging in default timezone time.

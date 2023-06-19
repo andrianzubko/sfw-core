@@ -96,18 +96,24 @@ abstract class Runner extends Base
 
         self::$e['system']['os'] = $this->detector()->os;
 
+        self::$e['system']['point'] = (new \App\Router())->get();
+
+        if (self::$e['system']['point'] === false) {
+            $this->abend()->errorPage(404);
+        }
+
         // }}}
-        // {{{ additional parameters
+        // {{{ additional environment
 
         $this->additional();
 
         // }}}
-        // {{{ routing and calling specified enty point if runned not under test suite.
-
-        self::$e['system']['point'] = $point = (new \App\Router())->get();
+        // {{{ go to routed enty point if runned not under test suite.
 
         if ($_SERVER['REMOTE_ADDR'] !== '0.0.0.0') {
-            if ($point === false || !class_exists("\\App\\Point\\$point")) {
+            $point = self::$e['system']['point'];
+
+            if (!class_exists("\\App\\Point\\$point")) {
                 $this->abend()->errorPage(404);
             }
 
@@ -118,7 +124,7 @@ abstract class Runner extends Base
     }
 
     /**
-     * Additional parameters.
+     * Placeholder for additional environment.
      */
-    abstract protected function additional(): void;
+    protected function additional(): void {}
 }

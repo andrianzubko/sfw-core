@@ -33,11 +33,9 @@ class Merger extends \SFW\Lazy
     /**
      * Get current prefix of merged files.
      */
-    public function getPrefix(): string|false
+    public function getPrefix(): string
     {
-        $time = @filemtime($this->dir);
-
-        return $time === false ? false : (string) $time;
+        return (string) @filemtime($this->dir);
     }
 
     /**

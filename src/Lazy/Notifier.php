@@ -53,8 +53,6 @@ class Notifier extends \SFW\Lazy
     {
         $notify = new ("App\\Notify\\$name")(...$arguments);
 
-        $notify->prepare();
-
         $this->notifies[] = &$notify;
 
         $this->transaction()->onabort(

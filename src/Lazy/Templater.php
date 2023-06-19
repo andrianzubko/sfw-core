@@ -3,12 +3,12 @@
 namespace SFW\Lazy;
 
 /**
- * Templater with STE.
+ * Templater.
  */
-class Templater extends \SFW\Lazy
+class Templater extends \App\Lazy
 {
     /**
-     * For your own properties.
+     * Add more properties to this array from constructor in nested class.
      */
     protected array $properties = [];
 

@@ -5,7 +5,7 @@ namespace SFW\Lazy;
 /**
  * Device and OS detector.
  */
-class Detector extends \SFW\Lazy
+class Detector extends \App\Lazy
 {
     /**
      * Device: 'mobile' or 'desktop'

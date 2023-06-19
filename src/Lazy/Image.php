@@ -5,7 +5,7 @@ namespace SFW\Lazy;
 /**
  * Image functions.
  */
-class Image extends \SFW\Lazy
+class Image extends \App\Lazy
 {
     /**
      * Reading image from string.

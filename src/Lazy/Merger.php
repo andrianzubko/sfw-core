@@ -5,7 +5,7 @@ namespace SFW\Lazy;
 /**
  * JS and CSS merger.
  */
-class Merger extends \SFW\Lazy
+class Merger extends \App\Lazy
 {
     /**
      * Javascript directories.
@@ -31,11 +31,13 @@ class Merger extends \SFW\Lazy
     protected string $dir = 'public/.merged/';
 
     /**
-     * Getting current time of merged directory. It's a version in other words.
+     * Get current prefix of merged files.
      */
-    public function getTime(): int|false
+    public function getPrefix(): string|false
     {
-        return @filemtime($this->dir);
+        $time = @filemtime($this->dir);
+
+        return $time === false ? false : (string) $time;
     }
 
     /**
@@ -74,9 +76,19 @@ class Merger extends \SFW\Lazy
             }
         }
 
-        $mergedTime = $this->getTime();
+        $mergedTime = @filemtime($this->dir);
 
         if ($sections) {
+            if ($mergedTime !== false) {
+                foreach (scandir($this->dir) as $file) {
+                    if (preg_match('/^(\d+)\./', $file, $M) && $M[1] != $mergedTime) {
+                        $mergedTime = false;
+
+                        break;
+                    }
+                }
+            }
+
             if ($mergedTime !== false) {
                 foreach (array_keys($sections) as $section) {
                     foreach (array_keys($sections[$section]) as $pattern) {
@@ -105,7 +117,7 @@ class Merger extends \SFW\Lazy
                 $this->abend()->error();
             }
 
-            $mergedTime = $this->getTime();
+            $mergedTime = @filemtime($this->dir);
 
             foreach (array_keys($sections) as $section) {
                 foreach (array_keys($sections[$section]) as $pattern) {

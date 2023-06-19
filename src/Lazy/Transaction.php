@@ -5,7 +5,7 @@ namespace SFW\Lazy;
 /**
  * Transaction.
  */
-class Transaction extends \SFW\Lazy
+class Transaction extends \App\Lazy
 {
     /**
      * How much retries transaction with expected states.

@@ -1,6 +1,6 @@
 {
     "name": "andrianzubko/sfw-core",
-    "description": "Simplest framework",
+    "description": "SFW core",
     "type": "library",
     "license": "GPL-3.0-or-later",
     "autoload": {

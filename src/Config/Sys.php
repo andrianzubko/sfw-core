@@ -38,11 +38,6 @@ class Sys
     // {{{ mailer
 
     /**
-     * Mailer enabled or not.
-     */
-    public bool $mailerEnabled = true;
-
-    /**
      * Mailer default sender.
      */
     public array $mailerSender = [];
@@ -58,12 +53,17 @@ class Sys
     public array $mailerRecipients = [];
 
     // }}}
-    // {{{ recombiner
+    // {{{ other
 
     /**
-     * Recheck and recombine css and js files.
+     * Merge css and js files.
      */
-    public bool $recombineCssAndJs = true;
+    public bool $mergeCssAndJs = true;
+
+    /**
+     * Cacher prefix.
+     */
+    public ?string $cacherPrefix = null;
 
     // }}}
 }

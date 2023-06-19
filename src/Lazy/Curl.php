@@ -5,7 +5,7 @@ namespace SFW\Lazy;
 /**
  * CURL.
  */
-class Curl extends \SFW\Lazy
+class Curl extends \App\Lazy
 {
     /**
      * Do CURL request with encoding detection.

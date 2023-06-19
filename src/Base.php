@@ -18,14 +18,14 @@ abstract class Base extends \stdClass
     protected static array $config;
 
     /**
-     * Already included lazy classes.
-     */
-    private static array $lazies = [];
-
-    /**
      * Available from everywhere default and user enviroment.
      */
     protected static array $e = [];
+
+    /**
+     * Already included lazy classes.
+     */
+    private static array $lazies = [];
 
     /**
      * This magic method allows you to access lazy classes from anywhere except templates.
@@ -36,10 +36,12 @@ abstract class Base extends \stdClass
             return self::$lazies[$name];
         }
 
-        $class = sprintf("Lazy\\%s", ucfirst($name));
+        $Name = ucfirst($name);
+
+        $class = "App\\Lazy\\$Name";
 
         if (!class_exists($class)) {
-            $class = "SFW\\$class";
+            $class = "SFW\\Lazy\\$Name";
         }
 
         if ($arguments) {

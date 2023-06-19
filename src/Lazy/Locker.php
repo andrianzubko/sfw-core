@@ -5,7 +5,7 @@ namespace SFW\Lazy;
 /**
  * Locker.
  */
-class Locker extends \SFW\Lazy
+class Locker extends \App\Lazy
 {
     /**
      * Lock files pattern.

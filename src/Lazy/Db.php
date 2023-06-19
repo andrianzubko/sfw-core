@@ -5,7 +5,7 @@ namespace SFW\Lazy;
 /**
  * Database.
  */
-class Db extends \SFW\Lazy
+class Db extends \App\Lazy
 {
     /**
      * Database module instance.

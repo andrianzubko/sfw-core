@@ -5,33 +5,32 @@ namespace SFW\Lazy;
 /**
  * Notifier.
  */
-class Notifier extends \SFW\Lazy
+class Notifier extends \App\Lazy
 {
     /**
-     * Prepared scructures.
-     */
-    protected array $structs = [];
-
-    /**
-     * Default environment for structures.
+     * Default structure.
      */
     protected array $defaults;
 
     /**
-     * Initializing default structure and at shutdown sender.
+     * Prepared notifies.
+     */
+    protected array $notifies = [];
+
+    /**
+     * Initializing default structure and registering shutdown finisher.
      */
     public function __construct()
     {
         $this->defaults = [
             'subject' => null,
+            'body' => null,
             'sender' => [],
-            'addresses' => [],
+            'recipients' => [],
             'replies' => [],
             'customs' => [],
             'attachments' => [],
-            'attachments_files' => [],
-            'template' => null,
-            'timezone' => null,
+            'files' => [],
             'e' => [
                 'system' => self::$e['system'],
                 'config' => self::$e['config'],
@@ -39,10 +38,10 @@ class Notifier extends \SFW\Lazy
         ];
 
         register_shutdown_function(
-            function (string $cwd) {
+            function (string $cwd): void {
                 chdir($cwd);
 
-                $this->send();
+                $this->finish();
             }, getcwd()
         );
     }
@@ -50,82 +49,84 @@ class Notifier extends \SFW\Lazy
     /**
      * Preparing notify with auto cleaner at transaction fails.
      */
-    public function prepare(\SFW\Lazy\Notify $notify): void
+    public function prepare(\App\Notify $notify): void
     {
-        $structs = $notify->prepare($this->defaults);
+        $notify->prepare();
 
-        foreach (array_keys($structs) as $i) {
-            $this->structs[] = &$structs[$i];
-        }
+        $this->notifies[] = &$notify;
 
         $this->transaction()->onabort(
-            function () use ($structs): void {
-                foreach (array_keys($structs) as $i) {
-                    $structs[$i] = null;
-                }
+            function () use (&$notify): void {
+                $notify = null;
             }
         );
     }
 
     /**
-     * Sending notifies after browser connection aborting.
+     * Call finish() method at all prepared notifies.
      */
-    public function send(): void
+    public function finish(): void
     {
-        foreach ($this->structs as $struct) {
-            if (isset($struct) && count($struct['addresses'])) {
-                try {
-                    $mailer = new \PHPMailer\PHPMailer\PHPMailer(true);
+        while ($this->notifies) {
+            $notify = array_shift($this->notifies);
 
-                    $mailer->CharSet = 'utf-8';
+            if (isset($notify)) {
+                $structs = $notify->finish($this->defaults);
 
-                    if (isset($struct['subject'])) {
-                        $mailer->Subject = $struct['subject'];
-                    }
+                foreach ($structs as $struct) {
+                    $this->send($struct);
+                }
+            }
+        }
+    }
 
-                    $mailer->setFrom(...$struct['sender']);
+    /**
+     * Sending single message.
+     */
+    public function send(array $struct): void
+    {
+        $mailer = new \PHPMailer\PHPMailer\PHPMailer();
 
-                    if (!empty(self::$config['mailer']['recipients'])) {
-                        foreach (self::$config['mailer']['recipients'] as $email) {
-                            try {
-                                $mailer->addAddress($email);
-                            } catch (\Exception $error) {}
-                        }
-                    } else {
-                        foreach ($struct['addresses'] as $email => $name) {
-                            try {
-                                $mailer->addAddress($email, $name);
-                            } catch (\Exception $error) {}
-                        }
-                    }
+        $mailer->CharSet = 'utf-8';
 
-                    foreach ($struct['replies'] as $email => $name) {
-                        try {
-                            $mailer->addReplyTo($email, $name);
-                        } catch (\Exception $error) {}
-                    }
+        if (isset($struct['subject'])) {
+            $mailer->Subject = $struct['subject'];
+        }
 
-                    foreach ($struct['customs'] as $name => $value) {
-                        $mailer->addCustomHeader($name, $value);
-                    }
+        if (isset($struct['body'])) {
+            $mailer->msgHTML($struct['body']);
+        }
 
-                    foreach ($struct['attachments'] as $filename => $contents) {
-                        $mailer->addStringAttachment($contents, $filename);
-                    }
+        if ($struct['sender']) {
+            $mailer->setFrom(...$struct['sender']);
+        }
 
-                    foreach ($struct['attachments_files'] as $filename => $path) {
-                        $mailer->addAttachment($path, $filename);
-                    }
-
-                    $mailer->msgHTML($this->out()->template($struct['e'], $struct['template'], true));
-
-                    if (self::$config['mailer']['enabled']) {
-                        $mailer->send();
-                    }
-                } catch (\Exception $error) {}
+        if (self::$config['mailerRecipients']) {
+            foreach (self::$config['mailerRecipients'] as $recipient) {
+                $mailer->addAddress(...$recipient);
+            }
+        } else {
+            foreach ($struct['recipients'] as $recipient) {
+                $mailer->addAddress(...$recipient);
             }
         }
 
-        $this->structs = [];
+        foreach ($struct['replies'] as $reply) {
+            $mailer->addReplyTo(...$reply);
+        }
+
+        foreach ($struct['customs'] as $custom) {
+            $mailer->addCustomHeader(...$custom);
+        }
+
+        foreach ($struct['attachments'] as $attachment) {
+            $mailer->addStringAttachment(...$attachment);
+        }
+
+        foreach ($struct['files'] as $file) {
+            $mailer->addAttachment(...$file);
+        }
+
+        $mailer->send();
     }
 }

@@ -5,7 +5,7 @@ namespace SFW\Lazy;
 /**
  * Output control.
  */
-class Out extends \SFW\Lazy
+class Out extends \App\Lazy
 {
     /**
      * Mime types for compess via gzip.
@@ -151,20 +151,16 @@ class Out extends \SFW\Lazy
     }
 
     /**
-     * Redirect with optional message.
+     * Redirect.
      */
-    public function redirect(string $url, ...$message): void
+    public function redirect(string $url): void
     {
-        if (count($message)) {
-            setcookie('M', json_encode($message), ['path' => '/']);
-        }
-
         if ($url === '') {
             $url = '/';
         }
 
-        if (strpos($url, '/') === 0 && strpos($url, '//') !== 0) {
-            $url = self::$e['system']['basicUrl'] . $url;
+        if (str_starts_with($url, '/') && !str_starts_with($url, '//')) {
+            $url = self::$e['system']['basic_url'] . $url;
         }
 
         http_response_code(302);

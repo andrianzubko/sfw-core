@@ -18,7 +18,7 @@ class Detector extends \SFW\Lazy
     public string $os;
 
     /**
-     * Very simple and very fast detector. Enough for CSS.
+     * Very simple and very fast detector. Enough for CSS triggering.
      */
     public function __construct()
     {

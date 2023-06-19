@@ -81,7 +81,8 @@ abstract class Runner extends Base
         }
 
         self::$e['system']['basic_url'] = sprintf('%s://%s',
-            self::$e['system']['basic_url_scheme'], self::$e['system']['basic_url_host']
+            self::$e['system']['basic_url_scheme'],
+            self::$e['system']['basic_url_host']
         );
 
         self::$e['system']['timestamp'] = (int) self::$started;
@@ -90,11 +91,9 @@ abstract class Runner extends Base
             $this->merger()->recombine();
         }
 
-        self::$e['system']['merged_prefix'] = $this->merger()->getPrefix();
+        self::$e['system']['merged'] = $this->merger()->get();
 
-        self::$e['system']['device'] = $this->detector()->device;
-
-        self::$e['system']['os'] = $this->detector()->os;
+        self::$e['system']['detected'] = (array) $this->detector();
 
         self::$e['system']['point'] = (new \App\Router())->get();
 

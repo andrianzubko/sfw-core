@@ -31,11 +31,11 @@ class Merger extends \SFW\Lazy
     protected string $dir = 'public/.merged/';
 
     /**
-     * Get current prefix of merged files.
+     * Get info about merged files.
      */
-    public function getPrefix(): string
+    public function get(): array
     {
-        return (string) @filemtime($this->dir);
+        return ['prefix' => (string) @filemtime($this->dir)];
     }
 
     /**

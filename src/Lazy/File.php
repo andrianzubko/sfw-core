@@ -27,9 +27,9 @@ class File extends \SFW\Lazy
      */
     public function put(string $target, mixed $contents, int $flags = 0): bool
     {
-        if ($this->dir()->create(dirname($target)) === false ||
-                file_put_contents($target, $contents, $flags) === false) {
-
+        if ($this->dir()->create(dirname($target)) === false
+            || file_put_contents($target, $contents, $flags) === false
+        ) {
             return false;
         }
 
@@ -43,9 +43,9 @@ class File extends \SFW\Lazy
      */
     public function copy(string $source, string $target): bool
     {
-        if ($this->dir()->create(dirname($target)) === false ||
-                copy($source, $target) === false) {
-
+        if ($this->dir()->create(dirname($target)) === false
+            || copy($source, $target) === false
+        ) {
             return false;
         }
 
@@ -59,9 +59,9 @@ class File extends \SFW\Lazy
      */
     public function move(string $source, string $target): bool
     {
-        if ($this->dir()->create(dirname($target)) === false ||
-                rename($source, $target) === false) {
-
+        if ($this->dir()->create(dirname($target)) === false
+            || rename($source, $target) === false
+        ) {
             return false;
         }
 

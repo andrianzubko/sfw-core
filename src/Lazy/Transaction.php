@@ -80,9 +80,9 @@ class Transaction extends \SFW\Lazy
                     $logger($error->getSqlState(), $retry);
                 }
 
-                if (!in_array($error->getSqlState(), $expected ?? [], true) ||
-                        $retry == $this->retries) {
-
+                if (!in_array($error->getSqlState(), $expected ?? [], true)
+                    || $retry == $this->retries
+                ) {
                     $this->abend()->$mode($error->getMessage(), $error->getFile(), $error->getLine());
 
                     return false;

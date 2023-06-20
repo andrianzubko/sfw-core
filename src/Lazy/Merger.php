@@ -12,7 +12,6 @@ class Merger extends \SFW\Lazy
      */
     protected array $jsDir = [
         'primary.js' => 'public/.js/primary/',
-
         'secondary.js' => 'public/.js/secondary/',
     ];
 
@@ -21,7 +20,6 @@ class Merger extends \SFW\Lazy
      */
     protected array $cssDir = [
         'primary.css' => 'public/.css/primary/',
-
         'secondary.css' => 'public/.css/secondary/',
     ];
 
@@ -177,21 +175,21 @@ class Merger extends \SFW\Lazy
             function (array $M) use ($merged): string {
                 $data = $type = false;
 
-                if (count(explode($M[1], $merged, 3)) == 2) {
-                    if (preg_match('~^/.+\.(gif|png|jpg|jpeg|svg|woff|woff2)\b$~ui', $M[1], $N)) {
-                        $type = strtolower($N[1]);
+                if (count(explode($M[1], $merged, 3)) == 2
+                    && preg_match('~^/.+\.(gif|png|jpg|jpeg|svg|woff|woff2)\b$~ui', $M[1], $N)
+                ) {
+                    $type = strtolower($N[1]);
 
-                        if ($type === 'jpg') {
-                            $type = 'jpeg';
-                        } elseif ($type === 'svg') {
-                            $type = 'svg+xml';
-                        }
+                    if ($type === 'jpg') {
+                        $type = 'jpeg';
+                    } elseif ($type === 'svg') {
+                        $type = 'svg+xml';
+                    }
 
-                        $size = @filesize('..' . $M[1]);
+                    $size = @filesize('..' . $M[1]);
 
-                        if ($size !== false && $size <= 32 * 1024) {
-                            $data = @$this->file()->get('..' . $M[1]);
-                        }
+                    if ($size !== false && $size <= 32 * 1024) {
+                        $data = @$this->file()->get('public' . $M[1]);
                     }
                 }
 

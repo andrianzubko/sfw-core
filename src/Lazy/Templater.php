@@ -17,7 +17,7 @@ class Templater extends \SFW\Lazy
      */
     public function transform(array $e, string $template): string
     {
-        return \SFW\Templater::transform("templates/$template",
+        return \SFW\Templater::transform("templates/$template.php",
             array_merge(
                 [
                     'e' => $e,

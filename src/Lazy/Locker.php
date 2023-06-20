@@ -40,12 +40,10 @@ class Locker extends \SFW\Lazy
      */
     public function unlock(string $key): void
     {
-        if (!isset($this->locks[$key])) {
-            return;
+        if (isset($this->locks[$key])) {
+            fclose($this->locks[$key]);
+
+            unset($this->locks[$key]);
         }
-
-        fclose($this->locks[$key]);
-
-        unset($this->locks[$key]);
     }
 }

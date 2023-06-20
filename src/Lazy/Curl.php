@@ -58,13 +58,13 @@ class Curl extends \SFW\Lazy
 
         $encoding = 'utf-8';
 
-        if ((preg_match('~charset\s*=\s*([a-z\d\-]+)~i', $info['content_type'], $M) ||
-                preg_match('~text/html~i', $info['content_type']) &&
-                    preg_match('~<meta[^>]+content-type[^>]*>~i', $response, $N) &&
-                        preg_match('~charset\s*=\s*([a-z\d\-]+)~i', $N[0], $M)) &&
-                            !in_array(strtolower($M[1]), ['utf8','utf-8'], true) &&
-                                @mb_encoding_aliases($M[1]) !== false) {
-
+        if ((preg_match('~charset\s*=\s*([a-z\d\-]+)~i', $info['content_type'], $M)
+            || preg_match('~text/html~i', $info['content_type'])
+                && preg_match('~<meta[^>]+content-type[^>]*>~i', $response, $N)
+                    && preg_match('~charset\s*=\s*([a-z\d\-]+)~i', $N[0], $M))
+                        && !in_array(strtolower($M[1]), ['utf8','utf-8'], true)
+                            && @mb_encoding_aliases($M[1]) !== false
+        ) {
             $encoding = $M[1];
         }
 

@@ -65,10 +65,10 @@ class Dir extends \SFW\Lazy
     {
         $status = true;
 
-        if (is_dir($source) &&
-                $this->dir()->create($target) !== false &&
-                    ($items = scandir($source)) !== false) {
-
+        if (is_dir($source)
+            && $this->dir()->create($target) !== false
+                && ($items = scandir($source)) !== false
+        ) {
             foreach ($items as $item) {
                 if ($item !== '.' && $item !== '..') {
                     if (is_dir("$source/$item")) {

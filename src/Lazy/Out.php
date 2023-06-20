@@ -77,10 +77,10 @@ class Out extends \SFW\Lazy
             sprintf('Content-Type: %s; charset=utf-8', $mime)
         );
 
-        if (strlen($contents) > 32 * 1024 &&
-                in_array($mime, $this->compress, true) &&
-                    strpos($_SERVER['HTTP_ACCEPT_ENCODING'] ?? '', 'gzip') !== false) {
-
+        if (strlen($contents) > 32 * 1024
+            && in_array($mime, $this->compress, true)
+                && strpos($_SERVER['HTTP_ACCEPT_ENCODING'] ?? '', 'gzip') !== false
+        ) {
             header('Content-Encoding: gzip');
 
             $contents = gzencode($contents, 5);

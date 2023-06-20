@@ -8,7 +8,7 @@ namespace SFW;
 abstract class Notify extends Base
 {
     /**
-     * Fill and return array of structures. This method called after browser disconnect.
+     * Build and return array of structures. This method called after browser disconnect.
      */
-    abstract public function finish(array $defaults): array;
+    abstract public function build(array $defaults): array;
 }

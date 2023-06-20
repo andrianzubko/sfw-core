@@ -18,7 +18,7 @@ class Notifier extends \SFW\Lazy
     protected array $notifies = [];
 
     /**
-     * Initializing default structure and registering shutdown finisher.
+     * Initializing default structure and registering shutdown function to build and send all messages.
      */
     public function __construct()
     {
@@ -41,7 +41,17 @@ class Notifier extends \SFW\Lazy
             function (string $cwd): void {
                 chdir($cwd);
 
-                $this->finish();
+                while ($this->notifies) {
+                    $notify = array_shift($this->notifies);
+
+                    if (isset($notify)) {
+                        $structs = $notify->build($this->defaults);
+
+                        foreach ($structs as $struct) {
+                            $this->send($struct);
+                        }
+                    }
+                }
             }, getcwd()
         );
     }
@@ -63,27 +73,9 @@ class Notifier extends \SFW\Lazy
     }
 
     /**
-     * Call finish() method at all prepared notifies.
-     */
-    public function finish(): void
-    {
-        while ($this->notifies) {
-            $notify = array_shift($this->notifies);
-
-            if (isset($notify)) {
-                $structs = $notify->finish($this->defaults);
-
-                foreach ($structs as $struct) {
-                    $this->send($struct);
-                }
-            }
-        }
-    }
-
-    /**
      * Sending single message.
      */
-    public function send(array $struct): void
+    protected function send(array $struct): void
     {
         $mailer = new \PHPMailer\PHPMailer\PHPMailer();
 

@@ -7,10 +7,8 @@ namespace SFW\Config;
  */
 class Sys
 {
-    // {{{ database
-
     /**
-     * Database driver.
+     * Database driver (PgSQL or MySQL).
      */
     public string $dbDriver = '';
 
@@ -34,36 +32,23 @@ class Sys
      */
     public float $dbSlowQueriesMin = 0.5;
 
-    // }}}
-    // {{{ mailer
-
     /**
-     * Mailer default sender.
-     */
-    public array $mailerSender = [];
-
-    /**
-     * Mailer default replies.
-     */
-    public array $mailerReplies = [];
-
-    /**
-     * Mailer recipients (overriding all for testing).
-     */
-    public array $mailerRecipients = [];
-
-    // }}}
-    // {{{ other
-
-    /**
-     * Merge css and js files.
+     * Merge css and js files (allways disable on production).
      */
     public bool $mergeCssAndJs = true;
 
     /**
-     * Cacher prefix.
+     * Cacher prefix (if not set, then md5(getcwd()) will be used).
      */
     public ?string $cacherPrefix = null;
 
-    // }}}
+    /**
+     * Enable mailer (if disabled, then build() method in notifies will be called, but no emails sent).
+     */
+    public bool $mailer = true;
+
+    /**
+     * Instead of disabling, you can replace recipients with these. Format: array('EMAIL' or array('EMAIL'[, 'NAME']), ...)
+     */
+    public array $mailerReplaceRecipients = [];
 }

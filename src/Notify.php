@@ -10,5 +10,8 @@ abstract class Notify extends Base
     /**
      * Build and return array of structures. This method called after browser disconnect.
      */
-    abstract public function build(array $defaults): array;
+    public function build(\SFW\NotifyStruct $defaultStruct): array
+    {
+        return [];
+    }
 }

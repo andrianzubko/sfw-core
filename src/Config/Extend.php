@@ -7,10 +7,8 @@ namespace SFW\Config;
  */
 class Extend
 {
-    // {{{ basic
-
     /**
-     * Basic URL of site.
+     * Basic URL of site (autodetect if not set).
      */
     public ?string $basicUrl = null;
 
@@ -18,16 +16,4 @@ class Extend
      * Default timezone.
      */
     public string $timezone = 'Europe/Moscow';
-
-    /**
-     * Sitename.
-     */
-    public string $sitename = '';
-
-    /**
-     * Opened for robots or not.
-     */
-    public bool $robots = false;
-
-    // }}}
 }

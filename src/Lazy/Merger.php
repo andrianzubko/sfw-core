@@ -33,7 +33,15 @@ class Merger extends \SFW\Lazy
      */
     public function get(): array
     {
-        return ['prefix' => (string) @filemtime($this->dir)];
+        if (($items = @scandir($this->dir)) !== false) {
+            foreach ($items as $item) {
+                if ($item !== '.' && $item !== '..') {
+                    return ['prefix' => (int) $item];
+                }
+            }
+        }
+
+        return ['prefix' => false];
     }
 
     /**
@@ -53,45 +61,35 @@ class Merger extends \SFW\Lazy
         $sections = [];
 
         foreach ($this->jsDir as $name => $dir) {
-            if (is_dir($dir)) {
-                foreach (scandir($dir) as $file) {
-                    if (preg_match('/\.js$/', $file)) {
-                        $sections['js'][$this->dir . sprintf('%%s.script.%%s')][$name][] = $dir . $file;
+            if (($items = scandir($dir)) !== false) {
+                foreach ($items as $item) {
+                    if (preg_match('/\.js$/', $item)) {
+                        $sections['js'][$this->dir . "%s.script.%s"][$name][] = $dir . $item;
                     }
                 }
             }
         }
 
         foreach ($this->cssDir as $name => $dir) {
-            if (is_dir($dir)) {
-                foreach (scandir($dir) as $file) {
-                    if (preg_match('/^([a-z])(?:\..*)?\.css$/', $file, $M)) {
-                        $sections['css'][$this->dir . sprintf('%%s.styles.%s.%%s', $M[1])][$name][] = $dir . $file;
+            if (($items = scandir($dir)) !== false) {
+                foreach ($items as $item) {
+                    if (preg_match('/^([a-z])(?:\..*)?\.css$/', $item, $M)) {
+                        $sections['css'][$this->dir . "%s.styles.{$M[1]}.%s"][$name][] = $dir . $item;
                     }
                 }
             }
         }
 
-        $mergedTime = @filemtime($this->dir);
+        $prefix = $this->get()['prefix'];
 
         if ($sections) {
-            if ($mergedTime !== false) {
-                foreach (scandir($this->dir) as $file) {
-                    if (preg_match('/^(\d+)\./', $file, $M) && $M[1] != $mergedTime) {
-                        $mergedTime = false;
-
-                        break;
-                    }
-                }
-            }
-
-            if ($mergedTime !== false) {
+            if ($prefix !== false) {
                 foreach (array_keys($sections) as $section) {
                     foreach (array_keys($sections[$section]) as $pattern) {
                         foreach ($sections[$section][$pattern] as $name => $files) {
                             foreach ($files as $file) {
-                                if ((int) filemtime($file) > $mergedTime) {
-                                    $mergedTime = false;
+                                if ((int) filemtime($file) > $prefix) {
+                                    $prefix = false;
 
                                     break 4;
                                 }
@@ -101,31 +99,27 @@ class Merger extends \SFW\Lazy
                 }
             }
         } else {
-            $this->dir()->remove($this->dir);
-
-            $mergedTime = false;
+            $prefix = false;
         }
 
-        if ($sections && $mergedTime === false) {
-            $this->dir()->remove($this->dir);
+        if ($prefix === false) {
+            $this->dir()->recreate($this->dir);
 
-            if ($this->dir()->create($this->dir) === false) {
-                $this->abend()->error();
-            }
+            if ($sections) {
+                $prefix = time();
 
-            $mergedTime = @filemtime($this->dir);
+                foreach (array_keys($sections) as $section) {
+                    foreach (array_keys($sections[$section]) as $pattern) {
+                        foreach ($sections[$section][$pattern] as $name => $files) {
+                            $sections[$section][$pattern][$name] = $this->{$section}($files);
+                        }
 
-            foreach (array_keys($sections) as $section) {
-                foreach (array_keys($sections[$section]) as $pattern) {
-                    foreach ($sections[$section][$pattern] as $name => $files) {
-                        $sections[$section][$pattern][$name] = $this->{$section}($files);
-                    }
+                        $sections[$section][$pattern][$section] = implode("\n", $sections[$section][$pattern]);
 
-                    $sections[$section][$pattern][$section] = implode("\n", $sections[$section][$pattern]);
-
-                    foreach ($sections[$section][$pattern] as $name => $merged) {
-                        if ($this->file()->put(sprintf($pattern, $mergedTime, $name), $merged) === false) {
-                            $this->abend()->error();
+                        foreach ($sections[$section][$pattern] as $name => $merged) {
+                            if ($this->file()->put(sprintf($pattern, $prefix, $name), $merged) === false) {
+                                $this->abend()->error();
+                            }
                         }
                     }
                 }
@@ -186,7 +180,7 @@ class Merger extends \SFW\Lazy
                         $type = 'svg+xml';
                     }
 
-                    $size = @filesize('..' . $M[1]);
+                    $size = @filesize('public' . $M[1]);
 
                     if ($size !== false && $size <= 32 * 1024) {
                         $data = @$this->file()->get('public' . $M[1]);

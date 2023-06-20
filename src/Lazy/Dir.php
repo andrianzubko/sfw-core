@@ -25,6 +25,18 @@ class Dir extends \SFW\Lazy
     }
 
     /**
+     * Directory recreation.
+     */
+    public function recreate(string $target): bool
+    {
+        if (!$this->dir()->remove($target)) {
+            return false;
+        }
+
+        return mkdir($target, 0777, true);
+    }
+
+    /**
      * Directory removing.
      */
     public function remove(string $target, bool $recursive = true): bool

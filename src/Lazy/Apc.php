@@ -8,6 +8,11 @@ namespace SFW\Lazy;
 class Apc extends \SFW\Lazy
 {
     /**
+     * Just in case.
+     */
+    public function __construct() {}
+
+    /**
      * APC cache module instance.
      */
     public function getInstance(): object

@@ -8,6 +8,11 @@ namespace SFW\Lazy;
 class Image extends \SFW\Lazy
 {
     /**
+     * Just in case.
+     */
+    public function __construct() {}
+
+    /**
      * Reading image from string.
      */
     public function fromString(string|false|null $data): \GdImage|false

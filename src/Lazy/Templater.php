@@ -8,12 +8,17 @@ namespace SFW\Lazy;
 class Templater extends \SFW\Lazy
 {
     /**
-     * Add more properties to this array from constructor in nested class.
+     * More properties.
      */
     protected array $properties = [];
 
     /**
-     * Transforming template to final page.
+     * Just in case of adding properties.
+     */
+    public function __construct() {}
+
+    /**
+     * Transforming template to page.
      */
     public function transform(array $e, string $template): string
     {

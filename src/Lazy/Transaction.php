@@ -8,6 +8,11 @@ namespace SFW\Lazy;
 class Transaction extends \SFW\Lazy
 {
     /**
+     * Logger.
+     */
+    protected ?\Closure $logger = null;
+
+    /**
      * How much retries transaction with expected states.
      */
     protected int $retries = 7;
@@ -16,6 +21,11 @@ class Transaction extends \SFW\Lazy
      * Registered callbacks for running on transaction abort.
      */
     protected array $onabort = [];
+
+    /**
+     * Just in case of changing logger and retries number.
+     */
+    public function __construct() {}
 
     /**
      * Do some action on transaction abort.
@@ -74,9 +84,22 @@ class Transaction extends \SFW\Lazy
                     $onerror($error->getSqlState());
                 }
 
-                $logger = $this->getLogger();
+                $logger = $this->logger;
 
-                if ($logger) {
+                if (!isset($logger)
+                    && isset(self::$config['dbTransactionsFailsLog'])
+                ) {
+                    $logger = function (string $state, int $retry): void {
+                        $this->logger()->save(self::$config['dbTransactionsFailsLog'],
+                            sprintf("[%s] [%d] %s",
+                                $state, $retry,
+                                    idn_to_utf8($_SERVER['HTTP_HOST']) . $_SERVER['REQUEST_URI']
+                            )
+                        );
+                    };
+                }
+
+                if (isset($logger)) {
                     $logger($error->getSqlState(), $retry);
                 }
 
@@ -91,24 +114,5 @@ class Transaction extends \SFW\Lazy
         }
 
         return true;
-    }
-
-    /**
-     * Getting logger for transaction fails.
-     */
-    protected function getLogger(): ?\Closure
-    {
-        if (!isset(self::$config['dbTransactionsFailsLog'])) {
-            return null;
-        }
-
-        return function (string $state, int $retry): void {
-            $message = sprintf("[%s] [%d] %s",
-                $state, $retry,
-                    idn_to_utf8($_SERVER['HTTP_HOST']) . $_SERVER['REQUEST_URI']
-            );
-
-            $this->logger()->save(self::$config['dbTransactionsFailsLog'], $message);
-        };
     }
 }

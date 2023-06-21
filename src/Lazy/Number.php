@@ -8,6 +8,11 @@ namespace SFW\Lazy;
 class Number extends \SFW\Lazy
 {
     /**
+     * Just in case.
+     */
+    public function __construct() {}
+
+    /**
      * Getting number from anything.
      */
     public function cast(mixed $number, int $precision = 0, ?float $min = null, ?float $max = null): float

@@ -10,15 +10,15 @@ abstract class Runner extends Base
     /**
      * Initializing environment and routing to starting point.
      */
-    public function __construct()
+    final public function __construct()
     {
-        // {{{ preventing double initialization
+        // {{{ getting started microtime and preventing multiple initialization
 
-        if (isset(self::$started)) {
+        if (isset(self::$startMicrotime)) {
             return;
         }
 
-        self::$started = gettimeofday(true);
+        self::$startMicrotime = gettimeofday(true);
 
         // }}}
         // {{{ important parameters checking and correcting
@@ -85,7 +85,7 @@ abstract class Runner extends Base
             self::$e['system']['basic_url_host']
         );
 
-        self::$e['system']['timestamp'] = (int) self::$started;
+        self::$e['system']['timestamp'] = (int) self::$startMicrotime;
 
         if (self::$config['mergeCssAndJs']) {
             $this->merger()->recombine();
@@ -123,7 +123,7 @@ abstract class Runner extends Base
     }
 
     /**
-     * Placeholder for additional environment.
+     * For additional environment.
      */
-    protected function environment(): void {}
+    abstract protected function environment(): void;
 }

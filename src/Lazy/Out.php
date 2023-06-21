@@ -33,6 +33,11 @@ class Out extends \SFW\Lazy
     protected int $counter = 0;
 
     /**
+     * Just in case.
+     */
+    public function __construct() {}
+
+    /**
      * Output string as attachment.
      */
     public function attachment(string $contents, string $mime = 'text/plain', int $expire = 0, ?string $filename = null, int $status = 200): self
@@ -137,15 +142,15 @@ class Out extends \SFW\Lazy
         }
 
         $contents .= sprintf("\n<!-- script %.03f + sql(%s) %.03f + template(%s) %.03f = %.03f -->",
-            $finished - self::$started - $this->db()->getMicrotime() - $this->microtime,
+            $finished - self::$startMicrotime - $this->db()->getMicrotime() - $this->microtime,
             $this->db()->getCounter(),
             $this->db()->getMicrotime(),
             $this->counter,
             $this->microtime,
-            $finished - self::$started
+            $finished - self::$startMicrotime
         );
 
-        $this->inline($contents, 'text/html', 0, null, $status);
+        $this->out()->inline($contents, 'text/html', 0, null, $status);
 
         return $this;
     }

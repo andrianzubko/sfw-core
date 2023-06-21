@@ -8,9 +8,14 @@ namespace SFW;
 abstract class Base extends \stdClass
 {
     /**
-     * Starting time.
+     * Start microtime.
      */
-    protected static float $started;
+    protected static float $startMicrotime;
+
+    /**
+     * Already included lazy classes.
+     */
+    private static array $lazyClasses = [];
 
     /**
      * System configuration not available from templates.
@@ -23,31 +28,24 @@ abstract class Base extends \stdClass
     protected static array $e = [];
 
     /**
-     * Already included lazy classes.
-     */
-    private static array $lazies = [];
-
-    /**
      * This magic method allows you to access lazy classes from anywhere except templates.
      */
     final public function __call(string $name, array $arguments): object
     {
-        if ( isset(self::$lazies[$name])) {
-            return self::$lazies[$name];
+        if ( isset(self::$lazyClasses[$name])) {
+            return self::$lazyClasses[$name];
         }
 
-        $Name = ucfirst($name);
-
-        $class = "App\\Lazy\\$Name";
+        $class = 'App\\Lazy\\' . ucfirst($name);
 
         if (!class_exists($class)) {
-            $class = "SFW\\Lazy\\$Name";
+            $class = 'SFW\\Lazy\\' . ucfirst($name);
         }
 
         $lazy = (new $class(...$arguments))->getInstance();
 
         if (!$arguments) {
-            self::$lazies[$name] = $lazy;
+            self::$lazyClasses[$name] = $lazy;
         }
 
         return $lazy;

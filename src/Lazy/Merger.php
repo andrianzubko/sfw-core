@@ -29,6 +29,11 @@ class Merger extends \SFW\Lazy
     protected string $dir = 'public/.merged/';
 
     /**
+     * Just in case.
+     */
+    public function __construct() {}
+
+    /**
      * Get info about merged files.
      */
     public function get(): array

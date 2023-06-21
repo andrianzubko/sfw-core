@@ -18,6 +18,11 @@ class Locker extends \SFW\Lazy
     protected array $locks = [];
 
     /**
+     * Just in case.
+     */
+    public function __construct() {}
+
+    /**
      * Locking or return with false.
      */
     public function lock(string $key): bool

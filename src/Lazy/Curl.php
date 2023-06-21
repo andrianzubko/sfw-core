@@ -8,6 +8,11 @@ namespace SFW\Lazy;
 class Curl extends \SFW\Lazy
 {
     /**
+     * Just in case.
+     */
+    public function __construct() {}
+
+    /**
      * Do CURL request with encoding detection.
      */
     public function request(array $options, ?array &$headers = null): string|false

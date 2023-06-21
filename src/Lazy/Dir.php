@@ -13,6 +13,11 @@ class Dir extends \SFW\Lazy
     protected ?string $temporary;
 
     /**
+     * Just in case.
+     */
+    public function __construct() {}
+
+    /**
      * Directory creation.
      */
     public function create(string $target): bool

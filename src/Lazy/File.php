@@ -8,6 +8,11 @@ namespace SFW\Lazy;
 class File extends \SFW\Lazy
 {
     /**
+     * Just in case.
+     */
+    public function __construct() {}
+
+    /**
      * File removing.
      */
     public function remove(string $target): bool

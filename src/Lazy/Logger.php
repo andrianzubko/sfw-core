@@ -13,7 +13,7 @@ class Logger extends \SFW\Lazy
     public function __construct() {}
 
     /**
-     * Logging in default timezone time.
+     * Logging in time with default timezone.
      */
     public function save(string $file, string $message): void
     {
@@ -25,9 +25,9 @@ class Logger extends \SFW\Lazy
             date_default_timezone_set(self::$e['config']['timezone']);
         }
 
-        $this->file()->put($file,
-            sprintf("[%s] %s\n", date('d.m.y H:i'), $message)
-        );
+        $message = sprintf("[%s] %s\n", date('d.m.y H:i'), $message);
+
+        $this->file()->put($file, $message, FILE_APPEND);
 
         if (isset($timezonePrev)) {
             date_default_timezone_set($timezonePrev);

@@ -8,51 +8,64 @@ namespace SFW\Lazy;
 class Merger extends \SFW\Lazy
 {
     /**
-     * Javascript directories.
-     */
-    protected array $jsDir = [
-        'primary.js' => 'public/.js/primary/',
-        'secondary.js' => 'public/.js/secondary/',
-    ];
-
-    /**
-     * CSS directories.
-     */
-    protected array $cssDir = [
-        'primary.css' => 'public/.css/primary/',
-        'secondary.css' => 'public/.css/secondary/',
-    ];
-
-    /**
-     * Directory for merged files.
-     */
-    protected string $dir = 'public/.merged/';
-
-    /**
      * Just in case.
      */
     public function __construct() {}
 
     /**
-     * Get info about merged files.
+     * Recombine all if needed and return merged info.
      */
-    public function get(): array
+    public function get(bool $recombine = true): array
     {
-        if (($items = @scandir($this->dir)) !== false) {
-            foreach ($items as $item) {
-                if ($item !== '.' && $item !== '..') {
-                    return ['prefix' => (int) $item];
+        if ($recombine) {
+            $this->recombine();
+        }
+
+        foreach (@$this->dir()->scan('public/.merged') as $item) {
+            return ['time' => (int) $item];
+        }
+
+        return ['time' => false];
+    }
+
+    /**
+     * Preparing struct of files to merging.
+     */
+    protected function prepareStruct(): array
+    {
+        $struct = [];
+
+        foreach (['css','js'] as $type) {
+            foreach (['primary','secondary'] as $section) {
+                $dir = "public/.$type/$section";
+
+                foreach (@$this->dir()->scan($dir, true) as $item) {
+                    $file = "$dir/$item";
+
+                    if (!is_file($file) || !str_ends_with($item, ".$type")) {
+                        continue;
+                    }
+
+                    if (preg_match('~^([^/]+)/~', $item, $M)) {
+                        $struct[$type]["public/.merged/%s.{$M[1]}.$type"][] = $file;
+
+                        $struct[$type]["public/.merged/%s.{$M[1]}.$section.$type"][] = $file;
+                    } else {
+                        $struct[$type]["public/.merged/%s.$type"][] = $file;
+
+                        $struct[$type]["public/.merged/%s.$section.$type"][] = $file;
+                    }
                 }
             }
         }
 
-        return ['prefix' => false];
+        return $struct;
     }
 
     /**
      * Recombining all.
      */
-    public function recombine(): void
+    protected function recombine(): void
     {
         // {{{ locking
 
@@ -61,71 +74,72 @@ class Merger extends \SFW\Lazy
         }
 
         // }}}
-        // {{{ processing
+        // {{{ preparing struct of files
 
-        $sections = [];
+        $struct = $this->prepareStruct();
 
-        foreach ($this->jsDir as $name => $dir) {
-            if (($items = scandir($dir)) !== false) {
-                foreach ($items as $item) {
-                    if (preg_match('/\.js$/', $item)) {
-                        $sections['js'][$this->dir . "%s.script.%s"][$name][] = $dir . $item;
+        if (!$struct) {
+            $this->dir()->clear('public/.merged');
+
+            return;
+        }
+
+        // }}}
+        // {{{ looking for time-prefix of merged files and some checking consistency
+
+        $count = 0;
+
+        $time = false;
+
+        foreach (@$this->dir()->scan('public/.merged') as $item) {
+            if ($time === false) {
+                $time = (int) $item;
+            } elseif ($time != (int) $item) {
+                $time = false;
+
+                break;
+            }
+
+            $count += 1;
+        }
+
+        if ($time !== false
+            && $count != array_sum(array_map(fn($a) => count($a), $struct))
+        ) {
+            $time = false;
+        }
+
+        // }}}
+        // {{{ comparing merged and sources times
+
+        if ($time !== false) {
+            foreach (array_keys($struct) as $type) {
+                foreach ($struct[$type] as $pattern => $files) {
+                    foreach ($files as $file) {
+                        if ((int) filemtime($file) > $time) {
+                            $time = false;
+
+                            break 3;
+                        }
                     }
                 }
             }
         }
 
-        foreach ($this->cssDir as $name => $dir) {
-            if (($items = scandir($dir)) !== false) {
-                foreach ($items as $item) {
-                    if (preg_match('/^([a-z])(?:\..*)?\.css$/', $item, $M)) {
-                        $sections['css'][$this->dir . "%s.styles.{$M[1]}.%s"][$name][] = $dir . $item;
-                    }
-                }
-            }
-        }
+        // }}}
+        // {{{ merging if needed
 
-        $prefix = $this->get()['prefix'];
+        if ($time === false) {
+            $this->dir()->clear('public/.merged');
 
-        if ($sections) {
-            if ($prefix !== false) {
-                foreach (array_keys($sections) as $section) {
-                    foreach (array_keys($sections[$section]) as $pattern) {
-                        foreach ($sections[$section][$pattern] as $name => $files) {
-                            foreach ($files as $file) {
-                                if ((int) filemtime($file) > $prefix) {
-                                    $prefix = false;
+            $time = time();
 
-                                    break 4;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
-            $prefix = false;
-        }
+            foreach (array_keys($struct) as $type) {
+                foreach ($struct[$type] as $pattern => $files) {
+                    $merged = $this->{$type}($files);
 
-        if ($prefix === false) {
-            $this->dir()->recreate($this->dir);
-
-            if ($sections) {
-                $prefix = time();
-
-                foreach (array_keys($sections) as $section) {
-                    foreach (array_keys($sections[$section]) as $pattern) {
-                        foreach ($sections[$section][$pattern] as $name => $files) {
-                            $sections[$section][$pattern][$name] = $this->{$section}($files);
-                        }
-
-                        $sections[$section][$pattern][$section] = implode("\n", $sections[$section][$pattern]);
-
-                        foreach ($sections[$section][$pattern] as $name => $merged) {
-                            if ($this->file()->put(sprintf($pattern, $prefix, $name), $merged) === false) {
-                                $this->abend()->error();
-                            }
-                        }
+                    if ($this->file()->put(sprintf($pattern, $time), $merged) === false) {
+                        $this->abend()->error();
                     }
                 }
             }
@@ -140,11 +154,11 @@ class Merger extends \SFW\Lazy
     }
 
     /**
-     * Merging Javascript.
+     * Merging JS.
      */
     protected function js(array $files): string
     {
-        $merged = $this->merge($files);
+        $merged = $this->files($files);
 
         $jsmin = new \JSMin\JSMin($merged);
 
@@ -162,7 +176,7 @@ class Merger extends \SFW\Lazy
      */
     protected function css(array $files): string
     {
-        $merged = $this->merge($files);
+        $merged = $this->files($files);
 
         $merged = preg_replace_callback('~/\*(.*?)\*/~us', fn($M) => strlen($M[1]) ? '' : '/**/', $merged);
 
@@ -206,7 +220,7 @@ class Merger extends \SFW\Lazy
     /**
      * Merging files.
      */
-    protected function merge(array $files): string
+    protected function files(array $files): string
     {
         $merged = [];
 

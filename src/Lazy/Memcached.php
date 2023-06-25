@@ -3,9 +3,9 @@
 namespace SFW\Lazy;
 
 /**
- * APC.
+ * Memcached.
  */
-class Apc extends \SFW\Lazy
+class Memcached extends \SFW\Lazy
 {
     /**
      * Just in case.
@@ -13,14 +13,14 @@ class Apc extends \SFW\Lazy
     public function __construct() {}
 
     /**
-     * APC module instance.
+     * Memcached module instance.
      */
     public function getInstance(): object
     {
-        $options = self::$config['apc'];
+        $options = self::$config['memcached'];
 
         $options['ns'] ??= md5(getcwd());
 
-        return new \SFW\SimpleCacher\Apc(...$options);
+        return new \SFW\SimpleCacher\Memcached(...$options);
     }
 }

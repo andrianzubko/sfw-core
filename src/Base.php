@@ -8,14 +8,14 @@ namespace SFW;
 abstract class Base extends \stdClass
 {
     /**
-     * Start microtime.
+     * Global microtime.
      */
-    protected static float $startMicrotime;
+    protected static float $globalMicrotime;
 
     /**
-     * Already included lazy classes.
+     * Instantiates of lazy classes.
      */
-    private static array $lazyClasses = [];
+    protected static array $lazyInstances = [];
 
     /**
      * System configuration not available from templates.
@@ -32,8 +32,8 @@ abstract class Base extends \stdClass
      */
     final public function __call(string $name, array $arguments): object
     {
-        if ( isset(self::$lazyClasses[$name])) {
-            return self::$lazyClasses[$name];
+        if (!$arguments && isset(self::$lazyInstances[$name])) {
+            return self::$lazyInstances[$name];
         }
 
         $class = 'App\\Lazy\\' . ucfirst($name);
@@ -44,9 +44,7 @@ abstract class Base extends \stdClass
 
         $lazy = (new $class(...$arguments))->getInstance();
 
-        if (!$arguments) {
-            self::$lazyClasses[$name] = $lazy;
-        }
+        self::$lazyInstances[$name] = $lazy;
 
         return $lazy;
     }

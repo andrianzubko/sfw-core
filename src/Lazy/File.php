@@ -13,34 +13,34 @@ class File extends \SFW\Lazy
     public function __construct() {}
 
     /**
-     * File removing.
-     */
-    public function remove(string $target): bool
-    {
-        return unlink($target);
-    }
-
-    /**
      * Getting file contents into string.
      */
-    public function get(string $target): string|false {
-        return file_get_contents($target);
+    public function get(string $file): string|false {
+        return file_get_contents($file);
     }
 
     /**
      * Putting contents to file.
      */
-    public function put(string $target, mixed $contents, int $flags = 0): bool
+    public function put(string $file, mixed $contents, int $flags = 0): bool
     {
-        if ($this->dir()->create(dirname($target)) === false
-            || file_put_contents($target, $contents, $flags) === false
+        if ($this->dir()->create(dirname($file)) === false
+            || file_put_contents($file, $contents, $flags) === false
         ) {
             return false;
         }
 
-        @chmod($target, 0666);
+        @chmod($file, 0666);
 
         return true;
+    }
+
+    /**
+     * File removing.
+     */
+    public function remove(string $file): bool
+    {
+        return unlink($file);
     }
 
     /**
@@ -80,22 +80,26 @@ class File extends \SFW\Lazy
      */
     public function stats(string $file): array
     {
-        $stat = @stat($file);
+        $stat = @stat($file) ?: [];
 
-        $size = @getimagesize($file);
+        $imagesize = @getimagesize($file) ?: [];
 
         return [
             'name' => basename($file),
 
-            'size' => (int) @$stat['size'],
+            'size' => $stat['size'] ?? 0,
 
-            'w' => (int) @$size[0],
+            'w' => $imagesize[0] ?? 0,
 
-            'h' => (int) @$size[1],
+            'h' => $imagesize[1] ?? 0,
 
-            'modified' => (int) @$stat['mtime'],
+            'mime' => $imagesize['mime'] ?? false,
 
-            'modified_localtime' => date('Y-m-d H:i:s', (int) @$stat['mtime']),
+            'modified' => $stat['mtime'] ?? 0,
+
+            'created' => $stat['ctime'] ?? 0,
+
+            'exists' => isset($stat['ctime']),
         ];
     }
 }

@@ -18,48 +18,58 @@ class Dir extends \SFW\Lazy
     public function __construct() {}
 
     /**
+     * Directory scanning.
+     */
+    public function scan(string $dir, bool $recursive = false, int $order = SCANDIR_SORT_ASCENDING): array
+    {
+        $items = [];
+
+        foreach ((scandir($dir, $order) ?: []) as $item) {
+            if ($item === '.' || $item === '..') {
+
+            } elseif (!$recursive || is_file("$dir/$item")) {
+                $items[] = $item;
+            } else {
+                foreach ($this->scan("$dir/$item", true, $order) as $subitem) {
+                    $items[] = "$item/$subitem";
+                }
+            }
+        }
+
+        return $items;
+    }
+
+    /**
      * Directory creation.
      */
-    public function create(string $target): bool
+    public function create(string $dir): bool
     {
-        if (!is_dir($target)) {
-            return mkdir($target, 0777, true);
+        if (!is_dir($dir)) {
+            return mkdir($dir, 0777, true);
         }
 
         return true;
     }
 
     /**
-     * Directory recreation.
-     */
-    public function recreate(string $target): bool
-    {
-        if (!$this->dir()->remove($target)) {
-            return false;
-        }
-
-        return mkdir($target, 0777, true);
-    }
-
-    /**
      * Directory removing.
      */
-    public function remove(string $target, bool $recursive = true): bool
+    public function remove(string $dir, bool $recursive = true): bool
     {
         $status = true;
 
-        if (is_dir($target)) {
+        if (is_dir($dir)) {
             if ($recursive) {
-                if (($items = scandir($target)) !== false) {
+                if (($items = scandir($dir)) !== false) {
                     foreach ($items as $item) {
-                        if ($item !== '.' && $item !== '..') {
-                            if (is_dir("$target/$item")) {
-                                if ($this->remove("$target/$item", true) === false) {
-                                    $status = false;
-                                }
-                            } elseif (unlink("$target/$item") === false) {
+                        if ($item === '.' || $item === '..') {
+
+                        } elseif (is_dir("$dir/$item")) {
+                            if ($this->remove("$dir/$item") === false) {
                                 $status = false;
                             }
+                        } elseif (unlink("$dir/$item") === false) {
+                            $status = false;
                         }
                     }
                 } else {
@@ -67,7 +77,35 @@ class Dir extends \SFW\Lazy
                 }
             }
 
-            if (rmdir($target) === false) {
+            if (rmdir($dir) === false) {
+                $status = false;
+            }
+        }
+
+        return $status;
+    }
+
+    /**
+     * Directory clearing.
+     */
+    public function clear(string $dir): bool
+    {
+        $status = true;
+
+        if (is_dir($dir)) {
+            if (($items = scandir($dir)) !== false) {
+                foreach ($items as $item) {
+                    if ($item === '.' || $item === '..') {
+
+                    } elseif (is_dir("$dir/$item")) {
+                        if ($this->remove("$dir/$item") === false) {
+                            $status = false;
+                        }
+                    } elseif (unlink("$dir/$item") === false) {
+                        $status = false;
+                    }
+                }
+            } else {
                 $status = false;
             }
         }
@@ -82,19 +120,18 @@ class Dir extends \SFW\Lazy
     {
         $status = true;
 
-        if (is_dir($source)
+        if (($items = scandir($source)) !== false
             && $this->dir()->create($target) !== false
-                && ($items = scandir($source)) !== false
         ) {
             foreach ($items as $item) {
-                if ($item !== '.' && $item !== '..') {
-                    if (is_dir("$source/$item")) {
-                        if ($this->copy("$source/$item", "$target/$item") === false) {
-                            $status = false;
-                        }
-                    } elseif (copy("$source/$item", "$target/$item") === false) {
+                if ($item === '.' || $item === '..') {
+
+                } elseif (is_dir("$source/$item")) {
+                    if ($this->copy("$source/$item", "$target/$item") === false) {
                         $status = false;
                     }
+                } elseif (copy("$source/$item", "$target/$item") === false) {
+                    $status = false;
                 }
             }
         } else {
@@ -102,6 +139,22 @@ class Dir extends \SFW\Lazy
         }
 
         return $status;
+    }
+
+    /**
+     * Directory moving.
+     */
+    public function move(string $source, string $target): bool
+    {
+        if ($this->dir()->create(dirname($target)) === false
+            || rename($source, $target) === false
+        ) {
+            return false;
+        }
+
+        @chmod($target, 0777);
+
+        return true;
     }
 
     /**
@@ -113,12 +166,12 @@ class Dir extends \SFW\Lazy
             $this->temporary = realpath(sys_get_temp_dir());
         }
 
-        for ($i = 1; $i <= 10; ++$i) {
+        for ($i = 1; $i <= 10; $i++) {
             $dir = sprintf('%s/%s', $this->temporary, $this->text()->random());
 
-            if (mkdir($dir, 0644, true)) {
+            if (mkdir($dir, 0600, true)) {
                 register_shutdown_function(
-                    function () use ($dir) {
+                    function () use ($dir): void {
                         $this->remove($dir);
                     }
                 );

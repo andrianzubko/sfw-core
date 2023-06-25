@@ -8,7 +8,7 @@ namespace SFW;
 abstract class Lazy extends Base
 {
     /**
-     * By default it self instance, but can be changed to any other in some lazy class.
+     * By default it self instance, but can be changed to any other in some lazy classes.
      */
     public function getInstance(): object
     {

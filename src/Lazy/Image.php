@@ -109,9 +109,9 @@ class Image extends \SFW\Lazy
         }
 
         if ($crop) {
-            return $this->resizeWithCrop($image, $nW, $nH, $oW, $oH);
+            $resized = $this->resizeWithCrop($image, $nW, $nH, $oW, $oH);
         } else {
-            return $this->resizeNoCrop($image, $nW, $nH, $oW, $oH);
+            $resized = $this->resizeNoCrop($image, $nW, $nH, $oW, $oH);
         }
 
         return $resized;

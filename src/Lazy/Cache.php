@@ -3,22 +3,22 @@
 namespace SFW\Lazy;
 
 /**
- * Default database.
+ * Default cache.
  */
-class Db extends \SFW\Lazy
+class Cache extends \SFW\Lazy
 {
     /**
      * Reinstanting class if called with argument.
      */
-    public function __construct(protected ?string $db = null) {}
+    public function __construct(protected ?string $cache = null) {}
 
     /**
      * Cache module instance.
      */
     public function getInstance(): object
     {
-        $db = $this->db ?? self::$config['db'];
+        $cache = $this->cache ?? self::$config['cache'];
 
-        return $this->{$db}();
+        return $this->{$cache}();
     }
 }

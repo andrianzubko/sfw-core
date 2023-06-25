@@ -12,13 +12,13 @@ abstract class Runner extends Base
      */
     final public function __construct()
     {
-        // {{{ getting started microtime and preventing multiple initialization
+        // {{{ getting global microtime and preventing multiple initialization
 
-        if (isset(self::$startMicrotime)) {
+        if (isset(self::$globalMicrotime)) {
             return;
         }
 
-        self::$startMicrotime = gettimeofday(true);
+        self::$globalMicrotime = gettimeofday(true);
 
         // }}}
         // {{{ important parameters checking and correcting
@@ -85,15 +85,7 @@ abstract class Runner extends Base
             self::$e['system']['basic_url_host']
         );
 
-        self::$e['system']['timestamp'] = (int) self::$startMicrotime;
-
-        if (self::$config['mergeCssAndJs']) {
-            $this->merger()->recombine();
-        }
-
-        self::$e['system']['merged'] = $this->merger()->get();
-
-        self::$e['system']['detected'] = (array) $this->detector();
+        self::$e['system']['timestamp'] = (int) self::$globalMicrotime;
 
         self::$e['system']['point'] = (new \App\Router())->get();
 

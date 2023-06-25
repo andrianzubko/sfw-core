@@ -141,14 +141,30 @@ class Out extends \SFW\Lazy
             return $contents;
         }
 
-        $contents .= sprintf("\n<!-- script %.03f + sql(%s) %.03f + template(%s) %.03f = %.03f -->",
-            $finished - self::$startMicrotime - $this->db()->getMicrotime() - $this->microtime,
-            $this->db()->getCounter(),
-            $this->db()->getMicrotime(),
-            $this->counter,
-            $this->microtime,
-            $finished - self::$startMicrotime
-        );
+        if (self::$config['appendStatsToTemplate']) {
+            $dbDrivers = [];
+
+            $dbMicrotime = $dbCounter = 0;
+
+            foreach (self::$lazyInstances as $lazy) {
+                if ($lazy instanceof \SFW\Databaser\Driver && !in_array($lazy, $dbDrivers, true)) {
+                    $dbDrivers[] = $lazy;
+
+                    $dbMicrotime += $lazy->getMicrotime();
+
+                    $dbCounter += $lazy->getCounter();
+                }
+            }
+
+            $contents .= sprintf("\n<!-- script %.03f + sql(%s) %.03f + template(%s) %.03f = %.03f -->",
+                $finished - self::$globalMicrotime - $dbMicrotime - $this->microtime,
+                $dbCounter,
+                $dbMicrotime,
+                $this->counter,
+                $this->microtime,
+                $finished - self::$globalMicrotime
+            );
+        }
 
         $this->out()->inline($contents, 'text/html', 0, null, $status);
 

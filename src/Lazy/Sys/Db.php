@@ -1,11 +1,11 @@
 <?php
 
-namespace SFW\Lazy;
+namespace SFW\Lazy\Sys;
 
 /**
  * Default database.
  */
-class Db extends \SFW\Lazy
+class Db extends \SFW\Lazy\Sys
 {
     /**
      * Reinstanting class if called with argument.
@@ -19,6 +19,6 @@ class Db extends \SFW\Lazy
     {
         $db = $this->db ?? self::$config['db'];
 
-        return $this->{$db}();
+        return self::$sys->{$db}();
     }
 }

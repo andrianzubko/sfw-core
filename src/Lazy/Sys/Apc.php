@@ -1,11 +1,11 @@
 <?php
 
-namespace SFW\Lazy;
+namespace SFW\Lazy\Sys;
 
 /**
  * APC.
  */
-class Apc extends \SFW\Lazy
+class Apc extends \SFW\Lazy\Sys
 {
     /**
      * Just in case.

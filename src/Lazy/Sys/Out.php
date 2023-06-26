@@ -1,11 +1,11 @@
 <?php
 
-namespace SFW\Lazy;
+namespace SFW\Lazy\Sys;
 
 /**
  * Output control.
  */
-class Out extends \SFW\Lazy
+class Out extends \SFW\Lazy\Sys
 {
     /**
      * Mime types for compess via gzip.
@@ -129,7 +129,7 @@ class Out extends \SFW\Lazy
     {
         $started = gettimeofday(true);
 
-        $contents = $this->templater()->transform($e, $template);
+        $contents = self::$sys->templater()->transform($e, $template);
 
         $finished = gettimeofday(true);
 
@@ -141,12 +141,12 @@ class Out extends \SFW\Lazy
             return $contents;
         }
 
-        if (self::$config['appendStatsToTemplate']) {
+        if (self::$config['add_stats_to_page']) {
             $dbDrivers = [];
 
             $dbMicrotime = $dbCounter = 0;
 
-            foreach (self::$lazyInstances as $lazy) {
+            foreach (self::$sys::$instances as $lazy) {
                 if ($lazy instanceof \SFW\Databaser\Driver && !in_array($lazy, $dbDrivers, true)) {
                     $dbDrivers[] = $lazy;
 
@@ -166,7 +166,7 @@ class Out extends \SFW\Lazy
             );
         }
 
-        $this->out()->inline($contents, 'text/html', 0, null, $status);
+        $this->inline($contents, 'text/html', 0, null, $status);
 
         return $this;
     }

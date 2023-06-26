@@ -1,11 +1,11 @@
 <?php
 
-namespace SFW\Lazy;
+namespace SFW\Lazy\Sys;
 
 /**
  * Image functions.
  */
-class Image extends \SFW\Lazy
+class Image extends \SFW\Lazy\Sys
 {
     /**
      * Just in case.
@@ -35,7 +35,7 @@ class Image extends \SFW\Lazy
      */
     public function fromFile(string $file): \GdImage|false
     {
-        return $this->fromString($this->file()->get($file));
+        return $this->fromString(self::$sys->file()->get($file));
     }
 
     /**

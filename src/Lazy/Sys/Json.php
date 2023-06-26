@@ -1,11 +1,11 @@
 <?php
 
-namespace SFW\Lazy;
+namespace SFW\Lazy\Sys;
 
 /**
  * Json functions.
  */
-class Json extends \SFW\Lazy
+class Json extends \SFW\Lazy\Sys
 {
     /**
      * Just in case.

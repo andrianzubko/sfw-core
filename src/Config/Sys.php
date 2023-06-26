@@ -17,17 +17,17 @@ class Sys
     /**
      * Log transactions fails.
      */
-    public ?string $dbTransactionsFailsLog = 'log/transactions.fails.log';
+    public ?string $db_transactions_fails_log = 'log/transactions.fails.log';
 
     /**
      * Log slow queries.
      */
-    public ?string $dbSlowQueriesLog = 'log/slow.queries.log';
+    public ?string $db_slow_queries_log = 'log/slow.queries.log';
 
     /**
      * Log slow queries with minimal time.
      */
-    public float $dbSlowQueriesMin = 0.5;
+    public float $db_slow_queries_min = 0.5;
 
     /**
      * PostgreSQL.
@@ -86,9 +86,11 @@ class Sys
     public bool $mailer = true;
 
     /**
-     * Instead of disabling, you can replace recipients with these. Format: array('EMAIL' or array('EMAIL'[, 'NAME']), ...)
+     * Instead of disabling, you can replace recipients with these.
+     * 
+     * array('EMAIL' or array('EMAIL'[, 'NAME']), ...)
      */
-    public array $mailerReplaceRecipients = [];
+    public array $mailer_replace_recipients = [];
 
     // }}}
     // {{{ frontend
@@ -96,12 +98,12 @@ class Sys
     /**
      * Recombine css and js files (allways disable on production).
      */
-    public bool $recombineCssAndJs = true;
+    public bool $recombine_css_and_js = true;
 
     /**
-     * Append stats to template via output class.
+     * Add statistics to each page generated from template.
      */
-    public bool $appendStatsToTemplate = true;
+    public bool $add_stats_to_page = true;
 
     // }}}
 }

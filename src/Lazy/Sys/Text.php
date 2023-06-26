@@ -1,11 +1,11 @@
 <?php
 
-namespace SFW\Lazy;
+namespace SFW\Lazy\Sys;
 
 /**
  * Text functions.
  */
-class Text extends \SFW\Lazy
+class Text extends \SFW\Lazy\Sys
 {
     /**
      * UTF-8 spaces for trim.

@@ -1,11 +1,11 @@
 <?php
 
-namespace SFW\Lazy;
+namespace SFW\Lazy\Sys;
 
 /**
  * Notifier.
  */
-class Notifier extends \SFW\Lazy
+class Notifier extends \SFW\Lazy\Sys
 {
     /**
      * Default structure.
@@ -38,15 +38,13 @@ class Notifier extends \SFW\Lazy
     }
 
     /**
-     * Preparing notify with auto cleaner at transaction fails.
+     * Adding notify to pool.
      */
-    public function prepare(string $name, ...$arguments): void
+    public function add(\SFW\Notify $notify): void
     {
-        $notify = new ("App\\Notify\\$name")(...$arguments);
-
         $this->notifies[] = &$notify;
 
-        $this->transaction()->onabort(
+        self::$sys->transaction()->onabort(
             function () use (&$notify): void {
                 $notify = null;
             }
@@ -66,8 +64,8 @@ class Notifier extends \SFW\Lazy
 
                 if (self::$config['mailer']) {
                     foreach ($structs as $struct) {
-                        if (self::$config['mailerReplaceRecipients']) {
-                            $struct->recipients = self::$config['mailerReplaceRecipients'];
+                        if (self::$config['mailer_replace_recipients']) {
+                            $struct->recipients = self::$config['mailer_replace_recipients'];
                         }
 
                         $this->send($struct);

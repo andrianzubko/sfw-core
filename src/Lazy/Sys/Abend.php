@@ -1,11 +1,11 @@
 <?php
 
-namespace SFW\Lazy;
+namespace SFW\Lazy\Sys;
 
 /**
  * ABnormal END.
  */
-class Abend extends \SFW\Lazy
+class Abend extends \SFW\Lazy\Sys
 {
     /**
      * Just in case.

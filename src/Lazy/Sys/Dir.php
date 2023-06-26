@@ -1,11 +1,11 @@
 <?php
 
-namespace SFW\Lazy;
+namespace SFW\Lazy\Sys;
 
 /**
  * Dir functions.
  */
-class Dir extends \SFW\Lazy
+class Dir extends \SFW\Lazy\Sys
 {
     /**
      * For temporary directory.
@@ -121,7 +121,7 @@ class Dir extends \SFW\Lazy
         $status = true;
 
         if (($items = scandir($source)) !== false
-            && $this->dir()->create($target) !== false
+            && $this->create($target) !== false
         ) {
             foreach ($items as $item) {
                 if ($item === '.' || $item === '..') {
@@ -146,7 +146,7 @@ class Dir extends \SFW\Lazy
      */
     public function move(string $source, string $target): bool
     {
-        if ($this->dir()->create(dirname($target)) === false
+        if ($this->create(dirname($target)) === false
             || rename($source, $target) === false
         ) {
             return false;
@@ -167,7 +167,7 @@ class Dir extends \SFW\Lazy
         }
 
         for ($i = 1; $i <= 10; $i++) {
-            $dir = sprintf('%s/%s', $this->temporary, $this->text()->random());
+            $dir = sprintf('%s/%s', $this->temporary, self::$sys->text()->random());
 
             if (mkdir($dir, 0600, true)) {
                 register_shutdown_function(
@@ -180,6 +180,6 @@ class Dir extends \SFW\Lazy
             }
         }
 
-        $this->abend()->error();
+        self::$sys->abend()->error();
     }
 }

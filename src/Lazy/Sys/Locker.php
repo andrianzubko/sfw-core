@@ -1,16 +1,16 @@
 <?php
 
-namespace SFW\Lazy;
+namespace SFW\Lazy\Sys;
 
 /**
  * Locker.
  */
-class Locker extends \SFW\Lazy
+class Locker extends \SFW\Lazy\Sys
 {
     /**
      * Lock files pattern.
      */
-    protected string $lock = 'locks/%s.lock';
+    protected string $pattern = 'locks/%s.lock';
 
     /**
      * Already created locks.
@@ -27,9 +27,9 @@ class Locker extends \SFW\Lazy
      */
     public function lock(string $key): bool
     {
-        $this->dir()->create(dirname($this->lock));
+        self::$sys->dir()->create(dirname($this->pattern));
 
-        $fh = fopen(sprintf($this->lock, $key), 'a+');
+        $fh = fopen(sprintf($this->pattern, $key), 'a+');
 
         if ($fh === false || flock($fh, LOCK_EX | LOCK_NB) === false) {
             return false;

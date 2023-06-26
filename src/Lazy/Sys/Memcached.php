@@ -1,11 +1,11 @@
 <?php
 
-namespace SFW\Lazy;
+namespace SFW\Lazy\Sys;
 
 /**
  * Memcached.
  */
-class Memcached extends \SFW\Lazy
+class Memcached extends \SFW\Lazy\Sys
 {
     /**
      * Just in case.

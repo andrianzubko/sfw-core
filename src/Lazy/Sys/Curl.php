@@ -1,11 +1,11 @@
 <?php
 
-namespace SFW\Lazy;
+namespace SFW\Lazy\Sys;
 
 /**
  * CURL.
  */
-class Curl extends \SFW\Lazy
+class Curl extends \SFW\Lazy\Sys
 {
     /**
      * Just in case.

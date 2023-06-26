@@ -1,11 +1,11 @@
 <?php
 
-namespace SFW\Lazy;
+namespace SFW\Lazy\Sys;
 
 /**
  * JS and CSS merger.
  */
-class Merger extends \SFW\Lazy
+class Merger extends \SFW\Lazy\Sys
 {
     /**
      * Just in case.
@@ -21,7 +21,7 @@ class Merger extends \SFW\Lazy
             $this->recombine();
         }
 
-        foreach (@$this->dir()->scan('public/.merged') as $item) {
+        foreach (@self::$sys->dir()->scan('public/.merged') as $item) {
             return ['time' => (int) $item];
         }
 
@@ -39,7 +39,7 @@ class Merger extends \SFW\Lazy
             foreach (['primary','secondary'] as $section) {
                 $dir = "public/.$type/$section";
 
-                foreach (@$this->dir()->scan($dir, true) as $item) {
+                foreach (@self::$sys->dir()->scan($dir, true) as $item) {
                     $file = "$dir/$item";
 
                     if (!is_file($file) || !str_ends_with($item, ".$type")) {
@@ -69,7 +69,7 @@ class Merger extends \SFW\Lazy
     {
         // {{{ locking
 
-        if ($this->locker()->lock('merger') === false) {
+        if (self::$sys->locker()->lock('merger') === false) {
             return;
         }
 
@@ -79,7 +79,7 @@ class Merger extends \SFW\Lazy
         $struct = $this->prepareStruct();
 
         if (!$struct) {
-            $this->dir()->clear('public/.merged');
+            self::$sys->dir()->clear('public/.merged');
 
             return;
         }
@@ -91,7 +91,7 @@ class Merger extends \SFW\Lazy
 
         $time = false;
 
-        foreach (@$this->dir()->scan('public/.merged') as $item) {
+        foreach (@self::$sys->dir()->scan('public/.merged') as $item) {
             if ($time === false) {
                 $time = (int) $item;
             } elseif ($time != (int) $item) {
@@ -130,7 +130,7 @@ class Merger extends \SFW\Lazy
         // {{{ merging if needed
 
         if ($time === false) {
-            $this->dir()->clear('public/.merged');
+            self::$sys->dir()->clear('public/.merged');
 
             $time = time();
 
@@ -138,8 +138,8 @@ class Merger extends \SFW\Lazy
                 foreach ($struct[$type] as $pattern => $files) {
                     $merged = $this->{$type}($files);
 
-                    if ($this->file()->put(sprintf($pattern, $time), $merged) === false) {
-                        $this->abend()->error();
+                    if (self::$sys->file()->put(sprintf($pattern, $time), $merged) === false) {
+                        self::$sys->abend()->error();
                     }
                 }
             }
@@ -148,7 +148,7 @@ class Merger extends \SFW\Lazy
         // }}}
         // {{{ unlocking
 
-        $this->locker()->unlock('merger');
+        self::$sys->locker()->unlock('merger');
 
         // }}}
     }
@@ -165,7 +165,7 @@ class Merger extends \SFW\Lazy
         try {
             $merged = $jsmin->min();
         } catch (\Exception $error) {
-            $this->abend()->error($error->getMessage());
+            self::$sys->abend()->error($error->getMessage());
         }
 
         return $merged;
@@ -180,7 +180,7 @@ class Merger extends \SFW\Lazy
 
         $merged = preg_replace_callback('~/\*(.*?)\*/~us', fn($M) => strlen($M[1]) ? '' : '/**/', $merged);
 
-        $merged = $this->text()->fulltrim($merged);
+        $merged = self::$sys->text()->fulltrim($merged);
 
         $merged = preg_replace('/([ }]*})\s*/u', "\$1\n", $merged);
 
@@ -202,7 +202,7 @@ class Merger extends \SFW\Lazy
                     $size = @filesize('public' . $M[1]);
 
                     if ($size !== false && $size <= 32 * 1024) {
-                        $data = @$this->file()->get('public' . $M[1]);
+                        $data = @self::$sys->file()->get('public' . $M[1]);
                     }
                 }
 
@@ -225,10 +225,10 @@ class Merger extends \SFW\Lazy
         $merged = [];
 
         foreach ($files as $file) {
-            $content = $this->file()->get($file);
+            $content = self::$sys->file()->get($file);
 
             if ($content === false) {
-                $this->abend()->error();
+                self::$sys->abend()->error();
             }
 
             $merged[] = $content;

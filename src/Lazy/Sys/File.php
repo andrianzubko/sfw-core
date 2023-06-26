@@ -1,11 +1,11 @@
 <?php
 
-namespace SFW\Lazy;
+namespace SFW\Lazy\Sys;
 
 /**
  * Files functions.
  */
-class File extends \SFW\Lazy
+class File extends \SFW\Lazy\Sys
 {
     /**
      * Just in case.
@@ -24,7 +24,7 @@ class File extends \SFW\Lazy
      */
     public function put(string $file, mixed $contents, int $flags = 0): bool
     {
-        if ($this->dir()->create(dirname($file)) === false
+        if (self::$sys->dir()->create(dirname($file)) === false
             || file_put_contents($file, $contents, $flags) === false
         ) {
             return false;
@@ -48,7 +48,7 @@ class File extends \SFW\Lazy
      */
     public function copy(string $source, string $target): bool
     {
-        if ($this->dir()->create(dirname($target)) === false
+        if (self::$sys->dir()->create(dirname($target)) === false
             || copy($source, $target) === false
         ) {
             return false;
@@ -64,7 +64,7 @@ class File extends \SFW\Lazy
      */
     public function move(string $source, string $target): bool
     {
-        if ($this->dir()->create(dirname($target)) === false
+        if (self::$sys->dir()->create(dirname($target)) === false
             || rename($source, $target) === false
         ) {
             return false;

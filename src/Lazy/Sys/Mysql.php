@@ -1,11 +1,11 @@
 <?php
 
-namespace SFW\Lazy;
+namespace SFW\Lazy\Sys;
 
 /**
- * Pgsql.
+ * Mysql.
  */
-class Pgsql extends \SFW\Lazy
+class Mysql extends \SFW\Lazy\Sys
 {
     /**
      * Profiler.
@@ -18,22 +18,22 @@ class Pgsql extends \SFW\Lazy
     public function __construct() {}
 
     /**
-     * Pgsql module instance.
+     * Mysql module instance.
      */
     public function getInstance(): object
     {
         $profiler = $this->profiler;
 
         if (!isset($profiler)
-            && isset(self::$config['dbSlowQueriesLog'])
+            && isset(self::$config['db_slow_queries_log'])
         ) {
             $profiler = function (float $microtime, array $queries): void {
-                if ($microtime >= self::$config['dbSlowQueriesMin']) {
-                    $this->logger()->save(self::$config['dbSlowQueriesLog'],
+                if ($microtime >= self::$config['db_slow_queries_min']) {
+                    self::$sys->logger()->save(self::$config['db_slow_queries_log'],
                         sprintf("[%.2f] %s\n\t%s\n",
                             $microtime,
                                 idn_to_utf8($_SERVER['HTTP_HOST']) . $_SERVER['REQUEST_URI'],
-                                    implode("\n\t", array_map(fn($a) => $this->text()->fulltrim($a), $queries))
+                                    implode("\n\t", array_map(fn($a) => self::$sys->text()->fulltrim($a), $queries))
                         )
                     );
                 }
@@ -41,9 +41,9 @@ class Pgsql extends \SFW\Lazy
         }
 
         try {
-            $db = new \SFW\Databaser\Pgsql(self::$config['pgsql'], $profiler);
+            $db = new \SFW\Databaser\Mysql(self::$config['mysql'], $profiler);
         } catch (\SFW\Databaser\Exception $error) {
-            $this->abend()->error($error->getMessage());
+            self::$sys->abend()->error($error->getMessage());
         }
 
         return $db;

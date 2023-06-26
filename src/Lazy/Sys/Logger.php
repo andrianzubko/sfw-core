@@ -1,11 +1,11 @@
 <?php
 
-namespace SFW\Lazy;
+namespace SFW\Lazy\Sys;
 
 /**
  * Logger.
  */
-class Logger extends \SFW\Lazy
+class Logger extends \SFW\Lazy\Sys
 {
     /**
      * Just in case.
@@ -27,7 +27,7 @@ class Logger extends \SFW\Lazy
 
         $message = sprintf("[%s] %s\n", date('d.m.y H:i'), $message);
 
-        $this->file()->put($file, $message, FILE_APPEND);
+        self::$sys->file()->put($file, $message, FILE_APPEND);
 
         if (isset($timezonePrev)) {
             date_default_timezone_set($timezonePrev);

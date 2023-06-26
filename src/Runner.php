@@ -21,22 +21,14 @@ abstract class Runner extends Base
         self::$globalMicrotime = gettimeofday(true);
 
         // }}}
-        // {{{ important parameters checking and correcting
+        // {{{ lazy classes callers
 
-        $_SERVER['REQUEST_URI'] = $_SERVER['REDIRECT_REQUEST_URI'] ?? $_SERVER['REQUEST_URI'] ?? '/';
+        self::$sys = new \SFW\Lazy\SysCaller();
 
-        $_SERVER['REQUEST_METHOD'] ??= 'GET';
-
-        $_SERVER['REMOTE_ADDR'] ??= '0.0.0.0';
-
-        $_SERVER['HTTP_HOST'] ??= 'localhost';
-
-        [$_SERVER['REQUEST_URL'], $_SERVER['REQUEST_QUERY']] = [
-            ...explode('?', $_SERVER['REQUEST_URI'], 2), ''
-        ];
+        self::$my = new \SFW\Lazy\MyCaller();
 
         // }}}
-        // {{{ configs merging
+        // {{{ configs merging as arrays
 
         self::$config = array_merge(
             (array) new \SFW\Config\Sys(),
@@ -56,17 +48,32 @@ abstract class Runner extends Base
         mb_internal_encoding('UTF-8');
 
         if (date_default_timezone_set(self::$e['config']['timezone']) === false) {
-            $this->abend()->error();
+            self::$sys->abend()->error();
         }
+
+        // }}}
+        // {{{ important parameters checking and correcting
+
+        $_SERVER['REQUEST_URI'] = $_SERVER['REDIRECT_REQUEST_URI'] ?? $_SERVER['REQUEST_URI'] ?? '/';
+
+        $_SERVER['REQUEST_METHOD'] ??= 'GET';
+
+        $_SERVER['REMOTE_ADDR'] ??= '0.0.0.0';
+
+        $_SERVER['HTTP_HOST'] ??= 'localhost';
+
+        [$_SERVER['REQUEST_URL'], $_SERVER['REQUEST_QUERY']] = [
+            ...explode('?', $_SERVER['REQUEST_URI'], 2), ''
+        ];
 
         // }}}
         // {{{ default environment
 
-        if (isset(self::$e['config']['basicUrl'])) {
-            $parsed = parse_url(self::$e['config']['basicUrl']);
+        if (isset(self::$e['config']['basic_url'])) {
+            $parsed = parse_url(self::$e['config']['basic_url']);
 
             if (!isset($parsed['host'])) {
-                $this->abend()->error('Incorrect basicUrl in extended configuration');
+                self::$sys->abend()->error('Incorrect basicUrl in extended configuration');
             }
 
             self::$e['system']['basic_url_scheme'] = $parsed['scheme'] ?? 'http';
@@ -90,7 +97,7 @@ abstract class Runner extends Base
         self::$e['system']['point'] = (new \App\Router())->get();
 
         if (self::$e['system']['point'] === false) {
-            $this->abend()->errorPage(404);
+            self::$sys->abend()->errorPage(404);
         }
 
         // }}}
@@ -105,7 +112,7 @@ abstract class Runner extends Base
             $point = self::$e['system']['point'];
 
             if (!class_exists("\\App\\Point\\$point")) {
-                $this->abend()->errorPage(404);
+                self::$sys->abend()->errorPage(404);
             }
 
             new ("\\App\\Point\\$point")();

@@ -13,9 +13,18 @@ abstract class Base extends \stdClass
     protected static float $globalMicrotime;
 
     /**
-     * Instantiates of lazy classes.
+     * Accessing system lazy classes from anywhere except templates.
+     *
+     * self::$sys->someClass()->someMethod()
      */
-    protected static array $lazyInstances = [];
+    public static Lazy\SysCaller $sys;
+
+    /**
+     * Accessing my (your) lazy classes from anywhere except templates.
+     *
+     * self::$my->someClass()->someMethod()
+     */
+    public static Lazy\MyCaller $my;
 
     /**
      * System configuration not available from templates.
@@ -23,29 +32,7 @@ abstract class Base extends \stdClass
     protected static array $config;
 
     /**
-     * Available from everywhere default and user enviroment.
+     * Available from everywhere enviroment.
      */
     protected static array $e = [];
-
-    /**
-     * This magic method allows you to access lazy classes from anywhere except templates.
-     */
-    final public function __call(string $name, array $arguments): object
-    {
-        if (!$arguments && isset(self::$lazyInstances[$name])) {
-            return self::$lazyInstances[$name];
-        }
-
-        $class = 'App\\Lazy\\' . ucfirst($name);
-
-        if (!class_exists($class)) {
-            $class = 'SFW\\Lazy\\' . ucfirst($name);
-        }
-
-        $lazy = (new $class(...$arguments))->getInstance();
-
-        self::$lazyInstances[$name] = $lazy;
-
-        return $lazy;
-    }
 }

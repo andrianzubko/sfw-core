@@ -1,11 +1,11 @@
 <?php
 
-namespace SFW\Lazy;
+namespace SFW\Lazy\Sys;
 
 /**
  * Transaction.
  */
-class Transaction extends \SFW\Lazy
+class Transaction extends \SFW\Lazy\Sys
 {
     /**
      * Logger.
@@ -60,21 +60,21 @@ class Transaction extends \SFW\Lazy
             try {
                 $this->onabort = [];
 
-                $this->db()->begin($isolation);
+                self::$sys->db()->begin($isolation);
 
                 if ($transaction() === false) {
-                    $this->db()->rollback();
+                    self::$sys->db()->rollback();
 
                     foreach ($this->onabort as $event) {
                         $event();
                     }
                 } else {
-                    $this->db()->commit();
+                    self::$sys->db()->commit();
                 }
 
                 return true;
             } catch (\SFW\Databaser\Exception $error) {
-                $this->db()->rollback();
+                self::$sys->db()->rollback();
 
                 foreach ($this->onabort as $event) {
                     $event();
@@ -87,10 +87,10 @@ class Transaction extends \SFW\Lazy
                 $logger = $this->logger;
 
                 if (!isset($logger)
-                    && isset(self::$config['dbTransactionsFailsLog'])
+                    && isset(self::$config['db_transactions_fails_log'])
                 ) {
                     $logger = function (string $state, int $retry): void {
-                        $this->logger()->save(self::$config['dbTransactionsFailsLog'],
+                        self::$sys->logger()->save(self::$config['db_transactions_fails_log'],
                             sprintf("[%s] [%d] %s",
                                 $state, $retry,
                                     idn_to_utf8($_SERVER['HTTP_HOST']) . $_SERVER['REQUEST_URI']
@@ -106,7 +106,7 @@ class Transaction extends \SFW\Lazy
                 if (!in_array($error->getSqlState(), $expected ?? [], true)
                     || $retry == $this->retries
                 ) {
-                    $this->abend()->$mode($error->getMessage(), $error->getFile(), $error->getLine());
+                    self::$sys->abend()->$mode($error->getMessage(), $error->getFile(), $error->getLine());
 
                     return false;
                 }

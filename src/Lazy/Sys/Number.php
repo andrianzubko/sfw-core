@@ -1,11 +1,11 @@
 <?php
 
-namespace SFW\Lazy;
+namespace SFW\Lazy\Sys;
 
 /**
  * Number functions.
  */
-class Number extends \SFW\Lazy
+class Number extends \SFW\Lazy\Sys
 {
     /**
      * Just in case.

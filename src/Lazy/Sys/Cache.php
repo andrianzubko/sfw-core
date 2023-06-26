@@ -1,11 +1,11 @@
 <?php
 
-namespace SFW\Lazy;
+namespace SFW\Lazy\Sys;
 
 /**
  * Default cache.
  */
-class Cache extends \SFW\Lazy
+class Cache extends \SFW\Lazy\Sys
 {
     /**
      * Reinstanting class if called with argument.
@@ -19,6 +19,6 @@ class Cache extends \SFW\Lazy
     {
         $cache = $this->cache ?? self::$config['cache'];
 
-        return $this->{$cache}();
+        return self::$sys->{$cache}();
     }
 }

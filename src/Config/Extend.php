@@ -10,7 +10,7 @@ class Extend
     /**
      * Basic URL of site (autodetect if not set).
      */
-    public ?string $basicUrl = null;
+    public ?string $basic_url = null;
 
     /**
      * Default timezone.

@@ -15,10 +15,10 @@ class Db extends \SFW\Lazy\Sys
     /**
      * Cache module instance.
      */
-    public function getInstance(): object
+    public function getInstance(): \SFW\Databaser\Driver
     {
         $db = $this->db ?? self::$config['db'];
 
-        return self::$sys->{$db}();
+        return self::$sys->$db();
     }
 }

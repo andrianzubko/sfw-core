@@ -21,25 +21,25 @@ abstract class Runner extends Base
         self::$globalMicrotime = gettimeofday(true);
 
         // }}}
+        // {{{ configs merging as arrays
+
+        self::$config = array_merge(
+            (array) new \SFW\Config\Primary(),
+            (array) new \App\Config\Primary()
+        );
+
+        self::$e['config'] = array_merge(
+            (array) new \SFW\Config\Secondary(),
+            (array) new \App\Config\Secondary()
+        );
+
+        // }}}
         // {{{ lazy classes callers
 
         self::$sys = new \SFW\Lazy\SysCaller();
 
         self::$my = new \SFW\Lazy\MyCaller();
-
-        // }}}
-        // {{{ configs merging as arrays
-
-        self::$config = array_merge(
-            (array) new \SFW\Config\Sys(),
-            (array) new \App\Config\Sys()
-        );
-
-        self::$e['config'] = array_merge(
-            (array) new \SFW\Config\Extend(),
-            (array) new \App\Config\Extend()
-        );
-
+    
         // }}}
         // {{{ default locale, encoding and timezone
 
@@ -73,7 +73,7 @@ abstract class Runner extends Base
             $parsed = parse_url(self::$e['config']['basic_url']);
 
             if (!isset($parsed['host'])) {
-                self::$sys->abend()->error('Incorrect basicUrl in extended configuration');
+                self::$sys->abend()->error('Incorrect basic_url in secondary configuration');
             }
 
             self::$e['system']['basic_url_scheme'] = $parsed['scheme'] ?? 'http';

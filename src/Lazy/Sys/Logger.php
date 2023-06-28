@@ -8,11 +8,6 @@ namespace SFW\Lazy\Sys;
 class Logger extends \SFW\Lazy\Sys
 {
     /**
-     * Just in case.
-     */
-    public function __construct() {}
-
-    /**
      * Logging in time with default timezone.
      */
     public function save(string $file, string $message): void

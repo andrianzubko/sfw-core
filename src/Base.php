@@ -20,7 +20,7 @@ abstract class Base extends \stdClass
     public static Lazy\SysCaller $sys;
 
     /**
-     * Accessing my (your) lazy classes from anywhere except templates.
+     * Accessing your lazy classes from anywhere except templates.
      *
      * self::$my->someClass()->someMethod()
      */

@@ -8,11 +8,6 @@ namespace SFW\Lazy\Sys;
 class Abend extends \SFW\Lazy\Sys
 {
     /**
-     * Just in case.
-     */
-    public function __construct() {}
-
-    /**
      * Log error and show error page 500.
      */
     public function error(?string $message = null, ?string $file = null, ?int $line = null): void

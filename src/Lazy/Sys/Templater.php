@@ -13,11 +13,6 @@ class Templater extends \SFW\Lazy\Sys
     protected array $properties = [];
 
     /**
-     * Just in case of adding properties.
-     */
-    public function __construct() {}
-
-    /**
      * Transforming template to page.
      */
     public function transform(array $e, string $template): string

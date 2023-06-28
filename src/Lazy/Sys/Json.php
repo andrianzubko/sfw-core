@@ -8,11 +8,6 @@ namespace SFW\Lazy\Sys;
 class Json extends \SFW\Lazy\Sys
 {
     /**
-     * Just in case.
-     */
-    public function __construct() {}
-
-    /**
      * Decoding some json fields in array. Very comfortably for DB results.
      */
     public function decode(array|false|null $items, array $decodes): array|false|null

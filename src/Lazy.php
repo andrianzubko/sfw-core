@@ -3,15 +3,12 @@
 namespace SFW;
 
 /**
- * Basic abstract for all Lazy classes.
+ * Basic abstract for all lazy classes and both callers.
  */
 abstract class Lazy extends Base
 {
     /**
-     * By default it self instance, but can be changed to any other in some lazy classes.
+     * Just in case.
      */
-    public function getInstance(): object
-    {
-        return $this;
-    }
+    public function __construct() {}
 }

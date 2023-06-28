@@ -13,11 +13,6 @@ class Text extends \SFW\Lazy\Sys
     protected string $spaces = " \t\n\r\0\x0B\x0C\u{A0}\u{FEFF}";
 
     /**
-     * Just in case.
-     */
-    public function __construct() {}
-
-    /**
      * To lower case.
      */
     public function lc(?string $string): string

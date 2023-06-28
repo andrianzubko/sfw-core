@@ -13,14 +13,9 @@ class Pgsql extends \SFW\Lazy\Sys
     protected ?\Closure $profiler = null;
 
     /**
-     * Just in case of changing profiler.
-     */
-    public function __construct() {}
-
-    /**
      * Pgsql module instance.
      */
-    public function getInstance(): object
+    public function getInstance(): \SFW\Databaser\Driver
     {
         $profiler = $this->profiler;
 

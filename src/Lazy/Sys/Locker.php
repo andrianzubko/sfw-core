@@ -18,11 +18,6 @@ class Locker extends \SFW\Lazy\Sys
     protected array $locks = [];
 
     /**
-     * Just in case.
-     */
-    public function __construct() {}
-
-    /**
      * Locking or return with false.
      */
     public function lock(string $key): bool
@@ -45,10 +40,12 @@ class Locker extends \SFW\Lazy\Sys
      */
     public function unlock(string $key): void
     {
-        if (isset($this->locks[$key])) {
-            fclose($this->locks[$key]);
-
-            unset($this->locks[$key]);
+        if (!isset($this->locks[$key])) {
+            return;
         }
+
+        fclose($this->locks[$key]);
+
+        unset($this->locks[$key]);
     }
 }

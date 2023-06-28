@@ -8,11 +8,6 @@ namespace SFW\Lazy\Sys;
 class Merger extends \SFW\Lazy\Sys
 {
     /**
-     * Just in case.
-     */
-    public function __construct() {}
-
-    /**
      * Recombine all if needed and return merged info.
      */
     public function get(bool $recombine = true): array
@@ -85,7 +80,7 @@ class Merger extends \SFW\Lazy\Sys
         }
 
         // }}}
-        // {{{ looking for time-prefix of merged files and some checking consistency
+        // {{{ looking for time-prefix of merged files and some checking of consistency
 
         $count = 0;
 

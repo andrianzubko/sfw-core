@@ -13,11 +13,6 @@ class Dir extends \SFW\Lazy\Sys
     protected ?string $temporary;
 
     /**
-     * Just in case.
-     */
-    public function __construct() {}
-
-    /**
      * Directory scanning.
      */
     public function scan(string $dir, bool $recursive = false, int $order = SCANDIR_SORT_ASCENDING): array

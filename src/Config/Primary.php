@@ -3,9 +3,9 @@
 namespace SFW\Config;
 
 /**
- * System configuration not available from templates.
+ * Primary configuration not available from templates.
  */
-class Sys
+class Primary
 {
     // {{{ database
 

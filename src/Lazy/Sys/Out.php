@@ -33,11 +33,6 @@ class Out extends \SFW\Lazy\Sys
     protected int $counter = 0;
 
     /**
-     * Just in case.
-     */
-    public function __construct() {}
-
-    /**
      * Output string as attachment.
      */
     public function attachment(string $contents, string $mime = 'text/plain', int $expire = 0, ?string $filename = null, int $status = 200): self

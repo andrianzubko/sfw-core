@@ -8,11 +8,6 @@ namespace SFW\Lazy\Sys;
 class File extends \SFW\Lazy\Sys
 {
     /**
-     * Just in case.
-     */
-    public function __construct() {}
-
-    /**
      * Getting file contents into string.
      */
     public function get(string $file): string|false {

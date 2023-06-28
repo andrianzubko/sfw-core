@@ -3,9 +3,9 @@
 namespace SFW\Config;
 
 /**
- * Extended configuration available from everywhere.
+ * Secondary configuration available from everywhere.
  */
-class Extend
+class Secondary
 {
     /**
      * Basic URL of site (autodetect if not set).

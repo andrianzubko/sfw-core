@@ -23,11 +23,6 @@ class Transaction extends \SFW\Lazy\Sys
     protected array $onabort = [];
 
     /**
-     * Just in case of changing logger and retries number.
-     */
-    public function __construct() {}
-
-    /**
      * Do some action on transaction abort.
      */
     public function onabort(callable $event)

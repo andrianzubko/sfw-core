@@ -82,10 +82,10 @@ class Transaction extends \SFW\Lazy\Sys
                 $logger = $this->logger;
 
                 if (!isset($logger)
-                    && isset(self::$config['db_transactions_fails_log'])
+                    && isset(self::$config['sys']->dbTransactionsFailsLog)
                 ) {
                     $logger = function (string $state, int $retry): void {
-                        self::$sys->logger()->save(self::$config['db_transactions_fails_log'],
+                        self::$sys->logger()->save(self::$config['sys']->dbTransactionsFailsLog,
                             sprintf("[%s] [%d] %s",
                                 $state, $retry,
                                     idn_to_utf8($_SERVER['HTTP_HOST']) . $_SERVER['REQUEST_URI']

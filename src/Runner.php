@@ -8,11 +8,11 @@ namespace SFW;
 abstract class Runner extends Base
 {
     /**
-     * Initializing environment and routing to starting point.
+     * Initizlizing environment and calling entry point.
      */
     final public function __construct()
     {
-        // {{{ getting global microtime and preventing multiple initialization
+        // {{{ prevent double initizlization and fix microtime
 
         if (isset(self::$globalMicrotime)) {
             return;
@@ -21,25 +21,19 @@ abstract class Runner extends Base
         self::$globalMicrotime = gettimeofday(true);
 
         // }}}
-        // {{{ configs merging as arrays
+        // {{{ configs
 
-        self::$config = array_merge(
-            (array) new \SFW\Config\Primary(),
-            (array) new \App\Config\Primary()
-        );
+        self::$config['sys'] = new \App\Config\Sys();
 
-        self::$e['config'] = array_merge(
-            (array) new \SFW\Config\Secondary(),
-            (array) new \App\Config\Secondary()
-        );
+        self::$config['my'] = new \App\Config\My();
 
         // }}}
-        // {{{ lazy classes callers
+        // {{{ callers of Lazy classes
 
-        self::$sys = new \SFW\Lazy\SysCaller();
+        self::$sys = new Lazy\SysCaller();
 
-        self::$my = new \SFW\Lazy\MyCaller();
-    
+        self::$my = new Lazy\MyCaller();
+
         // }}}
         // {{{ default locale, encoding and timezone
 
@@ -47,7 +41,7 @@ abstract class Runner extends Base
 
         mb_internal_encoding('UTF-8');
 
-        if (date_default_timezone_set(self::$e['config']['timezone']) === false) {
+        if (date_default_timezone_set(self::$config['sys']->timezone) === false) {
             self::$sys->abend()->error();
         }
 
@@ -69,34 +63,36 @@ abstract class Runner extends Base
         // }}}
         // {{{ default environment
 
-        if (isset(self::$e['config']['basic_url'])) {
-            $parsed = parse_url(self::$e['config']['basic_url']);
+        self::$e['config'] = new \App\Config\Defaults();
+
+        if (isset(self::$config['sys']->basicUrl)) {
+            $parsed = parse_url(self::$config['sys']->basicUrl);
 
             if (!isset($parsed['host'])) {
-                self::$sys->abend()->error('Incorrect basic_url in secondary configuration');
+                self::$sys->abend()->error('Incorrect basicUrl in Sys config');
             }
 
-            self::$e['system']['basic_url_scheme'] = $parsed['scheme'] ?? 'http';
+            self::$e['defaults']['basic_url_scheme'] = $parsed['scheme'] ?? 'http';
 
-            self::$e['system']['basic_url_host'] = $parsed['host'];
+            self::$e['defaults']['basic_url_host'] = $parsed['host'];
         } else {
-            self::$e['system']['basic_url_scheme'] =
+            self::$e['defaults']['basic_url_scheme'] =
                 empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off'
                     ? 'http' : 'https';
 
-            self::$e['system']['basic_url_host'] = $_SERVER['HTTP_HOST'];
+            self::$e['defaults']['basic_url_host'] = $_SERVER['HTTP_HOST'];
         }
 
-        self::$e['system']['basic_url'] = sprintf('%s://%s',
-            self::$e['system']['basic_url_scheme'],
-            self::$e['system']['basic_url_host']
+        self::$e['defaults']['basic_url'] = sprintf('%s://%s',
+            self::$e['defaults']['basic_url_scheme'],
+            self::$e['defaults']['basic_url_host']
         );
 
-        self::$e['system']['timestamp'] = (int) self::$globalMicrotime;
+        self::$e['defaults']['timestamp'] = (int) self::$globalMicrotime;
 
-        self::$e['system']['point'] = (new \App\Router())->get();
+        self::$e['defaults']['point'] = (new \App\Router())->get();
 
-        if (self::$e['system']['point'] === false) {
+        if (self::$e['defaults']['point'] === false) {
             self::$sys->abend()->errorPage(404);
         }
 
@@ -106,23 +102,25 @@ abstract class Runner extends Base
         $this->environment();
 
         // }}}
-        // {{{ go to routed enty point if runned not under test suite.
+        // {{{ calling entry point if this is not test suite
 
-        if ($_SERVER['REMOTE_ADDR'] !== '0.0.0.0') {
-            $point = self::$e['system']['point'];
-
-            if (!class_exists("\\App\\Point\\$point")) {
-                self::$sys->abend()->errorPage(404);
-            }
-
-            new ("\\App\\Point\\$point")();
+        if ($_SERVER['REMOTE_ADDR'] === '0.0.0.0') {
+            return;
         }
+
+        $class = 'App\\Point\\' . self::$e['defaults']['point'];
+
+        if (!class_exists($class)) {
+            self::$sys->abend()->errorPage(404);
+        }
+
+        new $class();
 
         // }}}
     }
 
     /**
-     * For additional environment.
+     * Initializing additional environment.
      */
     abstract protected function environment(): void;
 }

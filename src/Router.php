@@ -3,12 +3,12 @@
 namespace SFW;
 
 /**
- * Router to point.
+ * Abstraction for router.
  */
 abstract class Router extends Base
 {
     /**
-     * Route from request url to starting point.
+     * Route from request url to entry point.
      */
     abstract public function get(): string|false;
 }

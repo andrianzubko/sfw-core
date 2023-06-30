@@ -3,10 +3,28 @@
 namespace SFW\Config;
 
 /**
- * Primary configuration not available from templates.
+ * System configuration not available from templates.
  */
-class Primary
+abstract class Sys
 {
+    // {{{ frontend
+
+    /**
+     * Basic url of site (autodetect if not set).
+     */
+    public ?string $basicUrl = null;
+
+    /**
+     * Recombine css and js files (always disable on production).
+     */
+    public bool $recombineCssAndJs = true;
+
+    /**
+     * Add statistics to each page generated from template.
+     */
+    public bool $addStatsToPage = true;
+
+    // }}}
     // {{{ database
 
     /**
@@ -17,17 +35,17 @@ class Primary
     /**
      * Log transactions fails.
      */
-    public ?string $db_transactions_fails_log = 'log/transactions.fails.log';
+    public ?string $dbTransactionsFailsLog = 'log/transactions.fails.log';
 
     /**
      * Log slow queries.
      */
-    public ?string $db_slow_queries_log = 'log/slow.queries.log';
+    public ?string $dbSlowQueriesLog = 'log/slow.queries.log';
 
     /**
      * Log slow queries with minimal time.
      */
-    public float $db_slow_queries_min = 0.5;
+    public float $dbSlowQueriesMin = 0.5;
 
     /**
      * PostgreSQL.
@@ -57,7 +75,7 @@ class Primary
     /**
      * Default cache (can be changed at runtime).
      */
-    public string $cache = 'memcached';
+    public string $cache = 'apc';
 
     /**
      * Apc.
@@ -81,29 +99,26 @@ class Primary
     // {{{ mail
 
     /**
-     * Enable mailer (if disabled, then build() method in notifies will be called, but no emails sent).
+     * Enable mailer.
+     *
+     * If disabled, then no emails will be sent, but build() method in Notify classes will be called anyway.
      */
     public bool $mailer = true;
 
     /**
-     * Instead of disabling, you can replace recipients with these.
+     * Instead of disabling, you can replace recipients to your email.
      * 
      * array('EMAIL' or array('EMAIL'[, 'NAME']), ...)
      */
-    public array $mailer_replace_recipients = [];
+    public array $mailerReplaceRecipients = [];
 
     // }}}
-    // {{{ frontend
+    // {{{ time
 
     /**
-     * Recombine css and js files (allways disable on production).
+     * Default timezone.
      */
-    public bool $recombine_css_and_js = true;
-
-    /**
-     * Add statistics to each page generated from template.
-     */
-    public bool $add_stats_to_page = true;
+    public string $timezone = 'Europe/Moscow';
 
     // }}}
 }

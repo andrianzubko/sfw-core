@@ -3,7 +3,7 @@
 namespace SFW;
 
 /**
- * Abstraction for all notifies.
+ * Abstraction for all Notify classes.
  */
 abstract class Notify extends Base
 {

@@ -66,7 +66,7 @@ class Out extends \SFW\Lazy\Sys
         http_response_code($status);
 
         header(
-            sprintf('Last-Modified: %s', gmdate('D, d M Y H:i:s \G\M\T', self::$e['system']['timestamp']))
+            sprintf('Last-Modified: %s', gmdate('D, d M Y H:i:s \G\M\T', self::$e['defaults']['timestamp']))
         );
 
         header(
@@ -136,7 +136,7 @@ class Out extends \SFW\Lazy\Sys
             return $contents;
         }
 
-        if (self::$config['add_stats_to_page']) {
+        if (self::$config['sys']->addStatsToPage) {
             $dbDrivers = [];
 
             $dbMicrotime = $dbCounter = 0;
@@ -176,7 +176,7 @@ class Out extends \SFW\Lazy\Sys
         }
 
         if (str_starts_with($url, '/') && !str_starts_with($url, '//')) {
-            $url = self::$e['system']['basic_url'] . $url;
+            $url = self::$e['defaults']['basic_url'] . $url;
         }
 
         http_response_code(302);

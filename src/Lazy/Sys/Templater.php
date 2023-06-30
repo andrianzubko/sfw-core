@@ -17,34 +17,32 @@ class Templater extends \SFW\Lazy\Sys
      */
     public function transform(array $e, string $template): string
     {
-        $text = self::$sys->text();
-
         return \SFW\Templater::transform("templates/$template",
             array_merge(
                 [
                     'e' => $e,
 
-                    'lc' => [$text, 'lc'],
+                    'lc' => [self::$sys->text(), 'lc'],
 
-                    'lcfirst' => [$text, 'lcfirst'],
+                    'lcfirst' => [self::$sys->text(), 'lcfirst'],
 
-                    'uc' => [$text, 'uc'],
+                    'uc' => [self::$sys->text(), 'uc'],
 
-                    'ucfirst' => [$text, 'ucfirst'],
+                    'ucfirst' => [self::$sys->text(), 'ucfirst'],
 
-                    'trim' => [$text, 'trim'],
+                    'trim' => [self::$sys->text(), 'trim'],
 
-                    'rtrim' => [$text, 'rtrim'],
+                    'rtrim' => [self::$sys->text(), 'rtrim'],
 
-                    'ltrim' => [$text, 'ltrim'],
+                    'ltrim' => [self::$sys->text(), 'ltrim'],
 
-                    'fulltrim' => [$text, 'fulltrim'],
+                    'fulltrim' => [self::$sys->text(), 'fulltrim'],
 
-                    'multitrim' => [$text, 'multitrim'],
+                    'multitrim' => [self::$sys->text(), 'multitrim'],
 
-                    'cut' => [$text, 'cut'],
+                    'cut' => [self::$sys->text(), 'cut'],
 
-                    'random' => [$text, 'random'],
+                    'random' => [self::$sys->text(), 'random'],
 
                 ], $this->properties
             )

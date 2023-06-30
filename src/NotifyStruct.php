@@ -3,7 +3,7 @@
 namespace SFW;
 
 /**
- * Structure for notifies.
+ * Message structure for Notify classes.
  */
 class NotifyStruct
 {
@@ -62,7 +62,7 @@ class NotifyStruct
     /**
      * Environment for template.
      *
-     * By default here is copy of config and system environment.
+     * By default here is copy of config and defaults environment.
      */
     public array $e = [];
 }

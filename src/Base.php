@@ -3,9 +3,10 @@
 namespace SFW;
 
 /**
- * Basic abstract with basic environment.
+ * Abstraction with basic environment.
  */
-abstract class Base extends \stdClass
+#[\AllowDynamicProperties]
+abstract class Base
 {
     /**
      * Global microtime.
@@ -13,26 +14,26 @@ abstract class Base extends \stdClass
     protected static float $globalMicrotime;
 
     /**
-     * Accessing system lazy classes from anywhere except templates.
+     * Accessing system Lazy classes from anywhere except templates.
      *
-     * self::$sys->someClass()->someMethod()
+     * self::$sys->sysLazyClass()->someMethod()
      */
     public static Lazy\SysCaller $sys;
 
     /**
-     * Accessing your lazy classes from anywhere except templates.
+     * Accessing your Lazy classes from anywhere except templates.
      *
-     * self::$my->someClass()->someMethod()
+     * self::$my->myLazyClass()->someMethod()
      */
     public static Lazy\MyCaller $my;
 
     /**
-     * System configuration not available from templates.
+     * Configs not available from templates.
      */
-    protected static array $config;
+    protected static array $config = [];
 
     /**
-     * Available from everywhere enviroment.
+     * Environment available from everywhere.
      */
     protected static array $e = [];
 }

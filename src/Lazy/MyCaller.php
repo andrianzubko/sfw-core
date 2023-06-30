@@ -3,7 +3,7 @@
 namespace SFW\Lazy;
 
 /**
- * Caller for your lazy classes.
+ * Caller for your Lazy classes.
  */
 final class MyCaller extends \SFW\Lazy
 {
@@ -13,11 +13,11 @@ final class MyCaller extends \SFW\Lazy
     public static array $instances = [];
 
     /**
-     * Access to lazy classes from anywhere except templates.
+     * Access to Lazy classes from anywhere except templates.
      */
     public function __call(string $name, array $arguments): object
     {
-        if (!$arguments && isset(self::$instances[$name])) {
+        if ( isset(self::$instances[$name]) && !$arguments) {
             return self::$instances[$name];
         }
 
@@ -25,7 +25,7 @@ final class MyCaller extends \SFW\Lazy
 
         $lazy = new $class(...$arguments);
 
-        if (method_exists($lazy,'getInstance')) {
+        if (method_exists($lazy, 'getInstance')) {
             $lazy = $lazy->getInstance();
         }
 

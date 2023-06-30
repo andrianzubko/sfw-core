@@ -20,11 +20,11 @@ class Pgsql extends \SFW\Lazy\Sys
         $profiler = $this->profiler;
 
         if (!isset($profiler)
-            && isset(self::$config['db_slow_queries_log'])
+            && isset(self::$config['sys']->dbSlowQueriesLog)
         ) {
             $profiler = function (float $microtime, array $queries): void {
-                if ($microtime >= self::$config['db_slow_queries_min']) {
-                    self::$sys->logger()->save(self::$config['db_slow_queries_log'],
+                if ($microtime >= self::$config['sys']->dbSlowQueriesMin) {
+                    self::$sys->logger()->save(self::$config['sys']->dbSlowQueriesLog,
                         sprintf("[%.2f] %s\n\t%s\n",
                             $microtime,
                                 idn_to_utf8($_SERVER['HTTP_HOST']) . $_SERVER['REQUEST_URI'],
@@ -36,7 +36,7 @@ class Pgsql extends \SFW\Lazy\Sys
         }
 
         try {
-            $db = new \SFW\Databaser\Pgsql(self::$config['pgsql'], $profiler);
+            $db = new \SFW\Databaser\Pgsql(self::$config['sys']->pgsql, $profiler);
         } catch (\SFW\Databaser\Exception $error) {
             self::$sys->abend()->error($error->getMessage());
         }

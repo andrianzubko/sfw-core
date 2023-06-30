@@ -26,7 +26,7 @@ class Notifier extends \SFW\Lazy\Sys
 
         $this->defaultStruct->e['config'] = self::$e['config'];
 
-        $this->defaultStruct->e['system'] = self::$e['system'];
+        $this->defaultStruct->e['defaults'] = self::$e['defaults'];
 
         register_shutdown_function(
             function (string $cwd): void {
@@ -62,10 +62,10 @@ class Notifier extends \SFW\Lazy\Sys
             if (isset($notify)) {
                 $structs = $notify->build(clone $this->defaultStruct);
 
-                if (self::$config['mailer']) {
+                if (self::$config['sys']->mailer) {
                     foreach ($structs as $struct) {
-                        if (self::$config['mailer_replace_recipients']) {
-                            $struct->recipients = self::$config['mailer_replace_recipients'];
+                        if (self::$config['sys']->mailerReplaceRecipients) {
+                            $struct->recipients = self::$config['sys']->mailerReplaceRecipients;
                         }
 
                         $this->send($struct);

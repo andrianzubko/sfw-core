@@ -8,6 +8,11 @@ namespace SFW\Lazy\Sys;
 class Merger extends \SFW\Lazy\Sys
 {
     /**
+     * Public directory.
+     */
+    protected $publicDir = 'public';
+
+    /**
      * Recombine all if needed and return merged info.
      */
     public function get(bool $recombine = true): array
@@ -16,7 +21,7 @@ class Merger extends \SFW\Lazy\Sys
             $this->recombine();
         }
 
-        foreach (@self::$sys->dir()->scan('public/.merged') as $item) {
+        foreach (@self::$sys->dir()->scan("{$this->publicDir}/.merged") as $item) {
             return ['time' => (int) $item];
         }
 
@@ -32,7 +37,7 @@ class Merger extends \SFW\Lazy\Sys
 
         foreach (['css','js'] as $type) {
             foreach (['primary','secondary'] as $section) {
-                $dir = "public/.$type/$section";
+                $dir = "{$this->publicDir}/.$type/$section";
 
                 foreach (@self::$sys->dir()->scan($dir, true) as $item) {
                     $file = "$dir/$item";
@@ -42,13 +47,13 @@ class Merger extends \SFW\Lazy\Sys
                     }
 
                     if (preg_match('~^([^/]+)/~', $item, $M)) {
-                        $struct[$type]["public/.merged/%s.{$M[1]}.$type"][] = $file;
+                        $struct[$type]["{$this->publicDir}/.merged/%s.{$M[1]}.$type"][] = $file;
 
-                        $struct[$type]["public/.merged/%s.{$M[1]}.$section.$type"][] = $file;
+                        $struct[$type]["{$this->publicDir}/.merged/%s.{$M[1]}.$section.$type"][] = $file;
                     } else {
-                        $struct[$type]["public/.merged/%s.$type"][] = $file;
+                        $struct[$type]["{$this->publicDir}/.merged/%s.$type"][] = $file;
 
-                        $struct[$type]["public/.merged/%s.$section.$type"][] = $file;
+                        $struct[$type]["{$this->publicDir}/.merged/%s.$section.$type"][] = $file;
                     }
                 }
             }
@@ -74,7 +79,7 @@ class Merger extends \SFW\Lazy\Sys
         $struct = $this->prepareStruct();
 
         if (!$struct) {
-            self::$sys->dir()->clear('public/.merged');
+            self::$sys->dir()->clear("{$this->publicDir}/.merged");
 
             return;
         }
@@ -86,7 +91,7 @@ class Merger extends \SFW\Lazy\Sys
 
         $time = false;
 
-        foreach (@self::$sys->dir()->scan('public/.merged') as $item) {
+        foreach (@self::$sys->dir()->scan("{$this->publicDir}/.merged") as $item) {
             if ($time === false) {
                 $time = (int) $item;
             } elseif ($time != (int) $item) {
@@ -125,7 +130,7 @@ class Merger extends \SFW\Lazy\Sys
         // {{{ merging if needed
 
         if ($time === false) {
-            self::$sys->dir()->clear('public/.merged');
+            self::$sys->dir()->clear("{$this->publicDir}/.merged");
 
             $time = time();
 
@@ -194,10 +199,10 @@ class Merger extends \SFW\Lazy\Sys
                         $type = 'svg+xml';
                     }
 
-                    $size = @filesize('public' . $M[1]);
+                    $size = @filesize($this->publicDir . $M[1]);
 
                     if ($size !== false && $size <= 32 * 1024) {
-                        $data = @self::$sys->file()->get('public' . $M[1]);
+                        $data = @self::$sys->file()->get($this->publicDir . $M[1]);
                     }
                 }
 

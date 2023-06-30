@@ -17,7 +17,7 @@ class Cache extends \SFW\Lazy\Sys
      */
     public function getInstance(): \SFW\SimpleCacher\Cache
     {
-        $cache = $this->cache ?? self::$config['cache'];
+        $cache = $this->cache ?? self::$config['sys']->cache;
 
         return self::$sys->$cache();
     }

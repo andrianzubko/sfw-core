@@ -38,17 +38,13 @@ class Curl extends \SFW\Lazy\Sys
             return false;
         }
 
-        $headers = preg_split(
-            '/\r\n\r\n/', substr($response, 0, $info['header_size']), 0, PREG_SPLIT_NO_EMPTY
-        );
+        $headers = preg_split('/\r\n\r\n/', substr($response, 0, $info['header_size']), 0, PREG_SPLIT_NO_EMPTY);
 
         if (!count($headers)) {
             return false;
         }
 
-        $headers = preg_split(
-            '/\r\n/', array_pop($headers), 0, PREG_SPLIT_NO_EMPTY
-        );
+        $headers = preg_split('/\r\n/', array_pop($headers), 0, PREG_SPLIT_NO_EMPTY);
 
         if ($info['header_size'] >= strlen($response)) {
             return '';

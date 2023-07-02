@@ -10,7 +10,7 @@ class Notifier extends \SFW\Lazy\Sys
     /**
      * Default structure.
      */
-    protected \SFW\NotifyStruct $defaultStruct;
+    protected \SFW\Notify\Struct $defaultStruct;
 
     /**
      * Prepared notifies.
@@ -22,7 +22,7 @@ class Notifier extends \SFW\Lazy\Sys
      */
     public function __construct()
     {
-        $this->defaultStruct = new \SFW\NotifyStruct();
+        $this->defaultStruct = new \SFW\Notify\Struct();
 
         $this->defaultStruct->e['config'] = self::$e['config'];
 
@@ -62,10 +62,10 @@ class Notifier extends \SFW\Lazy\Sys
             if (isset($notify)) {
                 $structs = $notify->build(clone $this->defaultStruct);
 
-                if (self::$config['sys']->mailer) {
+                if (self::$config['sys']['mailer']) {
                     foreach ($structs as $struct) {
-                        if (self::$config['sys']->mailerReplaceRecipients) {
-                            $struct->recipients = self::$config['sys']->mailerReplaceRecipients;
+                        if (self::$config['sys']['mailer_override_recipients']) {
+                            $struct->recipients = self::$config['sys']['mailer_override_recipients'];
                         }
 
                         $this->send($struct);
@@ -78,7 +78,7 @@ class Notifier extends \SFW\Lazy\Sys
     /**
      * Sending single message.
      */
-    protected function send(\SFW\NotifyStruct $struct): void
+    protected function send(\SFW\Notify\Struct $struct): void
     {
         $mailer = new \PHPMailer\PHPMailer\PHPMailer();
 

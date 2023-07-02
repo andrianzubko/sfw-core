@@ -17,7 +17,7 @@ class Db extends \SFW\Lazy\Sys
      */
     public function getInstance(): \SFW\Databaser\Driver
     {
-        $db = $this->db ?? self::$config['sys']->db;
+        $db = $this->db ?? self::$config['sys']['db'];
 
         return self::$sys->$db();
     }

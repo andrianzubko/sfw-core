@@ -28,12 +28,12 @@ abstract class Base
     public static Lazy\MyCaller $my;
 
     /**
-     * Configs not available from templates.
+     * All configs (not available from templates).
      */
     protected static array $config = [];
 
     /**
-     * Environment available from everywhere.
+     * Shared config, default and your environment (should be passed to templates).
      */
     protected static array $e = [];
 }

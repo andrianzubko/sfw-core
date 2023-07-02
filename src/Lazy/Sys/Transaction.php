@@ -13,11 +13,6 @@ class Transaction extends \SFW\Lazy\Sys
     protected ?\Closure $logger = null;
 
     /**
-     * How much retries transaction with expected states.
-     */
-    protected int $retries = 7;
-
-    /**
      * Registered callbacks for running on transaction abort.
      */
     protected array $onabort = [];
@@ -51,7 +46,7 @@ class Transaction extends \SFW\Lazy\Sys
      */
     protected function process(?string $isolation, ?array $expected, callable $transaction, ?callable $onerror, string $mode): bool
     {
-        for ($retry = 1; $retry <= $this->retries; $retry++) {
+        for ($retry = 1; $retry <= self::$config['sys']['db_transactions_retries']; $retry++) {
             try {
                 $this->onabort = [];
 
@@ -82,10 +77,10 @@ class Transaction extends \SFW\Lazy\Sys
                 $logger = $this->logger;
 
                 if (!isset($logger)
-                    && isset(self::$config['sys']->dbTransactionsFailsLog)
+                    && isset(self::$config['sys']['db_transactions_fails_log'])
                 ) {
                     $logger = function (string $state, int $retry): void {
-                        self::$sys->logger()->save(self::$config['sys']->dbTransactionsFailsLog,
+                        self::$sys->logger()->save(self::$config['sys']['db_transactions_fails_log'],
                             sprintf("[%s] [%d] %s",
                                 $state, $retry,
                                     idn_to_utf8($_SERVER['HTTP_HOST']) . $_SERVER['REQUEST_URI']

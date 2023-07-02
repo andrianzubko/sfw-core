@@ -136,7 +136,7 @@ class Out extends \SFW\Lazy\Sys
             return $contents;
         }
 
-        if (self::$config['sys']->addStatsToPage) {
+        if (self::$config['sys']['add_stats_to_page']) {
             $dbDrivers = [];
 
             $dbMicrotime = $dbCounter = 0;

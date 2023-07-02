@@ -10,7 +10,7 @@ class Locker extends \SFW\Lazy\Sys
     /**
      * Lock files pattern.
      */
-    protected string $pattern = 'locks/%s.lock';
+    protected string $pattern = APP_DIR . '/locks/%s.lock';
 
     /**
      * Already created locks.

@@ -12,27 +12,45 @@ abstract class Runner extends Base
      */
     final public function __construct()
     {
-        // {{{ prevent double initizlization and fix microtime
+        // {{{ prevent multiple initizlizations
 
         if (isset(self::$globalMicrotime)) {
             return;
         }
 
+        // }}}
+        // {{{ fix microtime
+
         self::$globalMicrotime = gettimeofday(true);
 
         // }}}
-        // {{{ configs
-
-        self::$config['sys'] = new \App\Config\Sys();
-
-        self::$config['my'] = new \App\Config\My();
-
-        // }}}
-        // {{{ callers of Lazy classes
+        // {{{ callers for Lazy classes
 
         self::$sys = new Lazy\SysCaller();
 
         self::$my = new Lazy\MyCaller();
+
+        // }}}
+        // {{{ checking inportant constants
+
+        if (!defined('APP_DIR')) {
+            self::$sys->abend()->error('Undefined constant APP_DIR');
+        }
+
+        if (!defined('PUB_DIR')) {
+            self::$sys->abend()->error('Undefined constant PUB_DIR');
+        }
+
+        // }}}
+        // {{{ config
+
+        self::$config['sys'] = (new \App\Config\Sys())->get();
+
+        self::$config['my'] = (new \App\Config\My())->get();
+
+        self::$config['shared'] = (new \App\Config\Shared())->get();
+
+        self::$e['config'] = &self::$config['shared'];
 
         // }}}
         // {{{ default locale, encoding and timezone
@@ -41,7 +59,7 @@ abstract class Runner extends Base
 
         mb_internal_encoding('UTF-8');
 
-        if (date_default_timezone_set(self::$config['sys']->timezone) === false) {
+        if (date_default_timezone_set(self::$config['sys']['timezone']) === false) {
             self::$sys->abend()->error();
         }
 
@@ -63,13 +81,11 @@ abstract class Runner extends Base
         // }}}
         // {{{ default environment
 
-        self::$e['config'] = new \App\Config\Defaults();
-
-        if (isset(self::$config['sys']->basicUrl)) {
-            $parsed = parse_url(self::$config['sys']->basicUrl);
+        if (isset(self::$config['sys']['basic_url'])) {
+            $parsed = parse_url(self::$config['sys']['basic_url']);
 
             if (!isset($parsed['host'])) {
-                self::$sys->abend()->error('Incorrect basicUrl in Sys config');
+                self::$sys->abend()->error('Incorrect basic_url in system config');
             }
 
             self::$e['defaults']['basic_url_scheme'] = $parsed['scheme'] ?? 'http';
@@ -102,9 +118,9 @@ abstract class Runner extends Base
         $this->environment();
 
         // }}}
-        // {{{ calling entry point if this is not test suite
+        // {{{ calling entry point if this is not CLI
 
-        if ($_SERVER['REMOTE_ADDR'] === '0.0.0.0') {
+        if (php_sapi_name() === 'cli') {
             return;
         }
 
@@ -114,7 +130,15 @@ abstract class Runner extends Base
             self::$sys->abend()->errorPage(404);
         }
 
-        new $class();
+        try {
+            new $class();
+        } catch (\Exception $error) {
+            self::$sys->abend()->error(
+                $error->getMessage(),
+                $error->getFile(),
+                $error->getLine()
+            );
+        }
 
         // }}}
     }

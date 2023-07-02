@@ -14,10 +14,10 @@ class Logger extends \SFW\Lazy\Sys
     {
         $timezonePrev = date_default_timezone_get();
 
-        if ($timezonePrev === self::$config['sys']->timezone) {
+        if ($timezonePrev === self::$config['sys']['timezone']) {
             $timezonePrev = null;
         } else {
-            date_default_timezone_set(self::$config['sys']->timezone);
+            date_default_timezone_set(self::$config['sys']['timezone']);
         }
 
         $message = sprintf("[%s] %s\n", date('d.m.y H:i'), $message);

@@ -1,10 +1,6 @@
 <?php
 
 namespace PHPSTORM_META {
-    override(\SFW\Lazy\MyCaller::__call(), map([
-        '' => '\App\Lazy\My\@',
-    ]));
-
     override(\SFW\Lazy\SysCaller::__call(), map([
         'db' => \SFW\Databaser\Driver::class,
         'pgsql' => \SFW\Databaser\Driver::class,

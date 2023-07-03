@@ -1,11 +1,11 @@
 <?php
 
-namespace SFW\Notify;
+namespace SFW;
 
 /**
  * Message structure for Notify classes.
  */
-class Struct
+class NotifyStruct
 {
     /**
      * Subject.

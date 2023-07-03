@@ -22,7 +22,7 @@ class Locker extends \SFW\Lazy\Sys
      */
     public function lock(string $key): bool
     {
-        self::$sys->dir()->create(dirname($this->pattern));
+        $this->sys('Dir')->create(dirname($this->pattern));
 
         $fh = fopen(sprintf($this->pattern, $key), 'a+');
 

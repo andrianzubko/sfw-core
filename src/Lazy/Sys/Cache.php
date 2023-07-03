@@ -4,6 +4,8 @@ namespace SFW\Lazy\Sys;
 
 /**
  * Default cache.
+ *
+ * @mixin \SFW\SimpleCacher\Cache
  */
 class Cache extends \SFW\Lazy\Sys
 {
@@ -14,11 +16,11 @@ class Cache extends \SFW\Lazy\Sys
 
     /**
      * Cache module instance.
+     *
+     * @internal
      */
     public function getInstance(): \SFW\SimpleCacher\Cache
     {
-        $cache = $this->cache ?? self::$config['sys']['cache'];
-
-        return self::$sys->$cache();
+        return $this->sys($this->cache ?? self::$config['sys']['cache']);
     }
 }

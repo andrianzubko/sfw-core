@@ -4,6 +4,8 @@ namespace SFW\Lazy\Sys;
 
 /**
  * Default database.
+ *
+ * @mixin \SFW\Databaser\Driver
  */
 class Db extends \SFW\Lazy\Sys
 {
@@ -14,11 +16,11 @@ class Db extends \SFW\Lazy\Sys
 
     /**
      * Cache module instance.
+     *
+     * @internal
      */
     public function getInstance(): \SFW\Databaser\Driver
     {
-        $db = $this->db ?? self::$config['sys']['db'];
-
-        return self::$sys->$db();
+        return $this->sys($this->db ?? self::$config['sys']['db']);
     }
 }

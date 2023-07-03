@@ -24,21 +24,14 @@ abstract class Runner extends Base
         self::$globalMicrotime = gettimeofday(true);
 
         // }}}
-        // {{{ callers for Lazy classes
-
-        self::$sys = new Lazy\SysCaller();
-
-        self::$my = new Lazy\MyCaller();
-
-        // }}}
         // {{{ checking inportant constants
 
         if (!defined('APP_DIR')) {
-            self::$sys->abend()->error('Undefined constant APP_DIR');
+            $this->sys('Abend')->error('Undefined constant APP_DIR');
         }
 
         if (!defined('PUB_DIR')) {
-            self::$sys->abend()->error('Undefined constant PUB_DIR');
+            $this->sys('Abend')->error('Undefined constant PUB_DIR');
         }
 
         // }}}
@@ -60,7 +53,7 @@ abstract class Runner extends Base
         mb_internal_encoding('UTF-8');
 
         if (date_default_timezone_set(self::$config['sys']['timezone']) === false) {
-            self::$sys->abend()->error();
+            $this->sys('Abend')->error();
         }
 
         // }}}
@@ -85,7 +78,7 @@ abstract class Runner extends Base
             $parsed = parse_url(self::$config['sys']['basic_url']);
 
             if (!isset($parsed['host'])) {
-                self::$sys->abend()->error('Incorrect basic_url in system config');
+                $this->sys('Abend')->error('Incorrect basic_url in system config');
             }
 
             self::$e['defaults']['basic_url_scheme'] = $parsed['scheme'] ?? 'http';
@@ -109,7 +102,7 @@ abstract class Runner extends Base
         self::$e['defaults']['point'] = (new \App\Router())->get();
 
         if (self::$e['defaults']['point'] === false) {
-            self::$sys->abend()->errorPage(404);
+            $this->sys('Abend')->errorPage(404);
         }
 
         // }}}
@@ -124,16 +117,18 @@ abstract class Runner extends Base
             return;
         }
 
-        $class = 'App\\Point\\' . self::$e['defaults']['point'];
+        $point = self::$e['defaults']['point'];
+
+        $class = "App\\Point\\$point";
 
         if (!class_exists($class)) {
-            self::$sys->abend()->errorPage(404);
+            $this->sys('Abend')->errorPage(404);
         }
 
         try {
             new $class();
         } catch (\Exception $error) {
-            self::$sys->abend()->error(
+            $this->sys('Abend')->error(
                 $error->getMessage(),
                 $error->getFile(),
                 $error->getLine()

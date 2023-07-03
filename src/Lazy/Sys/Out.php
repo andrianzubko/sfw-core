@@ -124,7 +124,7 @@ class Out extends \SFW\Lazy\Sys
     {
         $started = gettimeofday(true);
 
-        $contents = self::$sys->templater()->transform($e, $template);
+        $contents = $this->sys('Templater')->transform($e, $template);
 
         $finished = gettimeofday(true);
 
@@ -141,13 +141,16 @@ class Out extends \SFW\Lazy\Sys
 
             $dbMicrotime = $dbCounter = 0;
 
-            foreach (self::$sys::$instances as $lazy) {
-                if ($lazy instanceof \SFW\Databaser\Driver && !in_array($lazy, $dbDrivers, true)) {
-                    $dbDrivers[] = $lazy;
+            if (isset(self::$lazyInstances['sys'])) {
+                foreach (self::$lazyInstances['sys'] as $lazy) {
+                    if ($lazy instanceof \SFW\Databaser\Driver && !in_array($lazy, $dbDrivers, true)) {
+                        $dbDrivers[] = $lazy;
 
-                    $dbMicrotime += $lazy->getMicrotime();
 
-                    $dbCounter += $lazy->getCounter();
+                        $dbMicrotime += $lazy->getMicrotime();
+
+                        $dbCounter += $lazy->getCounter();
+                    }
                 }
             }
 

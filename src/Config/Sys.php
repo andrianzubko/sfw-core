@@ -37,16 +37,16 @@ class Sys extends \SFW\Config
              *
              * string
              */
-            'param_for_paginator' => 'i',
+            'param_for_paginator' => 'page',
 
             // }}}
             // {{{ database
 
-            /* Default database driver (can be changed at runtime).
+            /* Default database driver Mysql or Pgsql (can be changed at runtime).
              *
              * string
              */
-            'db' => 'mysql',
+            'db' => 'Mysql',
 
             /* How many times to retry failed transactions with expected sql states.
              *
@@ -127,11 +127,11 @@ class Sys extends \SFW\Config
             // }}}
             // {{{ cache
 
-            /* Default cache (can be changed at runtime).
+            /* Default cache Apc or Memcached (can be changed at runtime).
              *
              * string
              */
-            'cache' => 'apc',
+            'cache' => 'Apc',
 
             /* Apc.
              *

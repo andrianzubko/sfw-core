@@ -3,6 +3,6 @@
 namespace SFW\Lazy;
 
 /**
- * Basic abstract for system lazy classes.
+ * Abstraction for system Lazy classes.
  */
 abstract class Sys extends \SFW\Lazy {}

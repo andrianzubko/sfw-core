@@ -22,7 +22,7 @@ class Logger extends \SFW\Lazy\Sys
 
         $message = sprintf("[%s] %s\n", date('d.m.y H:i'), $message);
 
-        self::$sys->file()->put($file, $message, FILE_APPEND);
+        $this->sys('File')->put($file, $message, FILE_APPEND);
 
         if (isset($timezonePrev)) {
             date_default_timezone_set($timezonePrev);

@@ -10,7 +10,7 @@ class Notifier extends \SFW\Lazy\Sys
     /**
      * Default structure.
      */
-    protected \SFW\Notify\Struct $defaultStruct;
+    protected \SFW\NotifyStruct $defaultStruct;
 
     /**
      * Prepared notifies.
@@ -22,7 +22,7 @@ class Notifier extends \SFW\Lazy\Sys
      */
     public function __construct()
     {
-        $this->defaultStruct = new \SFW\Notify\Struct();
+        $this->defaultStruct = new \SFW\NotifyStruct();
 
         $this->defaultStruct->e['config'] = self::$e['config'];
 
@@ -44,7 +44,7 @@ class Notifier extends \SFW\Lazy\Sys
     {
         $this->notifies[] = &$notify;
 
-        self::$sys->transaction()->onabort(
+        $this->sys('Transaction')->onabort(
             function () use (&$notify): void {
                 $notify = null;
             }
@@ -78,7 +78,7 @@ class Notifier extends \SFW\Lazy\Sys
     /**
      * Sending single message.
      */
-    protected function send(\SFW\Notify\Struct $struct): void
+    protected function send(\SFW\NotifyStruct $struct): void
     {
         $mailer = new \PHPMailer\PHPMailer\PHPMailer();
 

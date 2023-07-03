@@ -50,21 +50,21 @@ class Transaction extends \SFW\Lazy\Sys
             try {
                 $this->onabort = [];
 
-                self::$sys->db()->begin($isolation);
+                $this->sys('Db')->begin($isolation);
 
                 if ($transaction() === false) {
-                    self::$sys->db()->rollback();
+                    $this->sys('Db')->rollback();
 
                     foreach ($this->onabort as $event) {
                         $event();
                     }
                 } else {
-                    self::$sys->db()->commit();
+                    $this->sys('Db')->commit();
                 }
 
                 return true;
             } catch (\SFW\Databaser\Exception $error) {
-                self::$sys->db()->rollback();
+                $this->sys('Db')->rollback();
 
                 foreach ($this->onabort as $event) {
                     $event();
@@ -80,7 +80,7 @@ class Transaction extends \SFW\Lazy\Sys
                     && isset(self::$config['sys']['db_transactions_fails_log'])
                 ) {
                     $logger = function (string $state, int $retry): void {
-                        self::$sys->logger()->save(self::$config['sys']['db_transactions_fails_log'],
+                        $this->sys('Logger')->save(self::$config['sys']['db_transactions_fails_log'],
                             sprintf("[%s] [%d] %s",
                                 $state, $retry,
                                     idn_to_utf8($_SERVER['HTTP_HOST']) . $_SERVER['REQUEST_URI']
@@ -96,7 +96,7 @@ class Transaction extends \SFW\Lazy\Sys
                 if (!in_array($error->getSqlState(), $expected ?? [], true)
                     || $retry == $this->retries
                 ) {
-                    self::$sys->abend()->$mode($error->getMessage(), $error->getFile(), $error->getLine());
+                    $this->sys('Abend')->$mode($error->getMessage(), $error->getFile(), $error->getLine());
 
                     return false;
                 }

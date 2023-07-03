@@ -3,6 +3,6 @@
 namespace SFW\Lazy;
 
 /**
- * Basic abstract for your lazy classes.
+ * Abstraction for your Lazy classes.
  */
 abstract class My extends \SFW\Lazy {}

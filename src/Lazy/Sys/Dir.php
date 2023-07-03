@@ -162,7 +162,7 @@ class Dir extends \SFW\Lazy\Sys
         }
 
         for ($i = 1; $i <= 10; $i++) {
-            $dir = sprintf('%s/%s', $this->temporary, self::$sys->text()->random());
+            $dir = sprintf('%s/%s', $this->temporary, $this->sys('Text')->random());
 
             if (mkdir($dir, 0600, true)) {
                 register_shutdown_function(
@@ -175,6 +175,6 @@ class Dir extends \SFW\Lazy\Sys
             }
         }
 
-        self::$sys->abend()->error();
+        $this->sys('Abend')->error();
     }
 }

@@ -3,6 +3,6 @@
 namespace SFW;
 
 /**
- * Abstraction for all Lazy classes and both callers.
+ * Abstraction for Lazy classes.
  */
 abstract class Lazy extends Base {}

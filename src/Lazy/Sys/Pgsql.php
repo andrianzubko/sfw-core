@@ -4,6 +4,8 @@ namespace SFW\Lazy\Sys;
 
 /**
  * Pgsql.
+ *
+ * @mixin \SFW\Databaser\Driver
  */
 class Pgsql extends \SFW\Lazy\Sys
 {
@@ -14,6 +16,8 @@ class Pgsql extends \SFW\Lazy\Sys
 
     /**
      * Pgsql module instance.
+     *
+     * @internal
      */
     public function getInstance(): \SFW\Databaser\Driver
     {
@@ -24,11 +28,11 @@ class Pgsql extends \SFW\Lazy\Sys
         ) {
             $profiler = function (float $microtime, array $queries): void {
                 if ($microtime >= self::$config['sys']['db_slow_queries_min']) {
-                    self::$sys->logger()->save(self::$config['sys']['db_slow_queries_log'],
+                    $this->sys('Logger')->save(self::$config['sys']['db_slow_queries_log'],
                         sprintf("[%.2f] %s\n\t%s\n",
                             $microtime,
                                 idn_to_utf8($_SERVER['HTTP_HOST']) . $_SERVER['REQUEST_URI'],
-                                    implode("\n\t", array_map(fn($a) => self::$sys->text()->fulltrim($a), $queries))
+                                    implode("\n\t", array_map(fn($a) => $this->sys('Text')->fulltrim($a), $queries))
                         )
                     );
                 }
@@ -38,7 +42,7 @@ class Pgsql extends \SFW\Lazy\Sys
         try {
             $db = new \SFW\Databaser\Pgsql(self::$config['sys']['pgsql'], $profiler);
         } catch (\SFW\Databaser\Exception $error) {
-            self::$sys->abend()->error($error->getMessage());
+            $this->sys('Abend')->error($error->getMessage());
         }
 
         return $db;

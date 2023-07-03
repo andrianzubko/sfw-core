@@ -1,80 +1,64 @@
 <?php
 
-namespace SFW\Lazy\Sys;
+namespace SFW;
 
 /**
  * JS and CSS merger.
  */
-class Merger extends \SFW\Lazy\Sys
+class Merger extends Base
 {
     /**
-     * Recombine all if needed and return merged info.
+     * Passing merged dir to properties.
      */
-    public function get(bool $recombine = true): array
+    public function __construct(protected string $mergedDir)
     {
-        if ($recombine) {
-            $this->recombine();
-        }
-
-        foreach (@self::$sys->dir()->scan(PUB_DIR . '/.merged') as $item) {
-            return ['time' => (int) $item];
-        }
-
-        return ['time' => false];
+        $this->mergedDir = PUB_DIR . "/$this->mergedDir";
     }
 
     /**
-     * Preparing struct of files to merging.
+     * Returns merged time.
      */
-    protected function prepareStruct(): array
+    public function get(): int|false
     {
-        $struct = [];
-
-        foreach (['css','js'] as $type) {
-            foreach (['primary','secondary'] as $section) {
-                $dir = PUB_DIR . "/.$type/$section";
-
-                foreach (@self::$sys->dir()->scan($dir, true) as $item) {
-                    $file = "$dir/$item";
-
-                    if (!is_file($file) || !str_ends_with($item, ".$type")) {
-                        continue;
-                    }
-
-                    if (preg_match('~^([^/]+)/~', $item, $M)) {
-                        $struct[$type][PUB_DIR . "/.merged/%s.{$M[1]}.$type"][] = $file;
-
-                        $struct[$type][PUB_DIR . "/.merged/%s.{$M[1]}.$section.$type"][] = $file;
-                    } else {
-                        $struct[$type][PUB_DIR . "/.merged/%s.$type"][] = $file;
-
-                        $struct[$type][PUB_DIR . "/.merged/%s.$section.$type"][] = $file;
-                    }
-                }
-            }
+        foreach (@$this->sys('Dir')->scan($this->mergedDir) as $item) {
+            return (int) $item;
         }
 
-        return $struct;
+        return false;
     }
 
     /**
      * Recombining all.
      */
-    protected function recombine(): void
+    public function recombine(array $sources): void
     {
         // {{{ locking
 
-        if (self::$sys->locker()->lock('merger') === false) {
+        if ($this->sys('Locker')->lock('merger') === false) {
             return;
         }
 
         // }}}
         // {{{ preparing struct of files
 
-        $struct = $this->prepareStruct();
+        $struct = [];
+
+        foreach (array_keys($sources) as $from) {
+            if (preg_match('/\.(css|js)$/', $from, $M)) {
+                foreach ($sources[$from] as $to) {
+                    foreach (glob(PUB_DIR . "/$from") as $file) {
+                        if (str_ends_with($file, $M[0])
+                            && is_file($file)
+                        ) {
+                            $struct[$M[1]][$to][] = $file;
+                        }
+                    }
+                }
+            }
+        }
 
         if (!$struct) {
-            self::$sys->dir()->clear(PUB_DIR . '/.merged');
+            $this->sys('Dir')->clear($this->mergedDir);
 
             return;
         }
@@ -86,7 +70,7 @@ class Merger extends \SFW\Lazy\Sys
 
         $time = false;
 
-        foreach (@self::$sys->dir()->scan(PUB_DIR . '/.merged') as $item) {
+        foreach (@$this->sys('Dir')->scan($this->mergedDir) as $item) {
             if ($time === false) {
                 $time = (int) $item;
             } elseif ($time != (int) $item) {
@@ -109,7 +93,7 @@ class Merger extends \SFW\Lazy\Sys
 
         if ($time !== false) {
             foreach (array_keys($struct) as $type) {
-                foreach ($struct[$type] as $pattern => $files) {
+                foreach ($struct[$type] as $target => $files) {
                     foreach ($files as $file) {
                         if ((int) filemtime($file) > $time) {
                             $time = false;
@@ -125,16 +109,16 @@ class Merger extends \SFW\Lazy\Sys
         // {{{ merging if needed
 
         if ($time === false) {
-            self::$sys->dir()->clear(PUB_DIR . '/.merged');
+            $this->sys('Dir')->clear($this->mergedDir);
 
             $time = time();
 
             foreach (array_keys($struct) as $type) {
-                foreach ($struct[$type] as $pattern => $files) {
+                foreach ($struct[$type] as $target => $files) {
                     $merged = $this->{$type}($files);
 
-                    if (self::$sys->file()->put(sprintf($pattern, $time), $merged) === false) {
-                        self::$sys->abend()->error();
+                    if ($this->sys('File')->put("$this->mergedDir/$time.$target", $merged) === false) {
+                        $this->sys('Abend')->error();
                     }
                 }
             }
@@ -143,7 +127,7 @@ class Merger extends \SFW\Lazy\Sys
         // }}}
         // {{{ unlocking
 
-        self::$sys->locker()->unlock('merger');
+        $this->sys('Locker')->unlock('merger');
 
         // }}}
     }
@@ -160,7 +144,7 @@ class Merger extends \SFW\Lazy\Sys
         try {
             $merged = $jsmin->min();
         } catch (\Exception $error) {
-            self::$sys->abend()->error($error->getMessage());
+            $this->sys('Abend')->error($error->getMessage());
         }
 
         return $merged;
@@ -173,18 +157,17 @@ class Merger extends \SFW\Lazy\Sys
     {
         $merged = $this->files($files);
 
-        $merged = preg_replace_callback('~/\*(.*?)\*/~us', fn($M) => strlen($M[1]) ? '' : '/**/', $merged);
+        $merged = preg_replace('~/\*(.*?)\*/~us', '', $merged);
 
-        $merged = self::$sys->text()->fulltrim($merged);
+        $merged = $this->sys('Text')->fulltrim($merged);
 
-        $merged = preg_replace('/([ }]*})\s*/u', "\$1\n", $merged);
-
-        $merged = preg_replace_callback('/url\(\s*([^\)]+)\s*\)/u',
+        $merged = preg_replace_callback('/url\( ?(.+?) ?\)/u',
             function (array $M) use ($merged): string {
                 $data = $type = false;
 
-                if (count(explode($M[1], $merged, 3)) == 2
-                    && preg_match('~^/.+\.(gif|png|jpg|jpeg|svg|woff|woff2)\b$~ui', $M[1], $N)
+                if (preg_match('/\.(gif|png|jpg|jpeg|svg|woff|woff2)$/ui', $M[1], $N)
+                    && str_starts_with($M[1], '/')
+                        && !str_contains($M[1], '..')
                 ) {
                     $type = strtolower($N[1]);
 
@@ -197,7 +180,7 @@ class Merger extends \SFW\Lazy\Sys
                     $size = @filesize(PUB_DIR . $M[1]);
 
                     if ($size !== false && $size <= 32 * 1024) {
-                        $data = @self::$sys->file()->get(PUB_DIR . $M[1]);
+                        $data = @$this->sys('File')->get(PUB_DIR . $M[1]);
                     }
                 }
 
@@ -220,13 +203,13 @@ class Merger extends \SFW\Lazy\Sys
         $merged = [];
 
         foreach ($files as $file) {
-            $content = self::$sys->file()->get($file);
+            $contents = $this->sys('File')->get($file);
 
-            if ($content === false) {
-                self::$sys->abend()->error();
+            if ($contents === false) {
+                $this->sys('Abend')->error();
             }
 
-            $merged[] = $content;
+            $merged[] = $contents;
         }
 
         return implode("\n", $merged);

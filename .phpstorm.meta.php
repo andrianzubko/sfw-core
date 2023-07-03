@@ -1,13 +1,31 @@
 <?php
 
 namespace PHPSTORM_META {
-    override(\SFW\Lazy\SysCaller::__call(), map([
-        'db' => \SFW\Databaser\Driver::class,
-        'pgsql' => \SFW\Databaser\Driver::class,
-        'mysql' => \SFW\Databaser\Driver::class,
-        'cache' => \SFW\SimpleCacher\Cache::class,
-        'apc' => \SFW\SimpleCacher\Cache::class,
-        'memcached' => \SFW\SimpleCacher\Cache::class,
-        '' => '\App\Lazy\Sys\@|\SFW\Lazy\Sys\@',
+    expectedArguments(\SFW\Base::sys(0), 0,
+        'Abend',
+        'Apc',
+        'Cache',
+        'Curl',
+        'Db',
+        'Dir',
+        'File',
+        'Image',
+        'Json',
+        'Locker',
+        'Logger',
+        'Memcached',
+        'Mysql',
+        'Notifier',
+        'Number',
+        'Out',
+        'Paginator',
+        'Pgsql',
+        'Templater',
+        'Text',
+        'Transaction',
+    );
+
+    override(\SFW\Base::sys(0), map([
+        '' => 'App\Lazy\My\@|\SFW\Lazy\Sys\@',
     ]));
 }

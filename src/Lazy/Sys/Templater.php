@@ -21,27 +21,27 @@ class Templater extends \SFW\Lazy\Sys
 
         $this->templater->addProperties(
             [
-                'lc' => [self::$sys->text(), 'lc'],
+                'lc' => [$this->sys('Text'), 'lc'],
 
-                'lcfirst' => [self::$sys->text(), 'lcfirst'],
+                'lcfirst' => [$this->sys('Text'), 'lcfirst'],
 
-                'uc' => [self::$sys->text(), 'uc'],
+                'uc' => [$this->sys('Text'), 'uc'],
 
-                'ucfirst' => [self::$sys->text(), 'ucfirst'],
+                'ucfirst' => [$this->sys('Text'), 'ucfirst'],
 
-                'trim' => [self::$sys->text(), 'trim'],
+                'trim' => [$this->sys('Text'), 'trim'],
 
-                'rtrim' => [self::$sys->text(), 'rtrim'],
+                'rtrim' => [$this->sys('Text'), 'rtrim'],
 
-                'ltrim' => [self::$sys->text(), 'ltrim'],
+                'ltrim' => [$this->sys('Text'), 'ltrim'],
 
-                'fulltrim' => [self::$sys->text(), 'fulltrim'],
+                'fulltrim' => [$this->sys('Text'), 'fulltrim'],
 
-                'multitrim' => [self::$sys->text(), 'multitrim'],
+                'multitrim' => [$this->sys('Text'), 'multitrim'],
 
-                'cut' => [self::$sys->text(), 'cut'],
+                'cut' => [$this->sys('Text'), 'cut'],
 
-                'random' => [self::$sys->text(), 'random'],
+                'random' => [$this->sys('Text'), 'random'],
             ]
         );
     }

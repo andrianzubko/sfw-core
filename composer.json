@@ -22,12 +22,10 @@
         "ext-mbstring": "*",
         "mrclay/jsmin-php": "^2.4",
         "phpmailer/phpmailer": "^v6.8",
+        "phpunit/phpunit": "^10.2",
         "andrianzubko/sfw-databaser": "^0",
         "andrianzubko/sfw-paginator": "^0",
         "andrianzubko/sfw-templater": "^0",
         "andrianzubko/sfw-simple-cacher": "^0"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^10.2"
     }
 }

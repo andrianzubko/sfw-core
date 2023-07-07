@@ -58,13 +58,13 @@ class Sys extends \SFW\Config
              *
              * ?string
              */
-            'db_transactions_fails_log' => APP_DIR . '/log/transactions.fails.log',
+            'db_transactions_fails_log' => APP_DIR . '/var/log/transactions.fails.log',
 
             /* Log slow queries.
              *
              * ?string
              */
-            'db_slow_queries_log' => APP_DIR . '/log/slow.queries.log',
+            'db_slow_queries_log' => APP_DIR . '/var/log/slow.queries.log',
 
             /* Log slow queries with minimal time.
              *

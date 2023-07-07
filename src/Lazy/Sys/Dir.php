@@ -40,7 +40,13 @@ class Dir extends \SFW\Lazy\Sys
     public function create(string $dir): bool
     {
         if (!is_dir($dir)) {
-            return mkdir($dir, 0777, true);
+            $success = mkdir($dir, recursive: true);
+
+            if ($success) {
+                @chmod($dir, 0777);
+            }
+
+            return $success;
         }
 
         return true;

@@ -18,7 +18,7 @@
         "php": "^8.2",
         "ext-curl": "*",
         "ext-gd": "*",
-        "ext-intl", "*",
+        "ext-intl": "*",
         "ext-mbstring": "*",
         "mrclay/jsmin-php": "^2.4",
         "phpmailer/phpmailer": "^v6.8",

@@ -8,6 +8,11 @@ namespace SFW\Lazy\Sys;
 class Dir extends \SFW\Lazy\Sys
 {
     /**
+     * Default mode.
+     */
+    protected int $mode = 0777;
+
+    /**
      * For temporary directory.
      */
     protected ?string $temporary;
@@ -17,21 +22,23 @@ class Dir extends \SFW\Lazy\Sys
      */
     public function scan(string $dir, bool $recursive = false, int $order = SCANDIR_SORT_ASCENDING): array
     {
-        $items = [];
+        $scanned = [];
 
-        foreach ((scandir($dir, $order) ?: []) as $item) {
-            if ($item === '.' || $item === '..') {
+        if (($items = scandir($dir, $order)) !== false) {
+            foreach ($items as $item) {
+                if ($item === '.' || $item === '..') {
 
-            } elseif (!$recursive || is_file("$dir/$item")) {
-                $items[] = $item;
-            } else {
-                foreach ($this->scan("$dir/$item", true, $order) as $subitem) {
-                    $items[] = "$item/$subitem";
+                } elseif (!$recursive || is_file("$dir/$item")) {
+                    $scanned[] = $item;
+                } else {
+                    foreach ($this->scan("$dir/$item", true, $order) as $subitem) {
+                        $scanned[] = "$item/$subitem";
+                    }
                 }
             }
         }
 
-        return $items;
+        return $scanned;
     }
 
     /**
@@ -43,7 +50,7 @@ class Dir extends \SFW\Lazy\Sys
             $success = mkdir($dir, recursive: true);
 
             if ($success) {
-                @chmod($dir, 0777);
+                @chmod($dir, $this->mode);
             }
 
             return $success;
@@ -69,7 +76,7 @@ class Dir extends \SFW\Lazy\Sys
                             if ($this->remove("$dir/$item") === false) {
                                 $status = false;
                             }
-                        } elseif (unlink("$dir/$item") === false) {
+                        } elseif ($this->sys('File')->remove("$dir/$item") === false) {
                             $status = false;
                         }
                     }
@@ -89,7 +96,7 @@ class Dir extends \SFW\Lazy\Sys
     /**
      * Directory clearing.
      */
-    public function clear(string $dir): bool
+    public function clear(string $dir, bool $recursive = true): bool
     {
         $status = true;
 
@@ -99,10 +106,10 @@ class Dir extends \SFW\Lazy\Sys
                     if ($item === '.' || $item === '..') {
 
                     } elseif (is_dir("$dir/$item")) {
-                        if ($this->remove("$dir/$item") === false) {
+                        if ($this->remove("$dir/$item", $recursive) === false) {
                             $status = false;
                         }
-                    } elseif (unlink("$dir/$item") === false) {
+                    } elseif ($this->sys('File')->remove("$dir/$item") === false) {
                         $status = false;
                     }
                 }
@@ -121,8 +128,8 @@ class Dir extends \SFW\Lazy\Sys
     {
         $status = true;
 
-        if (($items = scandir($source)) !== false
-            && $this->create($target) !== false
+        if ($this->create($target) !== false
+            && ($items = scandir($source)) !== false
         ) {
             foreach ($items as $item) {
                 if ($item === '.' || $item === '..') {
@@ -131,7 +138,7 @@ class Dir extends \SFW\Lazy\Sys
                     if ($this->copy("$source/$item", "$target/$item") === false) {
                         $status = false;
                     }
-                } elseif (copy("$source/$item", "$target/$item") === false) {
+                } elseif ($this->sys('File')->copy("$source/$item", "$target/$item", false) === false) {
                     $status = false;
                 }
             }
@@ -152,8 +159,6 @@ class Dir extends \SFW\Lazy\Sys
         ) {
             return false;
         }
-
-        @chmod($target, 0777);
 
         return true;
     }

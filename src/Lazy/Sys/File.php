@@ -8,6 +8,11 @@ namespace SFW\Lazy\Sys;
 class File extends \SFW\Lazy\Sys
 {
     /**
+     * Default mode.
+     */
+    protected int $mode = 0666;
+
+    /**
      * Getting file contents into string.
      */
     public function get(string $file): string|false {
@@ -17,15 +22,16 @@ class File extends \SFW\Lazy\Sys
     /**
      * Putting contents to file.
      */
-    public function put(string $file, mixed $contents, int $flags = 0): bool
+    public function put(string $file, mixed $contents, int $flags = 0, bool $createDir = true): bool
     {
-        if ($this->sys('Dir')->create(dirname($file)) === false
-            || file_put_contents($file, $contents, $flags) === false
+        if ($createDir
+            && $this->sys('Dir')->create(dirname($file)) === false
+                || file_put_contents($file, $contents, $flags) === false
         ) {
             return false;
         }
 
-        @chmod($file, 0666);
+        @chmod($file, $this->mode);
 
         return true;
     }
@@ -41,15 +47,16 @@ class File extends \SFW\Lazy\Sys
     /**
      * File coping.
      */
-    public function copy(string $source, string $target): bool
+    public function copy(string $source, string $target, bool $createDir = true): bool
     {
-        if ($this->sys('Dir')->create(dirname($target)) === false
-            || copy($source, $target) === false
+        if ($createDir
+            && $this->sys('Dir')->create(dirname($target)) === false
+                || copy($source, $target) === false
         ) {
             return false;
         }
 
-        @chmod($target, 0666);
+        @chmod($target, $this->mode);
 
         return true;
     }
@@ -57,15 +64,14 @@ class File extends \SFW\Lazy\Sys
     /**
      * File moving.
      */
-    public function move(string $source, string $target): bool
+    public function move(string $source, string $target, bool $createDir = true): bool
     {
-        if ($this->sys('Dir')->create(dirname($target)) === false
-            || rename($source, $target) === false
+        if ($createDir
+            && $this->sys('Dir')->create(dirname($target)) === false
+                || rename($source, $target) === false
         ) {
             return false;
         }
-
-        @chmod($target, 0666);
 
         return true;
     }

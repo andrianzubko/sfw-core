@@ -8,6 +8,11 @@ namespace SFW\Lazy\Sys;
 class Image extends \SFW\Lazy\Sys
 {
     /**
+     * Default mode.
+     */
+    protected int $mode = 0666;
+
+    /**
      * Reading image from string.
      */
     public function fromString(string|false|null $data): \GdImage|false
@@ -44,7 +49,7 @@ class Image extends \SFW\Lazy\Sys
             $success = imagepng($image, $file, $quality);
 
             if ($success) {
-                @chmod($file, 0666);
+                @chmod($file, $this->mode);
             }
 
             return $success;
@@ -78,7 +83,7 @@ class Image extends \SFW\Lazy\Sys
             $success = imagejpeg($fixed, $file, $quality);
 
             if ($success) {
-                @chmod($file, 0666);
+                @chmod($file, $this->mode);
             }
 
             return $success;

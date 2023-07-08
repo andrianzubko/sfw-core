@@ -31,7 +31,7 @@ class Sys extends \SFW\Config
              *
              * string
              */
-            'param_for_paginator' => 'page',
+            'param_for_paginator' => 'i',
 
             // }}}
             // {{{ database

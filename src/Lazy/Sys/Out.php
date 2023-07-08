@@ -35,38 +35,61 @@ class Out extends \SFW\Lazy\Sys
     /**
      * Output string as attachment.
      */
-    public function attachment(string $contents, string $mime = 'text/plain', int $expire = 0, ?string $filename = null, int $status = 200): self
-    {
+    public function attachment(
+        string $contents,
+        string $mime = 'text/plain',
+        int $expire = 0,
+        ?string $filename = null,
+        int $status = 200
+    ): self {
         return $this->put('attachment', $contents, $mime, $expire, $filename, $status);
     }
 
     /**
      * Output string as inline.
      */
-    public function inline(string $contents, string $mime = 'text/plain', int $expire = 0, ?string $filename = null, int $status = 200): self
-    {
+    public function inline(
+        string $contents,
+        string $mime = 'text/plain',
+        int $expire = 0,
+        ?string $filename = null,
+        int $status = 200
+    ): self {
         return $this->put('inline', $contents, $mime, $expire, $filename, $status);
     }
 
     /**
      * Output some as inline json.
      */
-    public function json(mixed $contents, string $mime = 'text/plain', int $expire = 0, ?string $filename = null, int $status = 200): self
-    {
+    public function json(
+        mixed $contents,
+        string $mime = 'text/plain',
+        int $expire = 0,
+        ?string $filename = null,
+        int $status = 200
+    ): self {
         return $this->put('inline', json_encode($contents), $mime, $expire, $filename, $status);
     }
 
     /**
      * Output base.
      */
-    protected function put(string $disposition, string $contents, string $mime, int $expire, ?string $filename, int $status): self
-    {
+    protected function put(
+        string $disposition,
+        string $contents,
+        string $mime,
+        int $expire,
+        ?string $filename,
+        int $status
+    ): self {
         ini_set('zlib.output_compression', false);
 
         http_response_code($status);
 
         header(
-            sprintf('Last-Modified: %s', gmdate('D, d M Y H:i:s \G\M\T', self::$e['defaults']['timestamp']))
+            sprintf('Last-Modified: %s',
+                gmdate('D, d M Y H:i:s \G\M\T', self::$e['defaults']['timestamp'])
+            )
         );
 
         header(
@@ -89,12 +112,16 @@ class Out extends \SFW\Lazy\Sys
         }
 
         header(
-            sprintf('Content-Length: %s', strlen($contents))
+            sprintf('Content-Length: %s',
+                strlen($contents)
+            )
         );
 
         if (isset($filename)) {
             header(
-                sprintf('Content-Disposition: %s; filename="%s"', $disposition, $filename)
+                sprintf('Content-Disposition: %s; filename="%s"',
+                    $disposition, $filename
+                )
             );
         } elseif ($disposition === 'attachment') {
             header('Content-Disposition: attachment');
@@ -120,8 +147,12 @@ class Out extends \SFW\Lazy\Sys
     /**
      * Process and output template.
      */
-    public function template(array $e, string $template, bool $tostring = false, int $status = 200): string|self
-    {
+    public function template(
+        array $e,
+        string $template,
+        bool $tostring = false,
+        int $status = 200
+    ): string|self {
         $started = gettimeofday(true);
 
         $contents = $this->sys('Templater')->transform($e, $template);
@@ -143,9 +174,10 @@ class Out extends \SFW\Lazy\Sys
 
             if (isset(self::$lazyInstances['sys'])) {
                 foreach (self::$lazyInstances['sys'] as $lazy) {
-                    if ($lazy instanceof \SFW\Databaser\Driver && !in_array($lazy, $dbDrivers, true)) {
+                    if ($lazy instanceof \SFW\Databaser\Driver
+                        && !in_array($lazy, $dbDrivers, true)
+                    ) {
                         $dbDrivers[] = $lazy;
-
 
                         $dbMicrotime += $lazy->getMicrotime();
 
@@ -178,7 +210,9 @@ class Out extends \SFW\Lazy\Sys
             $url = '/';
         }
 
-        if (str_starts_with($url, '/') && !str_starts_with($url, '//')) {
+        if (str_starts_with($url, '/')
+            && !str_starts_with($url, '//')
+        ) {
             $url = self::$e['defaults']['basic_url'] . $url;
         }
 

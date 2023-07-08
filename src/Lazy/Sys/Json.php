@@ -12,7 +12,10 @@ class Json extends \SFW\Lazy\Sys
      */
     public function decode(array|false|null $items, array $decodes): array|false|null
     {
-        if (!isset($items) || $items === false || !count($items)) {
+        if (!isset($items)
+            || $items === false
+                || !count($items)
+        ) {
             return $items;
         }
 

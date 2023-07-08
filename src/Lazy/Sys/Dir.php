@@ -28,7 +28,7 @@ class Dir extends \SFW\Lazy\Sys
             foreach ($items as $item) {
                 if ($item === '.' || $item === '..') {
 
-                } elseif (!$recursive || is_file("$dir/$item")) {
+                } elseif (!$recursive  || is_file("$dir/$item")) {
                     $scanned[] = $item;
                 } else {
                     foreach ($this->scan("$dir/$item", true, $order) as $subitem) {

@@ -8,25 +8,26 @@ namespace SFW\Lazy\Sys;
 class Locker extends \SFW\Lazy\Sys
 {
     /**
-     * Lock files pattern.
-     */
-    protected string $pattern = APP_DIR . '/var/locks/%s.lock';
-
-    /**
      * Already created locks.
      */
     protected array $locks = [];
 
     /**
-     * Locking or return with false.
+     * Lock or return false.
      */
     public function lock(string $key): bool
     {
-        $this->sys('Dir')->create(dirname($this->pattern));
+        $file = sprintf(self::$config['sys']['lock_files_pattern'], $key);
 
-        $fh = fopen(sprintf($this->pattern, $key), 'a+');
+        if ($this->sys('Dir')->create(dirname($file)) === false) {
+            $this->sys('Abend')->error();
+        }
 
-        if ($fh === false || flock($fh, LOCK_EX | LOCK_NB) === false) {
+        $fh = fopen($file, 'a+');
+
+        if ($fh === false
+            || flock($fh, LOCK_EX | LOCK_NB) === false
+        ) {
             return false;
         }
 
@@ -36,16 +37,14 @@ class Locker extends \SFW\Lazy\Sys
     }
 
     /**
-     * Unlocking.
+     * Unlock.
      */
     public function unlock(string $key): void
     {
-        if (!isset($this->locks[$key])) {
-            return;
+        if (isset($this->locks[$key])) {
+            fclose($this->locks[$key]);
+
+            unset($this->locks[$key]);
         }
-
-        fclose($this->locks[$key]);
-
-        unset($this->locks[$key]);
     }
 }

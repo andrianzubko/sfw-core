@@ -60,63 +60,78 @@ class Sys extends \SFW\Config
              */
             'db_slow_queries_log' => APP_DIR . '/var/log/slow.queries.log',
 
-            /* Log slow queries with minimal time.
+            /* Log slow queries with minimal time in seconds.
              *
              * float
              */
             'db_slow_queries_min' => 0.5,
 
-            /* PostgreSQL.
+            // }}}
+            // {{{ database: postgresql
+
+            /*
+             * Postresql connection string.
              *
-             * array
+             * string
              */
-            'pgsql' => [
-                /* string
-                 */
-                'connection' => '',
+            'db_pgsql_connection' => '',
 
-                /* string
-                 */
-                'encoding' => 'utf-8',
-
-                /* bool
-                 */
-                'persistent' => false,
-            ],
-
-            /* MySQL.
+            /* Postgresql encoding (utf-8 if not set).
              *
-             * array
+             * ?string
              */
-            'mysql' => [
-                /* ?string
-                 */
-                'hostname' => null,
+            'db_pgsql_encoding' => null,
 
-                /* ?string
-                 */
-                'username' => null,
+            /* Postgresql persistent connection (use pgbouncer instead).
+             *
+             * bool
+             */
+            'db_pgsql_persistent' => false,
 
-                /* ?string
-                 */
-                'password' => null,
+            // }}}
+            // {{{ database: mysql
 
-                /* ?string
-                 */
-                'database' => null,
+            /* Mysql hostname.
+             *
+             * ?string
+             */
+            'db_mysql_hostname' => null,
 
-                /* ?int
-                 */
-                'port' => null,
+            /* Mysql username.
+             *
+             * ?string
+             */
+            'db_mysql_username' => null,
 
-                /* ?string
-                 */
-                'socket' => null,
+            /* Mysql password.
+             *
+             * ?string
+             */
+            'db_mysql_password' => null,
 
-                /* ?string
-                 */
-                'charset' => 'utf8mb4',
-            ],
+            /* Mysql database name.
+             *
+             * ?string
+             */
+            'db_mysql_database' => null,
+
+            /* Mysql port (3306 if not set).
+             *
+             * ?int
+             */
+            'db_mysql_port' => null,
+
+            /* Mysql socket.
+             *
+             * ?string
+             */
+            'db_mysql_socket' => null,
+
+            /* Mysql charset (utf8mb4 if not set).
+             *
+             * ?string
+             */
+            'db_mysql_charset' => null,
 
             // }}}
             // {{{ cache
@@ -127,41 +142,47 @@ class Sys extends \SFW\Config
              */
             'cache' => 'Apc',
 
-            /* Apc.
+            // }}}
+            // {{{ cache: apc
+
+            /* Apc default TTL.
              *
-             * array
+             * int
              */
-            'apc' => [
-                /* int
-                 */
-                'ttl' => 3600,
+            'cache_apc_ttl' => 3600,
 
-                /* ?string
-                 */
-                'ns' => null,
-            ],
-
-            /* Memcached.
+            /* Apc namespace (auto if not set).
              *
-             * array
+             * ?string
              */
-            'memcached' => [
-                /* int
-                 */
-                'ttl' => 3600,
+            'cache_apc_ns' => null,
 
-                /* ?string
-                 */
-                'ns' => null,
+            // }}}
+            // {{{ cache: memcached
 
-                /* ?array(KEY => VALUE, ...)
-                 */
-                'options' => null,
+            /* Memcached default TTl.
+             *
+             * int
+             */
+            'cache_memcached_ttl' => 3600,
 
-                /* ?array(array('HOST', PORT), ...)
-                 */
-                'servers' => null,
-            ],
+            /* Memcached namespace (auto if not set).
+             *
+             * ?string
+             */
+            'cache_memcached_ns' => null,
+
+            /* Memcached options.
+             *
+             * ?array(KEY => VALUE, ...)
+             */
+            'cache_memcached_options' => null,
+
+            /* Memcached servers (127.0.0.1:11211 if not set).
+             *
+             * ?array(array('HOST', PORT), ...)
+             */
+            'cache_memcached_servers' => null,
 
             // }}}
             // {{{ mail
@@ -181,7 +202,13 @@ class Sys extends \SFW\Config
             'mailer_override_recipients' => [],
 
             // }}}
-            // {{{ time
+            // {{{ etc
+
+            /* Lock files pattern.
+             *
+             * string
+             */
+            'lock_files_pattern' => APP_DIR . '/var/locks/%s.lock',
 
             /* Default timezone.
              *

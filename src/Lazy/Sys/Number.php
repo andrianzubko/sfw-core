@@ -12,7 +12,10 @@ class Number extends \SFW\Lazy\Sys
      */
     public function cast(mixed $number, int $precision = 0, ?float $min = null, ?float $max = null): float
     {
-        if (!isset($number) || !is_scalar($number) || !mb_check_encoding($number)) {
+        if (!isset($number)
+            || !is_scalar($number)
+                || !mb_check_encoding($number)
+        ) {
             return round($min, $precision);
         }
 

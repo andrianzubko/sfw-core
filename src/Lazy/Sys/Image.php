@@ -104,7 +104,9 @@ class Image extends \SFW\Lazy\Sys
 
         $oH = imagesy($image);
 
-        if ($oW == $nW && $oH == $nH || !$fit && $oW <= $nW && $oH <= $nH) {
+        if ($oW == $nW && $oH == $nH
+            || !$fit && $oW <= $nW && $oH <= $nH
+        ) {
             return $image;
         }
 

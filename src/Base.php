@@ -35,7 +35,9 @@ abstract class Base
      */
     public function sys(string $name, ...$arguments): object
     {
-        if ( isset(self::$lazyInstances['sys'][$name]) && !$arguments) {
+        if (isset(self::$lazyInstances['sys'][$name])
+            && !$arguments
+        ) {
             return self::$lazyInstances['sys'][$name];
         }
 
@@ -61,7 +63,9 @@ abstract class Base
      */
     public function my(string $name, ...$arguments): object
     {
-        if ( isset(self::$lazyInstances['my'][$name]) && !$arguments) {
+        if (isset(self::$lazyInstances['my'][$name])
+            && !$arguments
+        ) {
             return self::$lazyInstances['my'][$name];
         }
 

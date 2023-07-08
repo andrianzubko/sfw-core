@@ -8,11 +8,6 @@ namespace SFW\Lazy\Sys;
 class Transaction extends \SFW\Lazy\Sys
 {
     /**
-     * Logger.
-     */
-    protected ?\Closure $logger = null;
-
-    /**
      * Registered callbacks for running on transaction abort.
      */
     protected array $onabort = [];
@@ -20,7 +15,7 @@ class Transaction extends \SFW\Lazy\Sys
     /**
      * Do some action on transaction abort.
      */
-    public function onabort(callable $event)
+    public function onabort(callable $event): void
     {
         $this->onabort[] = $event;
     }
@@ -28,24 +23,37 @@ class Transaction extends \SFW\Lazy\Sys
     /**
      * Run transaction and die on unexpected errors.
      */
-    public function run(?string $isolation, ?array $expected, callable $transaction, ?callable $onerror = null): bool
-    {
+    public function run(
+        ?string $isolation,
+        ?array $expected,
+        callable $transaction,
+        ?callable $onerror = null
+    ): bool {
         return $this->process($isolation, $expected, $transaction, $onerror, 'error');
     }
 
     /**
      * Run transaction and just warn on unexpected errors.
      */
-    public function quiet(?string $isolation, ?array $expected, callable $transaction, ?callable $onerror = null): bool
-    {
+    public function quiet(
+        ?string $isolation,
+        ?array $expected,
+        callable $transaction,
+        ?callable $onerror = null
+    ): bool {
         return $this->process($isolation, $expected, $transaction, $onerror, 'warn');
     }
 
     /**
      * Processing transaction with retries on expected errors.
      */
-    protected function process(?string $isolation, ?array $expected, callable $transaction, ?callable $onerror, string $mode): bool
-    {
+    protected function process(
+        ?string $isolation,
+        ?array $expected,
+        callable $transaction,
+        ?callable $onerror,
+        string $mode
+    ): bool {
         for ($retry = 1; $retry <= self::$config['sys']['db_transactions_retries']; $retry++) {
             try {
                 $this->onabort = [];
@@ -74,29 +82,16 @@ class Transaction extends \SFW\Lazy\Sys
                     $onerror($error->getSqlState());
                 }
 
-                $logger = $this->logger;
-
-                if (!isset($logger)
-                    && isset(self::$config['sys']['db_transactions_fails_log'])
-                ) {
-                    $logger = function (string $state, int $retry): void {
-                        $this->sys('Logger')->save(self::$config['sys']['db_transactions_fails_log'],
-                            sprintf("[%s] [%d] %s",
-                                $state, $retry,
-                                    idn_to_utf8($_SERVER['HTTP_HOST']) . $_SERVER['REQUEST_URI']
-                            )
-                        );
-                    };
-                }
-
-                if (isset($logger)) {
-                    $logger($error->getSqlState(), $retry);
-                }
+                $this->sys('Logger')->transactionFail($error->getSqlState(), $retry);
 
                 if (!in_array($error->getSqlState(), $expected ?? [], true)
                     || $retry == $this->retries
                 ) {
-                    $this->sys('Abend')->$mode($error->getMessage(), $error->getFile(), $error->getLine());
+                    $this->sys('Abend')->$mode(
+                        $error->getMessage(),
+                        $error->getFile(),
+                        $error->getLine()
+                    );
 
                     return false;
                 }

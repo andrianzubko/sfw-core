@@ -179,7 +179,9 @@ class Merger extends Base
 
                     $size = @filesize(PUB_DIR . $M[1]);
 
-                    if ($size !== false && $size <= 32 * 1024) {
+                    if ($size !== false
+                        && $size <= 32 * 1024
+                    ) {
                         $data = @$this->sys('File')->get(PUB_DIR . $M[1]);
                     }
                 }

@@ -38,7 +38,9 @@ class Curl extends \SFW\Lazy\Sys
             return false;
         }
 
-        $headers = preg_split('/\r\n\r\n/', substr($response, 0, $info['header_size']), 0, PREG_SPLIT_NO_EMPTY);
+        $headers = preg_split('/\r\n\r\n/',
+            substr($response, 0, $info['header_size']), 0, PREG_SPLIT_NO_EMPTY
+        );
 
         if (!count($headers)) {
             return false;
@@ -52,7 +54,9 @@ class Curl extends \SFW\Lazy\Sys
 
         $response = substr($response, $info['header_size']);
 
-        if (mb_check_encoding($response) || !preg_match('~text/~i', $info['content_type'])) {
+        if (mb_check_encoding($response)
+            || !preg_match('~text/~i', $info['content_type'])
+        ) {
             return $response;
         }
 

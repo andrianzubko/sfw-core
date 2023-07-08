@@ -70,7 +70,10 @@ class Abend extends \SFW\Lazy\Sys
      */
     public function errorPage(int $status): void
     {
-        if (php_sapi_name() !== 'cli' && !headers_sent() && !ob_get_length()) {
+        if (php_sapi_name() !== 'cli'
+            && !headers_sent()
+            && !ob_get_length()
+        ) {
             include PUB_DIR . "/.bin/errors/$status.php";
         }
 

@@ -10,5 +10,5 @@ abstract class Config
     /**
      * Returns array with config parameters.
      */
-    abstract public function get(): array;
+    abstract public static function get(): array;
 }

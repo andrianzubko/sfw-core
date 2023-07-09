@@ -37,11 +37,11 @@ abstract class Runner extends Base
         // }}}
         // {{{ config
 
-        self::$config['sys'] = (new \App\Config\Sys())->get();
+        self::$config['sys'] = \App\Config\Sys::get();
 
-        self::$config['my'] = (new \App\Config\My())->get();
+        self::$config['my'] = \App\Config\My::get();
 
-        self::$config['shared'] = (new \App\Config\Shared())->get();
+        self::$config['shared'] = \App\Config\Shared::get();
 
         self::$e['config'] = &self::$config['shared'];
 
@@ -74,27 +74,27 @@ abstract class Runner extends Base
         // }}}
         // {{{ default environment
 
-        if (isset(self::$config['sys']['basic_url'])) {
-            $parsed = parse_url(self::$config['sys']['basic_url']);
+        if (isset(self::$config['sys']['url'])) {
+            $parsed = parse_url(self::$config['sys']['url']);
 
             if (!isset($parsed['host'])) {
-                $this->sys('Abend')->error('Incorrect basic_url in system config');
+                $this->sys('Abend')->error('Incorrect url in system config');
             }
 
-            self::$e['defaults']['basic_url_scheme'] = $parsed['scheme'] ?? 'http';
+            self::$e['defaults']['url_scheme'] = $parsed['scheme'] ?? 'http';
 
-            self::$e['defaults']['basic_url_host'] = $parsed['host'];
+            self::$e['defaults']['url_host'] = $parsed['host'];
         } else {
-            self::$e['defaults']['basic_url_scheme'] =
+            self::$e['defaults']['url_scheme'] =
                 empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off'
                     ? 'http' : 'https';
 
-            self::$e['defaults']['basic_url_host'] = $_SERVER['HTTP_HOST'];
+            self::$e['defaults']['url_host'] = $_SERVER['HTTP_HOST'];
         }
 
-        self::$e['defaults']['basic_url'] = sprintf('%s://%s',
-            self::$e['defaults']['basic_url_scheme'],
-            self::$e['defaults']['basic_url_host']
+        self::$e['defaults']['url'] = sprintf('%s://%s',
+            self::$e['defaults']['url_scheme'],
+            self::$e['defaults']['url_host']
         );
 
         self::$e['defaults']['timestamp'] = (int) self::$globalMicrotime;

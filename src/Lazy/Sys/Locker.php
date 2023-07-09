@@ -17,7 +17,7 @@ class Locker extends \SFW\Lazy\Sys
      */
     public function lock(string $key): bool
     {
-        $file = sprintf(self::$config['sys']['lock_files_pattern'], $key);
+        $file = sprintf(self::$config['sys']['locker']['pattern'], $key);
 
         if ($this->sys('Dir')->create(dirname($file)) === false) {
             $this->sys('Abend')->error();

@@ -54,7 +54,7 @@ class Transaction extends \SFW\Lazy\Sys
         ?callable $onerror,
         string $mode
     ): bool {
-        for ($retry = 1; $retry <= self::$config['sys']['db_transactions_retries']; $retry++) {
+        for ($retry = 1; $retry <= self::$config['sys']['db']['transactions_retries']; $retry++) {
             try {
                 $this->onabort = [];
 

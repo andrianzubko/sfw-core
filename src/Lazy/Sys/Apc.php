@@ -16,9 +16,6 @@ class Apc extends \SFW\Lazy\Sys
      */
     public function getInstance(): \SFW\SimpleCacher\Cache
     {
-        return new \SFW\SimpleCacher\Apc(
-            self::$config['sys']['cache_apc_ttl'],
-            self::$config['sys']['cache_apc_ns']
-        );
+        return new \SFW\SimpleCacher\Apc(...self::$config['sys']['cache']['apc']);
     }
 }

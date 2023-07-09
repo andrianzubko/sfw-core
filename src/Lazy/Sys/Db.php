@@ -15,12 +15,12 @@ class Db extends \SFW\Lazy\Sys
     public function __construct(protected ?string $db = null) {}
 
     /**
-     * Cache module instance.
+     * Database module instance.
      *
      * @internal
      */
     public function getInstance(): \SFW\Databaser\Driver
     {
-        return $this->sys($this->db ?? self::$config['sys']['db']);
+        return $this->sys($this->db ?? self::$config['sys']['db']['default']);
     }
 }

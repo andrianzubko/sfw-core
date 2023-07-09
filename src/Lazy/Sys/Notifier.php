@@ -62,10 +62,10 @@ class Notifier extends \SFW\Lazy\Sys
             if (isset($notify)) {
                 $structs = $notify->build(clone $this->defaultStruct);
 
-                if (self::$config['sys']['mailer']) {
+                if (self::$config['sys']['notifier']['enabled']) {
                     foreach ($structs as $struct) {
-                        if (self::$config['sys']['mailer_override_recipients']) {
-                            $struct->recipients = self::$config['sys']['mailer_override_recipients'];
+                        if (isset(self::$config['sys']['notifier']['recipients'])) {
+                            $struct->recipients = self::$config['sys']['notifier']['recipients'];
                         }
 
                         $this->send($struct);

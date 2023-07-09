@@ -12,15 +12,15 @@ class Logger extends \SFW\Lazy\Sys
      */
     public function dbSlowQuery(float $microtime, array $queries): void
     {
-        if (!isset(self::$config['sys']['db_slow_queries_min'])
-            || $microtime < self::$config['sys']['db_slow_queries_min']
+        if (!isset(self::$config['sys']['db']['slow_queries_min'])
+            || $microtime < self::$config['sys']['db']['slow_queries_min']
         ) {
             return;
         }
 
         $queries = array_map(fn($a) => $this->sys('Text')->fulltrim($a), $queries);
 
-        $this->save(self::$config['sys']['db_slow_queries_log'],
+        $this->save(self::$config['sys']['db']['slow_queries_log'],
             sprintf("[%.2f] %s%s\n\t%s\n",
                 $microtime,
                     idn_to_utf8($_SERVER['HTTP_HOST']),
@@ -35,11 +35,11 @@ class Logger extends \SFW\Lazy\Sys
      */
     public function transactionFail(string $state, int $retry): void
     {
-        if (!isset(self::$config['sys']['db_transactions_fails_log'])) {
+        if (!isset(self::$config['sys']['db']['transactions_fails_log'])) {
             return;
         }
 
-        $this->save(self::$config['sys']['db_transactions_fails_log'],
+        $this->save(self::$config['sys']['db']['transactions_fails_log'],
             sprintf("[%s] [%d] %s%s",
                 $state,
                     $retry,

@@ -28,7 +28,9 @@ class Dir extends \SFW\Lazy\Sys
             foreach ($items as $item) {
                 if ($item === '.' || $item === '..') {
 
-                } elseif (!$recursive  || is_file("$dir/$item")) {
+                } elseif (!$recursive
+                    || is_file("$dir/$item")
+                ) {
                     $scanned[] = $item;
                 } else {
                     foreach ($this->scan("$dir/$item", true, $order) as $subitem) {
@@ -175,7 +177,7 @@ class Dir extends \SFW\Lazy\Sys
         for ($i = 1; $i <= 10; $i++) {
             $dir = sprintf('%s/%s', $this->temporary, $this->sys('Text')->random());
 
-            if (mkdir($dir, 0600, true)) {
+            if (@mkdir($dir, 0600, true)) {
                 register_shutdown_function(
                     function () use ($dir): void {
                         $this->remove($dir);

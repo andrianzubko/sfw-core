@@ -167,7 +167,7 @@ class Out extends \SFW\Lazy\Sys
             return $contents;
         }
 
-        if (self::$config['sys']['add_stats_to_page']) {
+        if (self::$config['sys']['templater']['stats']) {
             $dbDrivers = [];
 
             $dbMicrotime = $dbCounter = 0;
@@ -213,7 +213,7 @@ class Out extends \SFW\Lazy\Sys
         if (str_starts_with($url, '/')
             && !str_starts_with($url, '//')
         ) {
-            $url = self::$e['defaults']['basic_url'] . $url;
+            $url = self::$e['defaults']['url'] . $url;
         }
 
         http_response_code(302);

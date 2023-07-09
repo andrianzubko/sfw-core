@@ -24,7 +24,7 @@ class Paginator extends \SFW\Lazy\Sys
 
         $pagination['url'] .= sprintf('%s%s=',
             str_contains($pagination['url'], '?')  ? '&' : '?',
-                self::$config['sys']['param_for_paginator']
+                self::$config['sys']['paginator']['param']
         );
 
         return $pagination;

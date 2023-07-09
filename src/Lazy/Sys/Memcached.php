@@ -16,11 +16,6 @@ class Memcached extends \SFW\Lazy\Sys
      */
     public function getInstance(): \SFW\SimpleCacher\Cache
     {
-        return new \SFW\SimpleCacher\Memcached(
-            self::$config['sys']['cache_memcached_ttl'],
-            self::$config['sys']['cache_memcached_ns'],
-            self::$config['sys']['cache_memcached_options'],
-            self::$config['sys']['cache_memcached_servers']
-        );
+        return new \SFW\SimpleCacher\Memcached(...self::$config['sys']['cache']['memcached']);
     }
 }

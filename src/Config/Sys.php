@@ -18,9 +18,15 @@ class Sys extends \SFW\Config
 
         /* Environment mode.
          *
-         * string 'dev', 'debug' or 'prod'
+         * string 'dev', 'test' or 'prod'
          */
         $sys['env'] = 'dev';
+
+        /* Debug mode (not minify HTML/CSS/JS if true).
+         *
+         * bool
+         */
+        $sys['debug'] = false;
 
         /* Basic url (autodetect if not set).
          *

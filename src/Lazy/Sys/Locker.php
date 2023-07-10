@@ -23,7 +23,7 @@ class Locker extends \SFW\Lazy\Sys
             $this->sys('Abend')->error();
         }
 
-        $fh = fopen($file, 'c+');
+        $fh = fopen($file, 'cb+');
 
         if ($fh === false
             || flock($fh, LOCK_EX | LOCK_NB) === false

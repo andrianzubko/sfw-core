@@ -49,8 +49,12 @@ class Templater extends \SFW\Lazy\Sys
     /**
      * Transforming template to page.
      */
-    public function transform(array $e, string $template): string
+    public function transform(array $e, string $template, ?bool $minify = null): string
     {
-        return $this->templater->transform($e, APP_DIR . "/templates/$template");
+        $template = APP_DIR . "/templates/$template";
+
+        $minify ??= !self::$config['sys']['debug'];
+
+        return $this->templater->transform($e, $template, $minify);
     }
 }

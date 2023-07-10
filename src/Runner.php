@@ -1,145 +1,105 @@
 <?php
 
-namespace SFW;
+namespace App;
 
 /**
  * Simplest framework runner.
  */
-abstract class Runner extends Base
+class Runner extends \SFW\Runner
 {
     /**
-     * Initizlizing environment and calling entry point.
+     * Initializing additional environment.
      */
-    final public function __construct()
+    protected function environment(): void
     {
-        // {{{ prevent multiple initizlizations
+        // {{{ merge css and js
 
-        if (isset(self::$globalMicrotime)) {
-            return;
-        }
+        $merger = new \SFW\Merger('.merged');
 
-        // }}}
-        // {{{ fix microtime
-
-        self::$globalMicrotime = gettimeofday(true);
-
-        // }}}
-        // {{{ checking inportant constants
-
-        if (!defined('APP_DIR')) {
-            $this->sys('Abend')->error('Undefined constant APP_DIR');
-        }
-
-        if (!defined('PUB_DIR')) {
-            $this->sys('Abend')->error('Undefined constant PUB_DIR');
-        }
-
-        // }}}
-        // {{{ config
-
-        self::$config['sys'] = \App\Config\Sys::get();
-
-        self::$config['my'] = \App\Config\My::get();
-
-        self::$config['shared'] = \App\Config\Shared::get();
-
-        self::$e['config'] = &self::$config['shared'];
-
-        // }}}
-        // {{{ default locale, encoding and timezone
-
-        setlocale(LC_ALL, 'C');
-
-        mb_internal_encoding('UTF-8');
-
-        if (date_default_timezone_set(self::$config['sys']['timezone']) === false) {
-            $this->sys('Abend')->error();
-        }
-
-        // }}}
-        // {{{ important parameters checking and correcting
-
-        $_SERVER['REQUEST_URI'] = $_SERVER['REDIRECT_REQUEST_URI'] ?? $_SERVER['REQUEST_URI'] ?? '/';
-
-        $_SERVER['REQUEST_METHOD'] ??= 'GET';
-
-        $_SERVER['REMOTE_ADDR'] ??= '0.0.0.0';
-
-        $_SERVER['HTTP_HOST'] ??= 'localhost';
-
-        [$_SERVER['REQUEST_URL'], $_SERVER['REQUEST_QUERY']] = [
-            ...explode('?', $_SERVER['REQUEST_URI'], 2), ''
-        ];
-
-        // }}}
-        // {{{ default environment
-
-        if (isset(self::$config['sys']['url'])) {
-            $parsed = parse_url(self::$config['sys']['url']);
-
-            if (!isset($parsed['host'])) {
-                $this->sys('Abend')->error('Incorrect url in system config');
-            }
-
-            self::$e['defaults']['url_scheme'] = $parsed['scheme'] ?? 'http';
-
-            self::$e['defaults']['url_host'] = $parsed['host'];
-        } else {
-            self::$e['defaults']['url_scheme'] =
-                empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off'
-                    ? 'http' : 'https';
-
-            self::$e['defaults']['url_host'] = $_SERVER['HTTP_HOST'];
-        }
-
-        self::$e['defaults']['url'] = sprintf('%s://%s',
-            self::$e['defaults']['url_scheme'],
-            self::$e['defaults']['url_host']
-        );
-
-        self::$e['defaults']['timestamp'] = (int) self::$globalMicrotime;
-
-        self::$e['defaults']['point'] = (new \App\Router())->get();
-
-        if (self::$e['defaults']['point'] === false) {
-            $this->sys('Abend')->errorPage(404);
-        }
-
-        // }}}
-        // {{{ additional environment
-
-        $this->environment();
-
-        // }}}
-        // {{{ calling entry point if this is not CLI
-
-        if (php_sapi_name() === 'cli') {
-            return;
-        }
-
-        $point = self::$e['defaults']['point'];
-
-        $class = "App\\Point\\$point";
-
-        if (!class_exists($class)) {
-            $this->sys('Abend')->errorPage(404);
-        }
-
-        try {
-            new $class();
-        } catch (\Exception $error) {
-            $this->sys('Abend')->error(
-                $error->getMessage(),
-                $error->getFile(),
-                $error->getLine()
+        if (self::$config['sys']['env'] !== 'prod') {
+            $merger->recombine(
+                [
+                    '.css/primary/*.css' => [
+                        'all.css',
+                        'primary.css',
+                    ],
+                    '.css/secondary/*.css' => [
+                        'all.css',
+                        'secondary.css',
+                    ],
+                    '.js/primary/*.js' => [
+                        'all.js',
+                        'primary.js',
+                    ],
+                    '.js/secondary/*.js' => [
+                        'all.js',
+                        'secondary.js',
+                    ],
+                ], self::$config['sys']['env'] !== 'debug'
             );
+        }
+
+        self::$e['defaults']['merged'] = $merger->get();
+
+        // }}}
+        // {{{ these params are only needed in templates
+
+        self::$e['defaults']['request_method'] = $_SERVER['REQUEST_METHOD'];
+
+        if (isset($_REQUEST['REQUEST_URI'])
+            && is_scalar($_REQUEST['REQUEST_URI'])
+                && mb_check_encoding($_REQUEST['REQUEST_URI'])
+        ) {
+            self::$e['defaults']['request_uri'] = $_REQUEST['REQUEST_URI'];
+
+            [self::$e['defaults']['request_url'], self::$e['defaults']['request_query']] = [
+                ...explode('?', self::$e['defaults']['request_uri'], 2), ''
+            ];
+        } else {
+            self::$e['defaults']['request_uri'] = $_SERVER['REQUEST_URI'];
+
+            self::$e['defaults']['request_url'] = $_SERVER['REQUEST_URL'];
+
+            self::$e['defaults']['request_query'] = $_SERVER['REQUEST_QUERY'];
+        }
+
+        // }}}
+        // {{{ detect os and device
+
+        if (preg_match('/\b(iphone|ipad|ipod|ios|android|mobile|phone)\b/',
+                strtolower($_SERVER['HTTP_USER_AGENT'] ?? ''), $M)
+        ) {
+            self::$e['defaults']['device'] = 'mobile';
+
+            if ($M[1] === 'android') {
+                self::$e['defaults']['os'] = 'android';
+            } elseif ($M[1] === 'mobile' || $M[1] === 'phone') {
+                self::$e['defaults']['os'] = 'winphone';
+            } else {
+                self::$e['defaults']['os'] = 'ios';
+            }
+        } else {
+            self::$e['defaults']['device'] = 'desktop';
+
+            self::$e['defaults']['os'] = 'other';
+        }
+
+        // }}}
+        // {{{ return back url
+
+        if (isset($_REQUEST['r'])
+            && is_scalar($_REQUEST['r'])
+                && mb_check_encoding($_REQUEST['r'])
+        ) {
+            self::$e['defaults']['r'] = $this->sys('Text')->fulltrim($_REQUEST['r'], 8192);
+
+            if (self::$e['defaults']['r'] === '') {
+                self::$e['defaults']['r'] = '/';
+            }
+        } else {
+            self::$e['defaults']['r'] = '/';
         }
 
         // }}}
     }
-
-    /**
-     * Initializing additional environment.
-     */
-    abstract protected function environment(): void;
 }

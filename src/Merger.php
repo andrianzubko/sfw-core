@@ -70,10 +70,7 @@ class Merger extends Base
 
         $time = false;
 
-        if (in_array($lock, ['min','raw'], true)
-            && ($lock === 'min' && $minify
-                || $lock === 'raw' && !$minify)
-        ) {
+        if ($minify === (bool) $lock) {
             $count = 0;
 
             foreach (@$this->sys('Dir')->scan($this->mergedDir) as $item) {
@@ -131,7 +128,7 @@ class Merger extends Base
         // }}}
         // {{{ unlocking
 
-        $this->sys('Locker')->unlock('merger', $minify ? 'min' : 'raw');
+        $this->sys('Locker')->unlock('merger', $minify);
 
         // }}}
     }
@@ -175,7 +172,8 @@ class Merger extends Base
 
                 if (preg_match('/\.(gif|png|jpg|jpeg|svg|woff|woff2)$/ui', $M[1], $N)
                     && str_starts_with($M[1], '/')
-                        && !str_contains($M[1], '..')
+                        && !str_starts_with($M[1], '//')
+                            && !str_contains($M[1], '..')
                 ) {
                     $type = strtolower($N[1]);
 

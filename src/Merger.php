@@ -30,11 +30,13 @@ class Merger extends Base
     /**
      * Recombining all.
      */
-    public function recombine(array $sources): void
+    public function recombine(array $sources, bool $minify = true): void
     {
         // {{{ locking
 
-        if ($this->sys('Locker')->lock('merger') === false) {
+        $lock = $this->sys('Locker')->lock('merger');
+
+        if ($lock === false) {
             return;
         }
 
@@ -64,41 +66,43 @@ class Merger extends Base
         }
 
         // }}}
-        // {{{ looking for time-prefix of merged files and some checking of consistency
-
-        $count = 0;
+        // {{{ checking of the need for recombination
 
         $time = false;
 
-        foreach (@$this->sys('Dir')->scan($this->mergedDir) as $item) {
-            if ($time === false) {
-                $time = (int) $item;
-            } elseif ($time != (int) $item) {
-                $time = false;
+        if (in_array($lock, ['min','raw'], true)
+            && ($lock === 'min' && $minify
+                || $lock === 'raw' && !$minify)
+        ) {
+            $count = 0;
 
-                break;
+            foreach (@$this->sys('Dir')->scan($this->mergedDir) as $item) {
+                if ($time === false) {
+                    $time = (int) $item;
+                } elseif ($time != (int) $item) {
+                    $time = false;
+
+                    break;
+                }
+
+                $count += 1;
             }
 
-            $count += 1;
-        }
+            if ($time !== false
+                && $count != array_sum(array_map(fn($a) => count($a), $struct))
+            ) {
+                $time = false;
+            }
 
-        if ($time !== false
-            && $count != array_sum(array_map(fn($a) => count($a), $struct))
-        ) {
-            $time = false;
-        }
+            if ($time !== false) {
+                foreach (array_keys($struct) as $type) {
+                    foreach ($struct[$type] as $target => $files) {
+                        foreach ($files as $file) {
+                            if ((int) filemtime($file) > $time) {
+                                $time = false;
 
-        // }}}
-        // {{{ comparing merged and sources times
-
-        if ($time !== false) {
-            foreach (array_keys($struct) as $type) {
-                foreach ($struct[$type] as $target => $files) {
-                    foreach ($files as $file) {
-                        if ((int) filemtime($file) > $time) {
-                            $time = false;
-
-                            break 3;
+                                break 3;
+                            }
                         }
                     }
                 }
@@ -115,7 +119,7 @@ class Merger extends Base
 
             foreach (array_keys($struct) as $type) {
                 foreach ($struct[$type] as $target => $files) {
-                    $merged = $this->{$type}($files);
+                    $merged = $this->{$type}($files, $minify);
 
                     if ($this->sys('File')->put("$this->mergedDir/$time.$target", $merged) === false) {
                         $this->sys('Abend')->error();
@@ -127,7 +131,7 @@ class Merger extends Base
         // }}}
         // {{{ unlocking
 
-        $this->sys('Locker')->unlock('merger');
+        $this->sys('Locker')->unlock('merger', $minify ? 'min' : 'raw');
 
         // }}}
     }
@@ -135,16 +139,18 @@ class Merger extends Base
     /**
      * Merging JS.
      */
-    protected function js(array $files): string
+    protected function js(array $files, bool $minify): string
     {
         $merged = $this->files($files);
 
-        $jsmin = new \JSMin\JSMin($merged);
+        if ($minify) {
+            $jsmin = new \JSMin\JSMin($merged);
 
-        try {
-            $merged = $jsmin->min();
-        } catch (\Exception $error) {
-            $this->sys('Abend')->error($error->getMessage());
+            try {
+                $merged = $jsmin->min();
+            } catch (\Exception $error) {
+                $this->sys('Abend')->error($error->getMessage());
+            }
         }
 
         return $merged;
@@ -153,15 +159,17 @@ class Merger extends Base
     /**
      * Merging CSS.
      */
-    protected function css(array $files): string
+    protected function css(array $files, bool $minify): string
     {
         $merged = $this->files($files);
 
-        $merged = preg_replace('~/\*(.*?)\*/~us', '', $merged);
+        if ($minify) {
+            $merged = preg_replace('~/\*(.*?)\*/~us', '', $merged);
 
-        $merged = $this->sys('Text')->fulltrim($merged);
+            $merged = $this->sys('Text')->fulltrim($merged);
+        }
 
-        $merged = preg_replace_callback('/url\( ?(.+?) ?\)/u',
+        $merged = preg_replace_callback('/url\(\s*(.+?)\s*\)/u',
             function (array $M) use ($merged): string {
                 $data = $type = false;
 

@@ -13,9 +13,9 @@ class Locker extends \SFW\Lazy\Sys
     protected array $locks = [];
 
     /**
-     * Lock or return false.
+     * Lock and return contents or false if can't.
      */
-    public function lock(string $key): bool
+    public function lock(string $key): string|false
     {
         $file = sprintf(self::$config['sys']['locker']['pattern'], $key);
 
@@ -23,7 +23,7 @@ class Locker extends \SFW\Lazy\Sys
             $this->sys('Abend')->error();
         }
 
-        $fh = fopen($file, 'a+');
+        $fh = fopen($file, 'c+');
 
         if ($fh === false
             || flock($fh, LOCK_EX | LOCK_NB) === false
@@ -33,18 +33,36 @@ class Locker extends \SFW\Lazy\Sys
 
         $this->locks[$key] = $fh;
 
-        return true;
+        $size = filesize($file);
+
+        if ($size > 0) {
+            return fread($fh, $size);
+        }
+
+        return '';
     }
 
     /**
-     * Unlock.
+     * Unlock and optionaly save contents to lock file.
      */
-    public function unlock(string $key): void
+    public function unlock(string $key, ?string $contents = null): void
     {
-        if (isset($this->locks[$key])) {
-            fclose($this->locks[$key]);
-
-            unset($this->locks[$key]);
+        if (!isset($this->locks[$key])) {
+            return;
         }
+
+        $fh = $this->locks[$key];
+
+        ftruncate($fh, 0);
+
+        if (isset($contents)) {
+            rewind($fh);
+
+            fwrite($fh, $contents);
+        }
+
+        fclose($fh);
+
+        unset($this->locks[$key]);
     }
 }

@@ -17,31 +17,33 @@ class Templater extends \SFW\Lazy\Sys
      */
     public function __construct()
     {
+        $text = $this->sys('Text');
+
         $this->templater = new \SFW\Templater();
 
         $this->templater->addProperties(
             [
-                'lc' => [$this->sys('Text'), 'lc'],
+                'lc' => [$text, 'lc'],
 
-                'lcfirst' => [$this->sys('Text'), 'lcfirst'],
+                'lcfirst' => [$text, 'lcfirst'],
 
-                'uc' => [$this->sys('Text'), 'uc'],
+                'uc' => [$text, 'uc'],
 
-                'ucfirst' => [$this->sys('Text'), 'ucfirst'],
+                'ucfirst' => [$text, 'ucfirst'],
 
-                'trim' => [$this->sys('Text'), 'trim'],
+                'trim' => [$text, 'trim'],
 
-                'rtrim' => [$this->sys('Text'), 'rtrim'],
+                'rtrim' => [$text, 'rtrim'],
 
-                'ltrim' => [$this->sys('Text'), 'ltrim'],
+                'ltrim' => [$text, 'ltrim'],
 
-                'fulltrim' => [$this->sys('Text'), 'fulltrim'],
+                'fulltrim' => [$text, 'fulltrim'],
 
-                'multitrim' => [$this->sys('Text'), 'multitrim'],
+                'multitrim' => [$text, 'multitrim'],
 
-                'cut' => [$this->sys('Text'), 'cut'],
+                'cut' => [$text, 'cut'],
 
-                'random' => [$this->sys('Text'), 'random'],
+                'random' => [$text, 'random'],
             ]
         );
     }
@@ -49,12 +51,12 @@ class Templater extends \SFW\Lazy\Sys
     /**
      * Transforming template to page.
      */
-    public function transform(array $e, string $template, ?bool $minify = null): string
+    public function transform(array $e, string $template, array $options = []): string
     {
-        $template = APP_DIR . "/templates/$template";
+        if (self::$config['sys']['debug']) {
+            $options['debug'] = true;
+        }
 
-        $minify ??= !self::$config['sys']['debug'];
-
-        return $this->templater->transform($e, $template, $minify);
+        return $this->templater->transform($e, APP_DIR . "/templates/$template", $options);
     }
 }

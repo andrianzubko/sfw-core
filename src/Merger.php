@@ -8,23 +8,32 @@ namespace SFW;
 class Merger extends Base
 {
     /**
+     * Full merged directory.
+     */
+    protected string $mergedDirFull;
+
+    /**
      * Passing merged dir to properties.
      */
     public function __construct(protected string $mergedDir)
     {
-        $this->mergedDir = PUB_DIR . "/$this->mergedDir";
+        $this->mergedDirFull = PUB_DIR . "/$this->mergedDir";
     }
 
     /**
      * Returns merged time.
      */
-    public function get(): int|false
+    public function get(): array
     {
-        foreach (@$this->sys('Dir')->scan($this->mergedDir) as $item) {
-            return (int) $item;
+        $files = [];
+
+        foreach (@$this->sys('Dir')->scan($this->mergedDirFull) as $item) {
+            if (preg_match('/^\d{10}\.(.+)$/', $item, $M)) {
+                $files[$M[1]] = "/$this->mergedDir/{$M[0]}";
+            }
         }
 
-        return false;
+        return $files;
     }
 
     /**
@@ -60,7 +69,7 @@ class Merger extends Base
         }
 
         if (!$struct) {
-            $this->sys('Dir')->clear($this->mergedDir);
+            $this->sys('Dir')->clear($this->mergedDirFull);
 
             return;
         }
@@ -75,7 +84,7 @@ class Merger extends Base
         ) {
             $count = 0;
 
-            foreach (@$this->sys('Dir')->scan($this->mergedDir) as $item) {
+            foreach (@$this->sys('Dir')->scan($this->mergedDirFull) as $item) {
                 if ($time === false) {
                     $time = (int) $item;
                 } elseif ($time != (int) $item) {
@@ -112,7 +121,7 @@ class Merger extends Base
         // {{{ merging if needed
 
         if ($time === false) {
-            $this->sys('Dir')->clear($this->mergedDir);
+            $this->sys('Dir')->clear($this->mergedDirFull);
 
             $time = time();
 
@@ -120,7 +129,7 @@ class Merger extends Base
                 foreach ($struct[$type] as $target => $files) {
                     $merged = $this->{$type}($files, $minify);
 
-                    if ($this->sys('File')->put("$this->mergedDir/$time.$target", $merged) === false) {
+                    if ($this->sys('File')->put("$this->mergedDirFull/$time.$target", $merged) === false) {
                         $this->sys('Abend')->error();
                     }
                 }

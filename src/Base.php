@@ -14,9 +14,14 @@ abstract class Base
     protected static float $globalMicrotime;
 
     /**
-     * Instances of Lazy classes.
+     * Instances of sys Lazy classes.
      */
-    protected static array $lazyInstances = [];
+    protected static array $sysLazyInstances = [];
+
+    /**
+     * Instances of your Lazy classes.
+     */
+    protected static array $myLazyInstances = [];
 
     /**
      * All configs (not available from templates).
@@ -35,10 +40,10 @@ abstract class Base
      */
     public function sys(string $name, ...$arguments): object
     {
-        if (isset(self::$lazyInstances['sys'][$name])
+        if (isset(self::$sysLazyInstances[$name])
             && !$arguments
         ) {
-            return self::$lazyInstances['sys'][$name];
+            return self::$sysLazyInstances[$name];
         }
 
         $class = "App\\Lazy\\Sys\\$name";
@@ -53,7 +58,7 @@ abstract class Base
             $lazy = $lazy->getInstance();
         }
 
-        return self::$lazyInstances['sys'][$name] = $lazy;
+        return self::$sysLazyInstances[$name] = $lazy;
     }
 
     /**
@@ -63,10 +68,10 @@ abstract class Base
      */
     public function my(string $name, ...$arguments): object
     {
-        if (isset(self::$lazyInstances['my'][$name])
+        if (isset(self::$myLazyInstances[$name])
             && !$arguments
         ) {
-            return self::$lazyInstances['my'][$name];
+            return self::$myLazyInstances[$name];
         }
 
         $class = "App\\Lazy\\My\\$name";
@@ -77,6 +82,6 @@ abstract class Base
             $lazy = $lazy->getInstance();
         }
 
-        return self::$lazyInstances['my'][$name] = $lazy;
+        return self::$myLazyInstances[$name] = $lazy;
     }
 }

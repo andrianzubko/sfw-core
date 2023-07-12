@@ -172,8 +172,8 @@ class Out extends \SFW\Lazy\Sys
 
             $dbMicrotime = $dbCounter = 0;
 
-            if (isset(self::$lazyInstances['sys'])) {
-                foreach (self::$lazyInstances['sys'] as $lazy) {
+            if (isset(self::$sysLazyInstances)) {
+                foreach (self::$sysLazyInstances as $lazy) {
                     if ($lazy instanceof \SFW\Databaser\Driver
                         && !in_array($lazy, $dbDrivers, true)
                     ) {

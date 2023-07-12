@@ -24,7 +24,7 @@ abstract class Runner extends Base
         self::$globalMicrotime = gettimeofday(true);
 
         // }}}
-        // {{{ checking inportant constants
+        // {{{ checking important constants
 
         if (!defined('APP_DIR')) {
             $this->sys('Abend')->error('Undefined constant APP_DIR');
@@ -35,7 +35,7 @@ abstract class Runner extends Base
         }
 
         // }}}
-        // {{{ config
+        // {{{ configs
 
         self::$config['sys'] = \App\Config\Sys::get();
 
@@ -46,30 +46,38 @@ abstract class Runner extends Base
         self::$e['config'] = &self::$config['shared'];
 
         // }}}
-        // {{{ default locale, encoding and timezone
+        // {{{ default locale
 
         setlocale(LC_ALL, 'C');
 
+        // }}}
+        // {{{ default encoding
+
         mb_internal_encoding('UTF-8');
+
+        // }}}
+        // {{{ default timezone
 
         if (date_default_timezone_set(self::$config['sys']['timezone']) === false) {
             $this->sys('Abend')->error();
         }
 
         // }}}
-        // {{{ important parameters checking and correcting
-
-        $_SERVER['REQUEST_URI'] = $_SERVER['REDIRECT_REQUEST_URI'] ?? $_SERVER['REQUEST_URI'] ?? '/';
-
-        $_SERVER['REQUEST_METHOD'] ??= 'GET';
-
-        $_SERVER['REMOTE_ADDR'] ??= '0.0.0.0';
+        // {{{ some parameters correcting
 
         $_SERVER['HTTP_HOST'] ??= 'localhost';
 
-        [$_SERVER['REQUEST_URL'], $_SERVER['REQUEST_QUERY']] = [
-            ...explode('?', $_SERVER['REQUEST_URI'], 2), ''
-        ];
+        $_SERVER['REMOTE_ADDR'] ??= '0.0.0.0';
+
+        $_SERVER['REQUEST_METHOD'] ??= 'GET';
+
+        $_SERVER['REQUEST_URI'] = $_SERVER['REDIRECT_REQUEST_URI'] ?? $_SERVER['REQUEST_URI'] ?? '/';
+
+        $chunks = explode('?', $_SERVER['REQUEST_URI'], 2);
+
+        $_SERVER['REQUEST_URL'] = $chunks[0];
+
+        $_SERVER['REQUEST_QUERY'] = $chunks[1] ?? '';
 
         // }}}
         // {{{ default environment
@@ -85,16 +93,20 @@ abstract class Runner extends Base
 
             self::$e['defaults']['url_host'] = $parsed['host'];
         } else {
-            self::$e['defaults']['url_scheme'] =
-                empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off'
-                    ? 'http' : 'https';
+            if (empty($_SERVER['HTTPS'])
+                || $_SERVER['HTTPS'] === 'off'
+            ) {
+                self::$e['defaults']['url_scheme'] = 'http';
+            } else {
+                self::$e['defaults']['url_scheme'] = 'https';
+            }
 
             self::$e['defaults']['url_host'] = $_SERVER['HTTP_HOST'];
         }
 
         self::$e['defaults']['url'] = sprintf('%s://%s',
             self::$e['defaults']['url_scheme'],
-            self::$e['defaults']['url_host']
+                self::$e['defaults']['url_host']
         );
 
         self::$e['defaults']['timestamp'] = (int) self::$globalMicrotime;

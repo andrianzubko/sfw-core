@@ -70,7 +70,7 @@ class Abend extends \SFW\Lazy\Sys
      */
     public function errorPage(int $status): void
     {
-        if (php_sapi_name() !== 'cli'
+        if (PHP_SAPI !== 'cli'
             && !headers_sent()
             && !ob_get_length()
         ) {

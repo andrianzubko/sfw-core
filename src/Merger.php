@@ -54,20 +54,20 @@ class Merger extends Base
 
         $struct = [];
 
-        foreach (array_keys($sources) as $from) {
-            if (preg_match('/\.(css|js)$/', $from, $M)) {
-                foreach ($sources[$from] as $to) {
-                    foreach (glob(PUB_DIR . "/$from") as $file) {
+        foreach ($sources as $source => $targets) {
+            if (preg_match('/\.(css|js)$/', $source, $M)) {
+                foreach ((array) $targets as $target) {
+                    foreach (glob(PUB_DIR . "/$source") as $file) {
                         if (str_ends_with($file, $M[0])
                             && is_file($file)
                         ) {
-                            $struct[$M[1]][$to][] = $file;
+                            $struct[$M[1]][$target][] = $file;
                         }
                     }
                 }
             }
         }
-
+        
         if (!$struct) {
             $this->sys('Dir')->clear($this->mergedDirFull);
 

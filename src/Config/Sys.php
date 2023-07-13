@@ -16,9 +16,9 @@ class Sys extends \SFW\Config
 
         // {{{ general
 
-        /* Environment mode.
+        /* Environment mode ('dev', 'test', 'prod', etc..).
          *
-         * string 'dev', 'prod', etc...
+         * string
          */
         $sys['env'] = 'dev';
 

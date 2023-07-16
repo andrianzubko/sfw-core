@@ -8,148 +8,186 @@ namespace SFW;
 class Merger extends Base
 {
     /**
-     * Full merged directory.
+     * Merged dir.
      */
-    protected string $mergedDirFull;
+    protected string $mergedDir = APP_DIR . '/var/cache/merged';
 
     /**
-     * Passing merged dir to properties.
+     * Merged dir version file.
      */
-    public function __construct(protected string $mergedDir)
+    protected string $versionFile = APP_DIR . '/var/cache/merged.version.php';
+
+    /**
+     * Passing parameters to properties.
+     */
+    public function __construct(protected array $sources) {}
+
+    /**
+     * Recombining if needed and returning merged paths.
+     */
+    public function get(array $options = []): array
     {
-        $this->mergedDirFull = PUB_DIR . "/$this->mergedDir";
+        $version = @include $this->versionFile;
+
+        if ($version !== false
+            && !($options['recheck'] ?? true)
+                && ($options['minify'] ?? true) === $version['minify']
+        ) {
+            return $this->getPaths($version['time']);
+        }
+
+        if ($this->sys('Locker')->lock('merger') === false) {
+            return $this->getPaths(
+                $version !== false
+                    ? $version['time']
+                    : 0
+            );
+        }
+
+        $version = @include $this->versionFile;
+
+        $sources = $this->getSources();
+
+        $version = $this->checkVersion($version, $sources, $options['minify'] ?? true);
+
+        if ($version === false) {
+            $version = $this->recombine($sources, $options['minify'] ?? true);
+        }
+
+        $this->sys('Locker')->unlock('merger');
+
+        return $this->getPaths($version['time']);
     }
 
     /**
-     * Returns merged time.
+     * Getting merged paths.
      */
-    public function get(): array
+    protected function getPaths(int $time): array
     {
-        $files = [];
+        $paths = [];
 
-        foreach (@$this->sys('Dir')->scan($this->mergedDirFull) as $item) {
-            if (preg_match('/^\d{10}\.(.+)$/', $item, $M)) {
-                $files[$M[1]] = "/$this->mergedDir/{$M[0]}";
+        foreach ($this->sources as $targets) {
+            foreach ((array) $targets as $target) {
+                $paths[$target] = "/.merged/$time.$target";
             }
         }
 
-        return $files;
+        return $paths;
     }
 
     /**
-     * Recombining all.
+     * Getting sources files.
      */
-    public function recombine(array $sources, bool $minify = true): void
+    protected function getSources(): array
     {
-        // {{{ locking
+        $sources = [];
 
-        $lock = $this->sys('Locker')->lock('merger');
-
-        if ($lock === false) {
-            return;
-        }
-
-        // }}}
-        // {{{ preparing struct of files
-
-        $struct = [];
-
-        foreach ($sources as $source => $targets) {
+        foreach ($this->sources as $source => $targets) {
             if (preg_match('/\.(css|js)$/', $source, $M)) {
                 foreach ((array) $targets as $target) {
-                    foreach (glob(PUB_DIR . "/$source") as $file) {
-                        if (str_ends_with($file, $M[0])
-                            && is_file($file)
-                        ) {
-                            $struct[$M[1]][$target][] = $file;
+                    $sources[$M[1]][$target] ??= [];
+
+                    foreach (glob($source) as $item) {
+                        if (is_file($item)) {
+                            $sources[$M[1]][$target][] = $item;
                         }
                     }
                 }
             }
         }
-        
-        if (!$struct) {
-            $this->sys('Dir')->clear($this->mergedDirFull);
 
-            return;
+        return $sources;
+    }
+
+    /**
+     * Recheck of the needs for recombination.
+     */
+    protected function checkVersion(array|false $version, array $sources, bool $minify): array|false
+    {
+        if ($version === false) {
+            return false;
         }
 
-        // }}}
-        // {{{ checking of the need for recombination
+        if ($minify !== $version['minify']) {
+            return false;
+        }
 
-        $time = false;
+        $targets = [];
 
-        if ($lock !== ''
-            && (bool) $lock === $minify
-        ) {
-            $count = 0;
-
-            foreach (@$this->sys('Dir')->scan($this->mergedDirFull) as $item) {
-                if ($time === false) {
-                    $time = (int) $item;
-                } elseif ($time != (int) $item) {
-                    $time = false;
-
-                    break;
-                }
-
-                $count += 1;
-            }
-
-            if ($time !== false
-                && $count != array_sum(array_map(fn($a) => count($a), $struct))
+        foreach (@$this->sys('Dir')->scan($this->mergedDir) as $item) {
+            if (is_file("$this->mergedDir/$item")
+                && preg_match('/^(\d+)\.(.+)$/', $item, $M)
+                    && (int) $M[1] === $version['time']
             ) {
-                $time = false;
+                $targets[] = $M[2];
+            } else {
+                return false;
             }
+        }
 
-            if ($time !== false) {
-                foreach (array_keys($struct) as $type) {
-                    foreach ($struct[$type] as $target => $files) {
-                        foreach ($files as $file) {
-                            if ((int) filemtime($file) > $time) {
-                                $time = false;
+        if (array_diff(
+                array_keys(
+                    array_merge(
+                        ...array_values($sources)
+                    )
+                ), $targets
+            )
+        ) {
+            return false;
+        }
 
-                                break 3;
-                            }
-                        }
+        foreach (array_keys($sources) as $type) {
+            foreach ($sources[$type] as $files) {
+                foreach ($files as $file) {
+                    if ((int) filemtime($file) > $version['time']) {
+                        return false;
                     }
                 }
             }
         }
 
-        // }}}
-        // {{{ merging if needed
+        return $version;
+    }
 
-        if ($time === false) {
-            $this->sys('Dir')->clear($this->mergedDirFull);
+    /**
+     * Recombining.
+     */
+    protected function recombine(array $sources, bool $minify): array
+    {
+        $this->sys('Dir')->clear($this->mergedDir);
 
-            $time = time();
+        $version = [
+            'time' => time(),
+            'minify' => $minify,
+        ];
 
-            foreach (array_keys($struct) as $type) {
-                foreach ($struct[$type] as $target => $files) {
-                    $merged = $this->{$type}($files, $minify);
+        foreach (array_keys($sources) as $type) {
+            foreach ($sources[$type] as $target => $files) {
+                $file = "$this->mergedDir/{$version['time']}.$target";
 
-                    if ($this->sys('File')->put("$this->mergedDirFull/$time.$target", $merged) === false) {
-                        $this->sys('Abend')->error();
-                    }
+                if ($type === 'js') {
+                    $contents = $this->mergeJs($files, $minify);
+                } else {
+                    $contents = $this->mergeCss($files, $minify);
+                }
+
+                if ($this->sys('File')->put($file, $contents) === false) {
+                    $this->sys('Abend')->error();
                 }
             }
         }
 
-        // }}}
-        // {{{ unlocking
+        $this->sys('File')->putVar($this->versionFile, $version);
 
-        $this->sys('Locker')->unlock('merger', (int) $minify);
-
-        // }}}
+        return $version;
     }
 
     /**
      * Merging JS.
      */
-    protected function js(array $files, bool $minify): string
+    protected function mergeJs(array $files, bool $minify): string
     {
-        $merged = $this->files($files);
+        $merged = $this->mergeFiles($files);
 
         if ($minify) {
             $jsmin = new \JSMin\JSMin($merged);
@@ -167,18 +205,18 @@ class Merger extends Base
     /**
      * Merging CSS.
      */
-    protected function css(array $files, bool $minify): string
+    protected function mergeCss(array $files, bool $minify): string
     {
-        $merged = $this->files($files);
+        $merged = $this->mergeFiles($files);
 
         if ($minify) {
-            $merged = preg_replace('~/\*(.*?)\*/~us', '', $merged);
-
-            $merged = $this->sys('Text')->fulltrim($merged);
+            $merged = $this->sys('Text')->fulltrim(
+                preg_replace('~/\*(.*?)\*/~us', '', $merged)
+            );
         }
 
-        $merged = preg_replace_callback('/url\(\s*(.+?)\s*\)/u',
-            function (array $M) use ($merged): string {
+        return preg_replace_callback('/url\(\s*(.+?)\s*\)/u',
+            function (array $M): string {
                 $data = $type = false;
 
                 if (preg_match('/\.(gif|png|jpg|jpeg|svg|woff|woff2)$/ui', $M[1], $N)
@@ -194,12 +232,12 @@ class Merger extends Base
                         $type = 'svg+xml';
                     }
 
-                    $size = @filesize(PUB_DIR . $M[1]);
+                    $size = @filesize(APP_DIR . "/public/$M[1]");
 
                     if ($size !== false
                         && $size <= 32 * 1024
                     ) {
-                        $data = @$this->sys('File')->get(PUB_DIR . $M[1]);
+                        $data = @$this->sys('File')->get(APP_DIR . "/public/$M[1]");
                     }
                 }
 
@@ -210,14 +248,12 @@ class Merger extends Base
                 }
             }, $merged
         );
-
-        return $merged;
     }
 
     /**
      * Merging files.
      */
-    protected function files(array $files): string
+    protected function mergeFiles(array $files): string
     {
         $merged = [];
 

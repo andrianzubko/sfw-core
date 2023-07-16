@@ -19,7 +19,7 @@ class Number extends \SFW\Lazy\Sys
             return round($min, $precision);
         }
 
-        $number = (float) preg_replace(['/\s+/u', '/[\.\,]+/u'], ['', '.'], $number);
+        $number = (float) preg_replace(['/\s+/u', '/[.,]+/u'], ['', '.'], $number);
 
         $number = round($number, $precision);
 

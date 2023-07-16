@@ -54,7 +54,7 @@ class Notifier extends \SFW\Lazy\Sys
     /**
      * Call build() method at all notifies and send all messages.
      */
-    protected function complete()
+    protected function complete(): void
     {
         while ($this->notifies) {
             $notify = array_shift($this->notifies);

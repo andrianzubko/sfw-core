@@ -8,7 +8,7 @@ namespace SFW\Lazy\Sys;
 class Out extends \SFW\Lazy\Sys
 {
     /**
-     * Mime types for compess via gzip.
+     * Mime types for compress via gzip.
      */
     protected array $compress = [
         'text/html',
@@ -102,7 +102,7 @@ class Out extends \SFW\Lazy\Sys
 
         if (strlen($contents) > 32 * 1024
             && in_array($mime, $this->compress, true)
-                && strpos($_SERVER['HTTP_ACCEPT_ENCODING'] ?? '', 'gzip') !== false
+                && str_contains($_SERVER['HTTP_ACCEPT_ENCODING'] ?? '', 'gzip')
         ) {
             header('Content-Encoding: gzip');
 

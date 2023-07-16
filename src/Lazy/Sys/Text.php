@@ -63,7 +63,7 @@ class Text extends \SFW\Lazy\Sys
     /**
      * Trim left side.
      */
-    public function ltrim(string $string): string
+    public function ltrim(?string $string): string
     {
         return ltrim($string ?? '', $this->spaces);
     }
@@ -71,7 +71,7 @@ class Text extends \SFW\Lazy\Sys
     /**
      * Trim both sides and convert all sequential spaces to one.
      */
-    public function fulltrim(string $string, int $limit = 0): string
+    public function fulltrim(?string $string, int $limit = 0): string
     {
         $string = preg_replace('/\s+/u', ' ', $string ?? '');
 
@@ -89,9 +89,9 @@ class Text extends \SFW\Lazy\Sys
     /**
      * Trim both sides and convert all sequential spaces to one, but leave new lines.
      */
-    public function multitrim(string $string, int $limit = 0): string
+    public function multitrim(?string $string, int $limit = 0): string
     {
-        $string = preg_replace(['/\h+/u', '/\s*\v\s*/u'], [' ', "\n"], $string);
+        $string = preg_replace(['/\h+/u', '/\s*\v\s*/u'], [' ', "\n"], $string ?? '');
 
         $string = trim($string);
 

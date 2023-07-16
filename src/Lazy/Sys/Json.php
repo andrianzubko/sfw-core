@@ -20,12 +20,12 @@ class Json extends \SFW\Lazy\Sys
         }
 
         if (is_numeric(key($items))) {
-            $items_array = &$items;
+            $array = &$items;
         } else {
-            $items_array = [&$items];
+            $array = [&$items];
         }
 
-        foreach ($items_array as &$item) {
+        foreach ($array as &$item) {
             foreach ($decodes as $decode) {
                 if (isset($item[$decode])) {
                     $item[$decode] = json_decode($item[$decode], true);

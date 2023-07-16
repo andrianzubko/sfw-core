@@ -8,11 +8,6 @@ namespace SFW\Lazy\Sys;
 class Dir extends \SFW\Lazy\Sys
 {
     /**
-     * Default mode.
-     */
-    protected int $mode = 0777;
-
-    /**
      * For temporary directory.
      */
     protected ?string $temporary;
@@ -52,7 +47,7 @@ class Dir extends \SFW\Lazy\Sys
             $success = mkdir($dir, recursive: true);
 
             if ($success) {
-                @chmod($dir, $this->mode);
+                @chmod($dir, self::$config['sys']['dir']['mode']);
             }
 
             return $success;

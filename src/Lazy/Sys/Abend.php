@@ -62,19 +62,21 @@ class Abend extends \SFW\Lazy\Sys
             );
         }
 
-        $this->errorPage(500);
+        if ($mode === 'error') {
+            $this->errorPage(500);
+        }
     }
 
     /**
-     * Show error page and exit.
+     * Set error header and exit.
      */
-    public function errorPage(int $status): void
+    public function errorPage(int $code): void
     {
         if (PHP_SAPI !== 'cli'
             && !headers_sent()
             && !ob_get_length()
         ) {
-            include PUB_DIR . "/.bin/errors/$status.php";
+            include APP_DIR . "/public/.bin/errors/$code.php";
         }
 
         exit;

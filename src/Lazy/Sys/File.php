@@ -8,11 +8,6 @@ namespace SFW\Lazy\Sys;
 class File extends \SFW\Lazy\Sys
 {
     /**
-     * Default mode.
-     */
-    protected int $mode = 0666;
-
-    /**
      * Getting file contents into string.
      */
     public function get(string $file): string|false {
@@ -31,9 +26,25 @@ class File extends \SFW\Lazy\Sys
             return false;
         }
 
-        @chmod($file, $this->mode);
+        @chmod($file, self::$config['sys']['file']['mode']);
 
         return true;
+    }
+
+    /**
+     * Putting variable to some PHP file.
+     */
+    public function putVar(string $file, mixed $var): bool
+    {
+        $var = var_export($var, true);
+
+        $success = $this->put($file, "<?php\n\nreturn $var;\n");
+
+        if ($success) {
+            opcache_invalidate($file, true);
+        }
+
+        return $success;
     }
 
     /**
@@ -56,7 +67,7 @@ class File extends \SFW\Lazy\Sys
             return false;
         }
 
-        @chmod($target, $this->mode);
+        @chmod($target, self::$config['sys']['file']['mode']);
 
         return true;
     }

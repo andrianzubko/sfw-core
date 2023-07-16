@@ -10,7 +10,7 @@ namespace SFW\Lazy\Sys;
 class Cache extends \SFW\Lazy\Sys
 {
     /**
-     * Reinstanting class if called with argument.
+     * Reinstating class if called with argument.
      */
     public function __construct(protected ?string $cache = null) {}
 

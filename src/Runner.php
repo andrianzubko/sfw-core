@@ -8,30 +8,26 @@ namespace SFW;
 abstract class Runner extends Base
 {
     /**
-     * Initizlizing environment and calling entry point.
+     * Initializing environment and calling entry point.
      */
     final public function __construct()
     {
-        // {{{ prevent multiple initizlizations
+        // {{{ prevent multiple initializations
 
         if (isset(self::$globalMicrotime)) {
             return;
         }
 
         // }}}
-        // {{{ fix microtime
+        // {{{ global microtime
 
         self::$globalMicrotime = gettimeofday(true);
 
         // }}}
-        // {{{ checking important constants
+        // {{{ checking important constant
 
         if (!defined('APP_DIR')) {
             $this->sys('Abend')->error('Undefined constant APP_DIR');
-        }
-
-        if (!defined('PUB_DIR')) {
-            $this->sys('Abend')->error('Undefined constant PUB_DIR');
         }
 
         // }}}
@@ -106,7 +102,7 @@ abstract class Runner extends Base
 
         self::$e['defaults']['url'] = sprintf('%s://%s',
             self::$e['defaults']['url_scheme'],
-                self::$e['defaults']['url_host']
+            self::$e['defaults']['url_host']
         );
 
         self::$e['defaults']['timestamp'] = (int) self::$globalMicrotime;

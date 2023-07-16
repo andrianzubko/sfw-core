@@ -85,7 +85,7 @@ class Transaction extends \SFW\Lazy\Sys
                 $this->sys('Logger')->transactionFail($error->getSqlState(), $retry);
 
                 if (!in_array($error->getSqlState(), $expected ?? [], true)
-                    || $retry == $this->retries
+                    || $retry == self::$config['sys']['db']['transactions_retries']
                 ) {
                     $this->sys('Abend')->$mode(
                         $error->getMessage(),

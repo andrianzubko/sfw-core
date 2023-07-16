@@ -16,16 +16,10 @@ class Mysql extends \SFW\Lazy\Sys
      */
     public function getInstance(): \SFW\Databaser\Driver
     {
-        try {
-            $db = new \SFW\Databaser\Mysql(self::$config['sys']['db']['mysql'],
-                [
-                    $this->sys('Logger'), 'dbSlowQuery'
-                ]
-            );
-        } catch (\SFW\Databaser\Exception $error) {
-            $this->sys('Abend')->error($error->getMessage());
-        }
-
-        return $db;
+        return new \SFW\Databaser\Mysql(self::$config['sys']['db']['mysql'],
+            [
+                $this->sys('Logger'), 'dbSlowQuery'
+            ]
+        );
     }
 }

@@ -53,9 +53,9 @@ class Templater extends \SFW\Lazy\Sys
      */
     public function transform(array $e, string $template, array $options = []): string
     {
-        if (self::$config['sys']['debug']) {
-            $options['debug'] = true;
-        }
+        $options['minify'] ??= self::$config['sys']['templater']['minify'];
+
+        $options['debug'] ??= self::$config['sys']['debug'];
 
         return $this->templater->transform($e, APP_DIR . "/templates/$template", $options);
     }

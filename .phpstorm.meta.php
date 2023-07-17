@@ -10,7 +10,6 @@ namespace PHPSTORM_META {
         'Dir',
         'File',
         'Image',
-        'Json',
         'Locker',
         'Logger',
         'Memcached',

@@ -43,23 +43,29 @@ class Sys extends \SFW\Config
         // }}}
         // {{{ database
 
-        /* Default database driver (can be changed at runtime).
+        /* PDO data source name.
          *
-         * string 'Pgsql' or 'Mysql'
+         * string
          */
-        $sys['db']['default'] = 'Pgsql';
+        $sys['db']['dsn'] = null;
 
-        /* How many times to retry failed transactions with expected sql states.
-         *
-         * int
-         */
-        $sys['db']['transactions_retries'] = 7;
-
-        /* Log transactions fails.
+        /* Username for dsn string.
          *
          * ?string
          */
-        $sys['db']['transactions_fails_log'] = APP_DIR . '/var/log/transactions.fails.log';
+        $sys['db']['username'] = null;
+
+        /* Password for dsn string.
+         *
+         * ?string
+         */
+        $sys['db']['password'] = null;
+
+        /* Options for PDO module.
+         *
+         * ?array
+         */
+        $sys['db']['options'] = null;
 
         /* Log slow queries.
          *
@@ -74,71 +80,19 @@ class Sys extends \SFW\Config
         $sys['db']['slow_queries_min'] = 0.5;
 
         // }}}
-        // {{{ database: postgresql
+        // {{{ transaction
 
-        /*
-         * Postresql connection string.
+        /* How many times to retry failed transactions with expected sql states.
          *
-         * string
+         * int
          */
-        $sys['db']['pgsql']['connection'] = '';
+        $sys['transaction']['retries'] = 7;
 
-        /* Postgresql encoding (utf-8 if not set).
-         *
-         * ?string
-         */
-        $sys['db']['pgsql']['encoding'] = null;
-
-        /* Postgresql persistent connection (use pgbouncer instead).
-         *
-         * bool
-         */
-        $sys['db']['pgsql']['persistent'] = false;
-
-        // }}}
-        // {{{ database: mysql
-
-        /* Mysql hostname.
+        /* Log transactions fails.
          *
          * ?string
          */
-        $sys['db']['mysql']['hostname'] = null;
-
-        /* Mysql username.
-         *
-         * ?string
-         */
-        $sys['db']['mysql']['username'] = null;
-
-        /* Mysql password.
-         *
-         * ?string
-         */
-        $sys['db']['mysql']['password'] = null;
-
-        /* Mysql database name.
-         *
-         * ?string
-         */
-        $sys['db']['mysql']['database'] = null;
-
-        /* Mysql port (3306 if not set).
-         *
-         * ?int
-         */
-        $sys['db']['mysql']['port'] = null;
-
-        /* Mysql socket.
-         *
-         * ?string
-         */
-        $sys['db']['mysql']['socket'] = null;
-
-        /* Mysql charset (utf8mb4 if not set).
-         *
-         * ?string
-         */
-        $sys['db']['mysql']['charset'] = null;
+        $sys['transaction']['fails_log'] = APP_DIR . '/var/log/transaction.fails.log';
 
         // }}}
         // {{{ cache

@@ -23,16 +23,6 @@ class Out extends \SFW\Lazy\Sys
     ];
 
     /**
-     * Microtime of templates processed.
-     */
-    protected float $microtime = 0;
-
-    /**
-     * Count of templates processed.
-     */
-    protected int $counter = 0;
-
-    /**
      * Output string as attachment.
      */
     public function attachment(
@@ -102,7 +92,7 @@ class Out extends \SFW\Lazy\Sys
 
         if (strlen($contents) > 32 * 1024
             && in_array($mime, $this->compress, true)
-                && str_contains($_SERVER['HTTP_ACCEPT_ENCODING'] ?? '', 'gzip')
+            && str_contains($_SERVER['HTTP_ACCEPT_ENCODING'] ?? '', 'gzip')
         ) {
             header('Content-Encoding: gzip');
 
@@ -150,53 +140,30 @@ class Out extends \SFW\Lazy\Sys
     public function template(
         array $e,
         string $template,
-        bool $tostring = false,
+        bool $toString = false,
         int $status = 200
     ): string|self {
-        $started = gettimeofday(true);
-
         $contents = $this->sys('Templater')->transform($e, $template);
 
-        $finished = gettimeofday(true);
-
-        $this->microtime += $finished - $started;
-
-        $this->counter += 1;
-
-        if ($tostring) {
+        if ($toString) {
             return $contents;
         }
 
         if (self::$config['sys']['templater']['stats']) {
-            $dbDrivers = [];
+            $timer = gettimeofday(true) - self::$startedTime;
 
-            $dbMicrotime = $dbCounter = 0;
-
-            if (isset(self::$sysLazyInstances)) {
-                foreach (self::$sysLazyInstances as $lazy) {
-                    if ($lazy instanceof \SFW\Databaser\Driver
-                        && !in_array($lazy, $dbDrivers, true)
-                    ) {
-                        $dbDrivers[] = $lazy;
-
-                        $dbMicrotime += $lazy->getMicrotime();
-
-                        $dbCounter += $lazy->getCounter();
-                    }
-                }
-            }
-
-            $contents .= sprintf("\n<!-- script %.03f + sql(%s) %.03f + template(%s) %.03f = %.03f -->",
-                $finished - self::$globalMicrotime - $dbMicrotime - $this->microtime,
-                $dbCounter,
-                $dbMicrotime,
-                $this->counter,
-                $this->microtime,
-                $finished - self::$globalMicrotime
+            $contents .= sprintf(
+                "\n<!-- script %.03f + sql(%s) %.03f + template(%s) %.03f = %.03f -->",
+                    $timer - $this->sys('Db')->getTimer() - $this->sys('Templater')->getTimer(),
+                    $this->sys('Db')->getCounter(),
+                    $this->sys('Db')->getTimer(),
+                    $this->sys('Templater')->getCounter(),
+                    $this->sys('Templater')->getTimer(),
+                    $timer
             );
         }
 
-        $this->inline($contents, 'text/html', 0, null, $status);
+        $this->inline($contents, 'text/html', status: $status);
 
         return $this;
     }

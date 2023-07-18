@@ -9,9 +9,9 @@ namespace SFW;
 abstract class Base
 {
     /**
-     * Global microtime.
+     * Started time.
      */
-    protected static float $globalMicrotime;
+    protected static float $startedTime;
 
     /**
      * Instances of sys Lazy classes.

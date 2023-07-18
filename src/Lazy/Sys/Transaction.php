@@ -26,10 +26,10 @@ class Transaction extends \SFW\Lazy\Sys
     public function run(
         ?string $isolation,
         ?array $expected,
-        callable $transaction,
+        callable $body,
         ?callable $onerror = null
     ): bool {
-        return $this->process($isolation, $expected, $transaction, $onerror, 'error');
+        return $this->process($isolation, $expected, $body, $onerror, 'error');
     }
 
     /**
@@ -38,10 +38,10 @@ class Transaction extends \SFW\Lazy\Sys
     public function quiet(
         ?string $isolation,
         ?array $expected,
-        callable $transaction,
+        callable $body,
         ?callable $onerror = null
     ): bool {
-        return $this->process($isolation, $expected, $transaction, $onerror, 'warn');
+        return $this->process($isolation, $expected, $body, $onerror, 'warn');
     }
 
     /**
@@ -50,29 +50,31 @@ class Transaction extends \SFW\Lazy\Sys
     protected function process(
         ?string $isolation,
         ?array $expected,
-        callable $transaction,
+        callable $body,
         ?callable $onerror,
         string $mode
     ): bool {
-        for ($retry = 1; $retry <= self::$config['sys']['db']['transactions_retries']; $retry++) {
+        for ($retry = 1; $retry <= self::$config['sys']['transaction']['retries']; $retry++) {
             try {
                 $this->onabort = [];
 
                 $this->sys('Db')->begin($isolation);
 
-                if ($transaction() === false) {
+                if ($body()) {
+                    $this->sys('Db')->commit();
+                } else {
                     $this->sys('Db')->rollback();
 
                     foreach ($this->onabort as $event) {
                         $event();
                     }
-                } else {
-                    $this->sys('Db')->commit();
                 }
 
                 return true;
             } catch (\SFW\Databaser\Exception $error) {
-                $this->sys('Db')->rollback();
+                try {
+                    $this->sys('Db')->rollback();
+                } catch (\SFW\Databaser\Exception) {}
 
                 foreach ($this->onabort as $event) {
                     $event();
@@ -85,7 +87,7 @@ class Transaction extends \SFW\Lazy\Sys
                 $this->sys('Logger')->transactionFail($error->getSqlState(), $retry);
 
                 if (!in_array($error->getSqlState(), $expected ?? [], true)
-                    || $retry == self::$config['sys']['db']['transactions_retries']
+                    || $retry == self::$config['sys']['transaction']['retries']
                 ) {
                     $this->sys('Abend')->$mode(
                         $error->getMessage(),

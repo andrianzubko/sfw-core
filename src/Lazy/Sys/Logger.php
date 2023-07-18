@@ -10,22 +10,25 @@ class Logger extends \SFW\Lazy\Sys
     /**
      * Logging database slow query.
      */
-    public function dbSlowQuery(float $microtime, array $queries): void
+    public function dbSlowQuery(float $timer, array $queries): void
     {
-        if (!isset(self::$config['sys']['db']['slow_queries_min'])
-            || $microtime < self::$config['sys']['db']['slow_queries_min']
+        if (!isset(self::$config['sys']['db']['slow_queries_log'])
+            || $timer < self::$config['sys']['db']['slow_queries_min']
         ) {
             return;
         }
 
-        $queries = array_map(fn($a) => $this->sys('Text')->fulltrim($a), $queries);
+        $host = idn_to_utf8($_SERVER['HTTP_HOST']) . $_SERVER['REQUEST_URI'];
+
+        $queries = implode("\n\t",
+            array_map(
+                fn($a) => $this->sys('Text')->fulltrim($a), $queries
+            )
+        );
 
         $this->save(self::$config['sys']['db']['slow_queries_log'],
-            sprintf("[%.2f] %s%s\n\t%s\n",
-                $microtime,
-                    idn_to_utf8($_SERVER['HTTP_HOST']),
-                        $_SERVER['REQUEST_URI'],
-                            implode("\n\t", $queries)
+            sprintf("[%.2f] %s\n\t%s\n",
+                $timer, $host, $queries
             )
         );
     }
@@ -35,16 +38,15 @@ class Logger extends \SFW\Lazy\Sys
      */
     public function transactionFail(string $state, int $retry): void
     {
-        if (!isset(self::$config['sys']['db']['transactions_fails_log'])) {
+        if (!isset(self::$config['sys']['transaction']['fails_log'])) {
             return;
         }
 
-        $this->save(self::$config['sys']['db']['transactions_fails_log'],
-            sprintf("[%s] [%d] %s%s",
-                $state,
-                    $retry,
-                        idn_to_utf8($_SERVER['HTTP_HOST']),
-                            $_SERVER['REQUEST_URI']
+        $host = idn_to_utf8($_SERVER['HTTP_HOST']) . $_SERVER['REQUEST_URI'];
+
+        $this->save(self::$config['sys']['transaction']['fails_log'],
+            sprintf("[%s] [%d] %s",
+                $state, $retry, $host
             )
         );
     }

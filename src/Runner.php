@@ -14,14 +14,14 @@ abstract class Runner extends Base
     {
         // {{{ prevent multiple initializations
 
-        if (isset(self::$globalMicrotime)) {
+        if (isset(self::$startedTime)) {
             return;
         }
 
         // }}}
-        // {{{ global microtime
+        // {{{ started time
 
-        self::$globalMicrotime = gettimeofday(true);
+        self::$startedTime = gettimeofday(true);
 
         // }}}
         // {{{ checking important constant
@@ -105,7 +105,7 @@ abstract class Runner extends Base
             self::$e['defaults']['url_host']
         );
 
-        self::$e['defaults']['timestamp'] = (int) self::$globalMicrotime;
+        self::$e['defaults']['timestamp'] = (int) self::$startedTime;
 
         self::$e['defaults']['point'] = (new \App\Router())->get();
 

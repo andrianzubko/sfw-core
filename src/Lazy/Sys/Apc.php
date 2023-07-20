@@ -5,7 +5,7 @@ namespace SFW\Lazy\Sys;
 /**
  * APC.
  *
- * @mixin \SFW\SimpleCacher\Cache
+ * @mixin \SFW\Cacher\Driver
  */
 class Apc extends \SFW\Lazy\Sys
 {
@@ -14,8 +14,8 @@ class Apc extends \SFW\Lazy\Sys
      *
      * @internal
      */
-    public function getInstance(): \SFW\SimpleCacher\Cache
+    public function getInstance(): \SFW\Cacher\Driver
     {
-        return new \SFW\SimpleCacher\Apc(...self::$config['sys']['cache']['apc']);
+        return new \SFW\Cacher\Apc(self::$config['sys']['cacher']['apc']);
     }
 }

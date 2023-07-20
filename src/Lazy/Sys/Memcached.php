@@ -5,7 +5,7 @@ namespace SFW\Lazy\Sys;
 /**
  * Memcached.
  *
- * @mixin \SFW\SimpleCacher\Cache
+ * @mixin \SFW\Cacher\Driver
  */
 class Memcached extends \SFW\Lazy\Sys
 {
@@ -14,8 +14,8 @@ class Memcached extends \SFW\Lazy\Sys
      *
      * @internal
      */
-    public function getInstance(): \SFW\SimpleCacher\Cache
+    public function getInstance(): \SFW\Cacher\Driver
     {
-        return new \SFW\SimpleCacher\Memcached(...self::$config['sys']['cache']['memcached']);
+        return new \SFW\Cacher\Memcached(self::$config['sys']['cacher']['memcached']);
     }
 }

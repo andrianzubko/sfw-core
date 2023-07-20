@@ -41,31 +41,47 @@ class Sys extends \SFW\Config
         $sys['timezone'] = 'Europe/Moscow';
 
         // }}}
-        // {{{ database
+        // {{{ databaser
 
-        /* PDO data source name.
+        /* Default database (can be changed at runtime).
          *
-         * string
+         * string 'Pgsql' or 'Mysql'
          */
-        $sys['db']['dsn'] = null;
+        $sys['db']['default'] = 'Pgsql';
 
-        /* Username for dsn string.
-         *
-         * ?string
+        /**
+         * Pgsql.
          */
-        $sys['db']['username'] = null;
+        $sys['db']['pgsql']['host'] = 'localhost';
 
-        /* Password for dsn string.
-         *
-         * ?string
-         */
-        $sys['db']['password'] = null;
+        $sys['db']['pgsql']['port'] = 5432;
 
-        /* Options for PDO module.
-         *
-         * ?array
+        $sys['db']['pgsql']['db'] = null;
+
+        $sys['db']['pgsql']['user'] = null;
+
+        $sys['db']['pgsql']['pass'] = null;
+
+        $sys['db']['pgsql']['charset'] = 'utf-8';
+
+        $sys['db']['pgsql']['persistent'] = false;
+
+        /**
+         * Mysql.
          */
-        $sys['db']['options'] = null;
+        $sys['db']['mysql']['host'] = 'localhost';
+
+        $sys['db']['mysql']['port'] = 3306;
+
+        $sys['db']['mysql']['db'] = null;
+
+        $sys['db']['mysql']['user'] = null;
+
+        $sys['db']['mysql']['pass'] = null;
+
+        $sys['db']['mysql']['charset'] = 'utf8mb4';
+
+        $sys['db']['mysql']['persistent'] = false;
 
         /* Log slow queries.
          *
@@ -95,55 +111,31 @@ class Sys extends \SFW\Config
         $sys['transaction']['fails_log'] = APP_DIR . '/var/log/transaction.fails.log';
 
         // }}}
-        // {{{ cache
+        // {{{ cacher
 
         /* Default cache (can be changed at runtime).
          *
          * string 'Apc' or 'Memcached'
          */
-        $sys['cache']['default'] = 'Apc';
+        $sys['cacher']['default'] = 'Apc';
 
-        // }}}
-        // {{{ cache: apc
-
-        /* Apc default TTL.
-         *
-         * int
+        /* Apc.
          */
-        $sys['cache']['apc']['ttl'] = 3600;
+        $sys['cacher']['apc']['ttl'] = 3600;
 
-        /* Apc namespace (auto if not set).
-         *
-         * ?string
+        $sys['cacher']['apc']['ns'] = md5(__FILE__);
+
+        /* Memcached.
          */
-        $sys['cache']['apc']['ns'] = null;
+        $sys['cacher']['memcached']['ttl'] = 3600;
 
-        // }}}
-        // {{{ cache: memcached
+        $sys['cacher']['memcached']['ns'] = md5(__FILE__);
 
-        /* Memcached default TTl.
-         *
-         * int
-         */
-        $sys['cache']['memcached']['ttl'] = 3600;
+        $sys['cacher']['memcached']['options'] = null;
 
-        /* Memcached namespace (auto if not set).
-         *
-         * ?string
-         */
-        $sys['cache']['memcached']['ns'] = null;
-
-        /* Memcached options.
-         *
-         * ?array(KEY => VALUE, ...)
-         */
-        $sys['cache']['memcached']['options'] = null;
-
-        /* Memcached servers (127.0.0.1:11211 if not set).
-         *
-         * ?array(array('HOST', PORT), ...)
-         */
-        $sys['cache']['memcached']['servers'] = null;
+        $sys['cacher']['memcached']['servers'] = [
+            ['127.0.0.1', 11211],
+        ];
 
         // }}}
         // {{{ notifier

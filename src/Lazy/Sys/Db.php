@@ -3,26 +3,24 @@
 namespace SFW\Lazy\Sys;
 
 /**
- * Databaser.
+ * Default database.
  *
- * @mixin \SFW\Databaser
+ * @mixin \SFW\Databaser\Driver
  */
 class Db extends \SFW\Lazy\Sys
 {
+    /**
+     * Reinstating class if called with argument.
+     */
+    public function __construct(protected ?string $db = null) {}
+
     /**
      * Database module instance.
      *
      * @internal
      */
-    public function getInstance(): \SFW\Databaser
+    public function getInstance(): \SFW\Databaser\Driver
     {
-        return new \SFW\Databaser(
-            self::$config['sys']['db']['dsn'],
-            self::$config['sys']['db']['username'],
-            self::$config['sys']['db']['password'],
-            self::$config['sys']['db']['options'],
-
-            profiler: [$this->sys('Logger'), 'dbSlowQuery']
-        );
+        return $this->sys($this->db ?? self::$config['sys']['db']['default']);
     }
 }

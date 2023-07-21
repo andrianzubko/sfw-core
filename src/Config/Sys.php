@@ -16,9 +16,9 @@ class Sys extends \SFW\Config
 
         // {{{ general
 
-        /* Environment mode ('dev', 'test', 'prod', etc..).
+        /* Environment mode.
          *
-         * string
+         * string 'dev', 'test', 'prod', etc..
          */
         $sys['env'] = 'dev';
 
@@ -62,9 +62,11 @@ class Sys extends \SFW\Config
 
         $sys['db']['pgsql']['pass'] = null;
 
+        $sys['db']['pgsql']['persistent'] = false;
+
         $sys['db']['pgsql']['charset'] = 'utf-8';
 
-        $sys['db']['pgsql']['persistent'] = false;
+        $sys['db']['pgsql']['mode'] = \SFW\Databaser::ASSOC;
 
         /**
          * Mysql.
@@ -79,9 +81,11 @@ class Sys extends \SFW\Config
 
         $sys['db']['mysql']['pass'] = null;
 
+        $sys['db']['mysql']['persistent'] = false;
+
         $sys['db']['mysql']['charset'] = 'utf8mb4';
 
-        $sys['db']['mysql']['persistent'] = false;
+        $sys['db']['mysql']['mode'] = \SFW\Databaser::ASSOC;
 
         /* Log slow queries.
          *
@@ -98,7 +102,7 @@ class Sys extends \SFW\Config
         // }}}
         // {{{ transaction
 
-        /* How many times to retry failed transactions with expected sql states.
+        /* How many times retry failed transactions with expected sql states.
          *
          * int
          */

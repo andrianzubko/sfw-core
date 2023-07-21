@@ -13,6 +13,16 @@ class Transaction extends \SFW\Lazy\Sys
     protected array $onabort = [];
 
     /**
+     * Sets default database if needed.
+     */
+    public function __construct(?string $db = null)
+    {
+        if (isset($db)) {
+            $this->sys('Db', $db);
+        }
+    }
+
+    /**
      * Do some action on transaction abort.
      */
     public function onabort(callable $event): void

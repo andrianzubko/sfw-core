@@ -51,7 +51,15 @@ class Merger extends Base
         $version = $this->checkVersion($version, $sources, $options['minify'] ?? true);
 
         if ($version === false) {
-            $version = $this->recombine($sources, $options['minify'] ?? true);
+            try {
+                $version = $this->recombine($sources, $options['minify'] ?? true);
+            } catch (Exception $error) {
+                $this->sys('Abend')->error(
+                    $error->getMessage(),
+                    $error->getFile(),
+                    $error->getLine()
+                );
+            }
         }
 
         $this->sys('Locker')->unlock('merger');
@@ -151,6 +159,8 @@ class Merger extends Base
 
     /**
      * Recombining.
+     *
+     * @throws Exception
      */
     protected function recombine(array $sources, bool $minify): array
     {
@@ -171,21 +181,27 @@ class Merger extends Base
                     $contents = $this->mergeCss($files, $minify);
                 }
 
-                if ($this->sys('File')->put($file, $contents) === false) {
-                    $this->sys('Abend')->error();
+                if (@$this->sys('File')->put($file, $contents) === false) {
+                    throw new Exception("Unable to write file $file");
                 }
             }
         }
 
-        $this->sys('File')->putVar($this->versionFile, $version);
+        if (@$this->sys('File')->putVar($this->versionFile, $version) === false) {
+            throw new Exception(
+                "Unable to write file $this->versionFile"
+            );
+        }
 
         return $version;
     }
 
     /**
      * Merging JS.
+     *
+     * @throws Exception
      */
-    protected function mergeJs(array $files, bool $minify): string
+    public function mergeJs(array $files, bool $minify): string
     {
         $merged = $this->mergeFiles($files);
 
@@ -195,7 +211,7 @@ class Merger extends Base
             try {
                 $merged = $jsmin->min();
             } catch (\Exception $error) {
-                $this->sys('Abend')->error($error->getMessage());
+                throw new Exception($error->getMessage());
             }
         }
 
@@ -204,8 +220,10 @@ class Merger extends Base
 
     /**
      * Merging CSS.
+     *
+     * @throws Exception
      */
-    protected function mergeCss(array $files, bool $minify): string
+    public function mergeCss(array $files, bool $minify): string
     {
         $merged = $this->mergeFiles($files);
 
@@ -252,16 +270,18 @@ class Merger extends Base
 
     /**
      * Merging files.
+     *
+     * @throws Exception
      */
-    protected function mergeFiles(array $files): string
+    public function mergeFiles(array $files): string
     {
         $merged = [];
 
         foreach ($files as $file) {
-            $contents = $this->sys('File')->get($file);
+            $contents = @$this->sys('File')->get($file);
 
             if ($contents === false) {
-                $this->sys('Abend')->error();
+                throw new Exception("Unable to read file $file");
             }
 
             $merged[] = $contents;

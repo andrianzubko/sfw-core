@@ -24,6 +24,15 @@ abstract class Runner extends Base
         self::$startedTime = gettimeofday(true);
 
         // }}}
+        // {{{ important php params.
+
+        ini_set('display_errors', PHP_SAPI === 'cli');
+
+        ini_set('error_reporting', -1);
+
+        ini_set('ignore_user_abort', true);
+
+        // }}}
         // {{{ checking important constant
 
         if (!defined('APP_DIR')) {
@@ -121,26 +130,24 @@ abstract class Runner extends Base
         // }}}
         // {{{ calling entry point if this is not CLI
 
-        if (PHP_SAPI === 'cli') {
-            return;
-        }
+        if (PHP_SAPI !== 'cli') {
+            $point = self::$e['defaults']['point'];
 
-        $point = self::$e['defaults']['point'];
+            $class = "App\\Point\\$point";
 
-        $class = "App\\Point\\$point";
+            if (!class_exists($class)) {
+                $this->sys('Abend')->errorPage(404);
+            }
 
-        if (!class_exists($class)) {
-            $this->sys('Abend')->errorPage(404);
-        }
-
-        try {
-            new $class();
-        } catch (\Exception $error) {
-            $this->sys('Abend')->error(
-                $error->getMessage(),
-                $error->getFile(),
-                $error->getLine()
-            );
+            try {
+                new $class();
+            } catch (\Exception $error) {
+                $this->sys('Abend')->error(
+                    $error->getMessage(),
+                    $error->getFile(),
+                    $error->getLine()
+                );
+            }
         }
 
         // }}}

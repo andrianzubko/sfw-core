@@ -152,11 +152,29 @@ class Out extends \SFW\Lazy\Sys
         if (self::$config['sys']['templater']['stats']) {
             $timer = gettimeofday(true) - self::$startedTime;
 
+            $dbTimer = $dbCounter = 0;
+
+            $dbDrivers = [];
+
+            if (isset(self::$sysLazyInstances)) {
+                foreach (self::$sysLazyInstances as $lazy) {
+                    if ($lazy instanceof \SFW\Databaser\Driver
+                        && !in_array($lazy, $dbDrivers, true)
+                    ) {
+                        $dbTimer += $lazy->getTimer();
+
+                        $dbCounter += $lazy->getCounter();
+
+                        $dbDrivers[] = $lazy;
+                    }
+                }
+            }
+
             $contents .= sprintf(
                 "\n<!-- script %.03f + sql(%s) %.03f + template(%s) %.03f = %.03f -->",
-                    $timer - $this->sys('Db')->getTimer() - $this->sys('Templater')->getTimer(),
-                    $this->sys('Db')->getCounter(),
-                    $this->sys('Db')->getTimer(),
+                    $timer - $dbTimer - $this->sys('Templater')->getTimer(),
+                    $dbCounter,
+                    $dbTimer,
                     $this->sys('Templater')->getCounter(),
                     $this->sys('Templater')->getTimer(),
                     $timer

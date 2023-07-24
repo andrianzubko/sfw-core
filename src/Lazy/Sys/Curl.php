@@ -18,9 +18,7 @@ class Curl extends \SFW\Lazy\Sys
 
         $options[CURLOPT_HEADER] = true;
 
-        if (!isset($options[CURLOPT_FOLLOWLOCATION])) {
-            $options[CURLOPT_FOLLOWLOCATION] = true;
-        }
+        $options[CURLOPT_FOLLOWLOCATION] = true;
 
         $curl = curl_init();
 
@@ -39,14 +37,14 @@ class Curl extends \SFW\Lazy\Sys
         }
 
         $headers = preg_split('/\r\n\r\n/',
-            substr($response, 0, $info['header_size']), 0, PREG_SPLIT_NO_EMPTY
+            substr($response, 0, $info['header_size']), flags: PREG_SPLIT_NO_EMPTY
         );
 
         if (!count($headers)) {
             return false;
         }
 
-        $headers = preg_split('/\r\n/', array_pop($headers), 0, PREG_SPLIT_NO_EMPTY);
+        $headers = preg_split('/\r\n/', array_pop($headers), flags: PREG_SPLIT_NO_EMPTY);
 
         if ($info['header_size'] >= strlen($response)) {
             return '';
@@ -54,24 +52,20 @@ class Curl extends \SFW\Lazy\Sys
 
         $response = substr($response, $info['header_size']);
 
-        if (mb_check_encoding($response)
-            || !preg_match('~text/~i', $info['content_type'])
+        if (!mb_check_encoding($response)
+            && preg_match('~text/~i', $info['content_type'])
         ) {
-            return $response;
+            if (preg_match('~charset\s*=\s*([a-z\d\-#]+)~i', $info['content_type'], $M)
+                || preg_match('~text/html~i', $info['content_type'])
+                    && preg_match('~<meta[^>]+content-type[^>]*>~i', $response, $N)
+                        && preg_match('~charset\s*=\s*([a-z\d\-#]+)~i', $N[0], $M)
+            ) {
+                try {
+                    return @mb_convert_encoding($response, 'utf-8', $M[1]);
+                } catch (\ValueError) {}
+            }
         }
 
-        $encoding = 'utf-8';
-
-        if ((preg_match('~charset\s*=\s*([a-z\d\-]+)~i', $info['content_type'], $M)
-            || preg_match('~text/html~i', $info['content_type'])
-                && preg_match('~<meta[^>]+content-type[^>]*>~i', $response, $N)
-                    && preg_match('~charset\s*=\s*([a-z\d\-]+)~i', $N[0], $M))
-                        && !in_array(strtolower($M[1]), ['utf8','utf-8'], true)
-                            && @mb_encoding_aliases($M[1]) !== false
-        ) {
-            $encoding = $M[1];
-        }
-
-        return @mb_convert_encoding($response, 'utf-8', $encoding);
+        return $response;
     }
 }

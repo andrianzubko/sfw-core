@@ -17,7 +17,11 @@ class Text extends \SFW\Lazy\Sys
      */
     public function lc(?string $string): string
     {
-        return mb_strtolower($string ?? '');
+        if (!isset($string)) {
+            return '';
+        }
+
+        return mb_strtolower($string);
     }
 
     /**
@@ -25,7 +29,11 @@ class Text extends \SFW\Lazy\Sys
      */
     public function lcfirst(?string $string): string
     {
-        return mb_strtolower(mb_substr($string ?? '', 0, 1)) . mb_substr($string ?? '', 1);
+        if (!isset($string)) {
+            return '';
+        }
+
+        return mb_strtolower(mb_substr($string, 0, 1)) . mb_substr($string, 1);
     }
 
     /**
@@ -33,7 +41,11 @@ class Text extends \SFW\Lazy\Sys
      */
     public function uc(?string $string): string
     {
-        return mb_strtoupper($string ?? '');
+        if (!isset($string)) {
+            return '';
+        }
+
+        return mb_strtoupper($string);
     }
 
     /**
@@ -41,7 +53,11 @@ class Text extends \SFW\Lazy\Sys
      */
     public function ucfirst(?string $string): string
     {
-        return mb_strtoupper(mb_substr($string ?? '', 0, 1)) . mb_substr($string ?? '', 1);
+        if (!isset($string)) {
+            return '';
+        }
+
+        return mb_strtoupper(mb_substr($string, 0, 1)) . mb_substr($string, 1);
     }
 
     /**
@@ -49,7 +65,11 @@ class Text extends \SFW\Lazy\Sys
      */
     public function trim(?string $string): string
     {
-        return trim($string ?? '', $this->spaces);
+        if (!isset($string)) {
+            return '';
+        }
+
+        return trim($string, $this->spaces);
     }
 
     /**
@@ -57,7 +77,11 @@ class Text extends \SFW\Lazy\Sys
      */
     public function rtrim(?string $string): string
     {
-        return rtrim($string ?? '', $this->spaces);
+        if (!isset($string)) {
+            return '';
+        }
+
+        return rtrim($string, $this->spaces);
     }
 
     /**
@@ -65,7 +89,11 @@ class Text extends \SFW\Lazy\Sys
      */
     public function ltrim(?string $string): string
     {
-        return ltrim($string ?? '', $this->spaces);
+        if (!isset($string)) {
+            return '';
+        }
+
+        return ltrim($string, $this->spaces);
     }
 
     /**
@@ -73,14 +101,18 @@ class Text extends \SFW\Lazy\Sys
      */
     public function fulltrim(?string $string, int $limit = 0): string
     {
-        $string = preg_replace('/\s+/u', ' ', $string ?? '');
+        if (!isset($string)) {
+            return '';
+        }
 
-        $string = trim($string);
+        $string = trim(
+            preg_replace('/\s+/u', ' ', $string)
+        );
 
         if ($limit > 0) {
-            $string = mb_substr($string, 0, $limit);
-
-            return rtrim($string);
+            return rtrim(
+                mb_substr($string, 0, $limit)
+            );
         }
 
         return $string;
@@ -91,14 +123,18 @@ class Text extends \SFW\Lazy\Sys
      */
     public function multitrim(?string $string, int $limit = 0): string
     {
-        $string = preg_replace(['/\h+/u', '/\s*\v\s*/u'], [' ', "\n"], $string ?? '');
+        if (!isset($string)) {
+            return '';
+        }
 
-        $string = trim($string);
+        $string = trim(
+            preg_replace(['/\h+/u', '/\s*\v\s*/u'], [' ', "\n"], $string)
+        );
 
         if ($limit > 0) {
-            $string = mb_substr($string, 0, $limit);
-
-            return rtrim($string);
+            return rtrim(
+                mb_substr($string, 0, $limit)
+            );
         }
 
         return $string;
@@ -107,25 +143,29 @@ class Text extends \SFW\Lazy\Sys
     /**
      * Cut string.
      */
-    public function cut(string $string, int $min, ?int $max = null): string
+    public function cut(?string $string, int $min, ?int $max = null): string
     {
-        $string = preg_replace('/\s+/u', ' ', $string);
+        if (!isset($string)) {
+            return '';
+        }
 
-        $string = trim($string);
+        $string = trim(
+            preg_replace('/\s+/u', ' ', $string)
+        );
 
         if (mb_strlen($string) > $min) {
             if (isset($max)) {
                 if (preg_match(sprintf('/^(.{%d,%d}?)[^\p{L}\d]/u', $min, $max - 1), $string, $M)) {
                     $string = $M[1];
                 } else {
-                    $string = mb_substr($string, 0, $max - 1);
-
-                    $string = rtrim($string);
+                    $string = rtrim(
+                        mb_substr($string, 0, $max - 1)
+                    );
                 }
             } else {
-                $string = mb_substr($string, 0, $min - 1);
-
-                $string = rtrim($string);
+                $string = rtrim(
+                    mb_substr($string, 0, $min - 1)
+                );
             }
 
             $string .= '...';
@@ -137,18 +177,26 @@ class Text extends \SFW\Lazy\Sys
     /**
      * Generate random string.
      */
-    public function random(int $limit = 32): string
+    public function random(int $size = 32, string $chars = '[ALPHA][NUMERIC]'): string
     {
-        $sequence = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        $chars = str_replace(
+            [
+                '[ALPHA]',
+                '[UPPER]',
+                '[LOWER]',
+                '[NUMERIC]',
+            ], [
+                'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+                'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+                'abcdefghijklmnopqrstuvwxyz',
+                '0123456789',
+            ], $chars
+        );
 
-        $min = 0;
+        $string = str_repeat(' ', $size);
 
-        $max = 61;
-
-        $string = str_repeat(' ', $limit);
-
-        while ($limit-- > 0) {
-            $string[$limit] = $sequence[mt_rand($min, $max)];
+        for ($i = 0, $max = strlen($chars) - 1; $i < $size; $i++) {
+            $string[$i] = $chars[mt_rand(0, $max)];
         }
 
         return $string;

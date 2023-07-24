@@ -10,13 +10,13 @@ class Image extends \SFW\Lazy\Sys
     /**
      * Reading image from string.
      */
-    public function fromString(string|false|null $data): \GdImage|false
+    public function fromString(string|false|null $string): \GdImage|false
     {
-        if (empty($data)) {
+        if (empty($string)) {
             return false;
         }
 
-        $image = imagecreatefromstring($data);
+        $image = imagecreatefromstring($string);
 
         if ($image === false) {
             return false;
@@ -30,7 +30,9 @@ class Image extends \SFW\Lazy\Sys
      */
     public function fromFile(string $file): \GdImage|false
     {
-        return $this->fromString($this->sys('File')->get($file));
+        return $this->fromString(
+            $this->sys('File')->get($file)
+        );
     }
 
     /**

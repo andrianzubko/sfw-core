@@ -16,9 +16,7 @@ class Paginator extends \SFW\Lazy\Sys
         int $pagesPerSet,
         int $currentPage
     ): array {
-        $pagination = new \SFW\Paginator(...func_get_args());
-
-        $pagination = $pagination->toArray();
+        $pagination = (new \SFW\Paginator(...func_get_args()))->toArray();
 
         $pagination['url'] = preg_replace('/[&?]i=[^&?]*/u', '', $_SERVER['REQUEST_URI']);
 

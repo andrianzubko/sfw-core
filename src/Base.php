@@ -14,16 +14,6 @@ abstract class Base
     protected static float $startedTime;
 
     /**
-     * Instances of sys Lazy classes.
-     */
-    protected static array $sysLazyInstances = [];
-
-    /**
-     * Instances of your Lazy classes.
-     */
-    protected static array $myLazyInstances = [];
-
-    /**
      * All configs (not available from templates).
      */
     protected static array $config = [];
@@ -32,6 +22,16 @@ abstract class Base
      * Shared config, default and your environment (should be passed to templates).
      */
     protected static array $e = [];
+
+    /**
+     * Instances of sys Lazy classes.
+     */
+    private static array $sysLazyInstances = [];
+
+    /**
+     * Instances of your Lazy classes.
+     */
+    private static array $myLazyInstances = [];
 
     /**
      * Accessing system Lazy classes from anywhere except templates.

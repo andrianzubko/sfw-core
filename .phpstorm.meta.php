@@ -14,6 +14,7 @@ namespace PHPSTORM_META {
         'Logger',
         'Memcached',
         'Mysql',
+        'Native',
         'Notifier',
         'Number',
         'Out',
@@ -22,6 +23,7 @@ namespace PHPSTORM_META {
         'Templater',
         'Text',
         'Transaction',
+        'Xslt',
     );
 
     override(\SFW\Base::sys(0), map([

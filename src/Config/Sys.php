@@ -49,6 +49,18 @@ class Sys extends \SFW\Config
          */
         $sys['db']['default'] = 'Pgsql';
 
+        /* Log slow queries.
+         *
+         * ?string
+         */
+        $sys['db']['slow_queries_log'] = APP_DIR . '/var/log/slow.queries.log';
+
+        /* Log slow queries with minimal time in seconds.
+         *
+         * float
+         */
+        $sys['db']['slow_queries_min'] = 0.5;
+
         /**
          * Pgsql.
          */
@@ -86,18 +98,6 @@ class Sys extends \SFW\Config
         $sys['db']['mysql']['charset'] = 'utf8mb4';
 
         $sys['db']['mysql']['mode'] = \SFW\Databaser::ASSOC;
-
-        /* Log slow queries.
-         *
-         * ?string
-         */
-        $sys['db']['slow_queries_log'] = APP_DIR . '/var/log/slow.queries.log';
-
-        /* Log slow queries with minimal time in seconds.
-         *
-         * float
-         */
-        $sys['db']['slow_queries_min'] = 0.5;
 
         // }}}
         // {{{ transaction
@@ -142,11 +142,40 @@ class Sys extends \SFW\Config
         ];
 
         // }}}
+        // {{{ templater
+
+        /* Default templater (can be changed at runtime).
+         *
+         * string 'Native' or 'Xslt'
+         */
+        $sys['templater']['default'] = 'Native';
+
+        /* Add statistics to each page (if called from Out class).
+         *
+         * bool
+         */
+        $sys['templater']['stats'] = true;
+
+        /* Native
+         */
+        $sys['templater']['native']['dir'] = APP_DIR . '/templates';
+
+        $sys['templater']['native']['minify'] = true;
+
+        /* Xslt
+         */
+        $sys['templater']['xslt']['dir'] = APP_DIR . '/templates';
+
+        $sys['templater']['xslt']['root'] = 'root';
+
+        $sys['templater']['xslt']['item'] = 'item';
+
+        // }}}
         // {{{ notifier
 
         /* Enable notifier.
          *
-         * If disabled, then no emails will be sent, but build() method in Notify classes will be called anyway.
+         * Build() method in Notify classes will be called even if notifier disabled.
          *
          * bool
          */
@@ -193,21 +222,6 @@ class Sys extends \SFW\Config
          * string
          */
         $sys['paginator']['param'] = 'i';
-
-        // }}}
-        // {{{ templater
-
-        /* Minify pages.
-         *
-         * bool
-         */
-        $sys['templater']['minify'] = true;
-
-        /* Add statistics to each page (if called from Out class).
-         *
-         * bool
-         */
-        $sys['templater']['stats'] = true;
 
         // }}}
 

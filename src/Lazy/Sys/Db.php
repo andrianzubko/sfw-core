@@ -3,7 +3,7 @@
 namespace SFW\Lazy\Sys;
 
 /**
- * Default database.
+ * Default databaser.
  *
  * @mixin \SFW\Databaser\Driver
  */
@@ -15,7 +15,7 @@ class Db extends \SFW\Lazy\Sys
     public function __construct(protected ?string $db = null) {}
 
     /**
-     * Database module instance.
+     * Databaser module instance.
      *
      * @internal
      */

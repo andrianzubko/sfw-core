@@ -99,11 +99,7 @@ class Transaction extends \SFW\Lazy\Sys
                 if (!in_array($error->getSqlState(), $expected ?? [], true)
                     || $retry == self::$config['sys']['transaction']['retries']
                 ) {
-                    $this->sys('Abend')->$mode(
-                        $error->getMessage(),
-                        $error->getFile(),
-                        $error->getLine()
-                    );
+                    $this->sys('Abend')->$mode($error);
 
                     return false;
                 }

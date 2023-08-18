@@ -10,7 +10,7 @@ class Out extends \SFW\Lazy\Sys
     /**
      * Mime types for compress via gzip.
      */
-    protected array $compress = [
+    protected static array $compress = [
         'text/html',
         'text/plain',
         'text/xml',
@@ -21,6 +21,16 @@ class Out extends \SFW\Lazy\Sys
         'application/rss+xml',
         'application/xml',
     ];
+
+    /**
+     * Sets default templater if needed.
+     */
+    public function __construct(?string $templater = null)
+    {
+        if (isset($templater)) {
+            $this->sys('Templater', $templater);
+        }
+    }
 
     /**
      * Output string as attachment.
@@ -91,7 +101,7 @@ class Out extends \SFW\Lazy\Sys
         );
 
         if (strlen($contents) > 32 * 1024
-            && in_array($mime, $this->compress, true)
+            && in_array($mime, self::$compress, true)
             && str_contains($_SERVER['HTTP_ACCEPT_ENCODING'] ?? '', 'gzip')
         ) {
             header('Content-Encoding: gzip');
@@ -143,7 +153,15 @@ class Out extends \SFW\Lazy\Sys
         bool $toString = false,
         int $status = 200
     ): string|self {
-        $contents = $this->sys('Templater')->transform($e, $template);
+        try {
+            $contents = $this->sys('Templater')->transform($e, $template);
+        } catch (\SFW\Templater\Exception $error) {
+            foreach (debug_backtrace() as $trace) {
+                if ($trace['file'] !== __FILE__) {
+                    $this->sys('Abend')->error($error->getMessage(), $trace['file'], $trace['line']);
+                }
+            }
+        }
 
         if ($toString) {
             return $contents;
@@ -153,7 +171,7 @@ class Out extends \SFW\Lazy\Sys
             $timer = gettimeofday(true) - self::$startedTime;
 
             $contents .= sprintf(
-                "\n<!-- script %.03f + sql(%s) %.03f + template(%s) %.03f = %.03f -->",
+                '<!-- script %.03f + sql(%s) %.03f + template(%s) %.03f = %.03f -->',
                     $timer - $this->sys('Db')->getTimer() - $this->sys('Templater')->getTimer(),
                     $this->sys('Db')->getCounter(),
                     $this->sys('Db')->getTimer(),

@@ -3,7 +3,7 @@
 namespace SFW\Lazy\Sys;
 
 /**
- * Default cache.
+ * Default cacher.
  *
  * @mixin \SFW\Cacher\Driver
  */

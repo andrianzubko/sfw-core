@@ -10,17 +10,33 @@ class Abend extends \SFW\Lazy\Sys
     /**
      * Log error and show error page 500.
      */
-    public function error(?string $message = null, ?string $file = null, ?int $line = null): void
+    public function error(\Exception|string|null $message = null, ?string $file = null, ?int $line = null): void
     {
-        $this->process(__FUNCTION__, $message, $file, $line);
+        if ($message instanceof \Exception) {
+            $this->process(__FUNCTION__,
+                $message->getMessage(),
+                $message->getFile(),
+                $message->getLine()
+            );
+        } else {
+            $this->process(__FUNCTION__, $message, $file, $line);
+        }
     }
 
     /**
      * Just log error without exiting.
      */
-    public function warn(?string $message = null, ?string $file = null, ?int $line = null): void
+    public function warn(\Exception|string|null $message = null, ?string $file = null, ?int $line = null): void
     {
-        $this->process(__FUNCTION__, $message, $file, $line);
+        if ($message instanceof \Exception) {
+            $this->process(__FUNCTION__,
+                $message->getMessage(),
+                $message->getFile(),
+                $message->getLine()
+            );
+        } else {
+            $this->process(__FUNCTION__, $message, $file, $line);
+        }
     }
 
     /**

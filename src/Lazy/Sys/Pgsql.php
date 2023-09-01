@@ -16,9 +16,7 @@ class Pgsql extends \SFW\Lazy\Sys
      */
     public function getInstance(): \SFW\Databaser\Driver
     {
-        return new \SFW\Databaser\Pgsql(
-            self::$config['sys']['db']['pgsql'],
-
+        return new \SFW\Databaser\Pgsql(self::$config['sys']['db']['pgsql'],
             profiler: [$this->sys('Logger'), 'dbSlowQuery']
         );
     }

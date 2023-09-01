@@ -11,17 +11,17 @@ abstract class Base
     /**
      * Started time.
      */
-    protected static float $startedTime;
+    public static float $startedTime;
 
     /**
      * All configs (not available from templates).
      */
-    protected static array $config = [];
+    public static array $config = [];
 
     /**
      * Shared config, default and your environment (should be passed to templates).
      */
-    protected static array $e = [];
+    public static array $e = [];
 
     /**
      * Instances of sys Lazy classes.

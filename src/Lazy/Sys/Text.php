@@ -177,14 +177,14 @@ class Text extends \SFW\Lazy\Sys
     /**
      * Generate random string.
      */
-    public function random(int $size = 32, string $chars = '[ALPHA][NUMERIC]'): string
+    public function random(int $size = 32, string $chars = '[alpha][digit]'): string
     {
         $chars = str_replace(
             [
-                '[ALPHA]',
-                '[UPPER]',
-                '[LOWER]',
-                '[NUMERIC]',
+                '[alpha]',
+                '[upper]',
+                '[lower]',
+                '[digit]',
             ], [
                 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
                 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',

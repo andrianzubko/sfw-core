@@ -141,7 +141,7 @@ abstract class Runner extends Base
 
             try {
                 new $class();
-            } catch (\Exception $error) {
+            } catch (\Error | \Exception $error) {
                 $this->sys('Abend')->error($error);
             }
         }

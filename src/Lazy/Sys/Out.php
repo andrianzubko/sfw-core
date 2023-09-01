@@ -158,7 +158,11 @@ class Out extends \SFW\Lazy\Sys
         } catch (\SFW\Templater\Exception $error) {
             foreach (debug_backtrace() as $trace) {
                 if ($trace['file'] !== __FILE__) {
-                    $this->sys('Abend')->error($error->getMessage(), $trace['file'], $trace['line']);
+                    $this->sys('Abend')->error(
+                        $error->getMessage(),
+                        $trace['file'],
+                        $trace['line']
+                    );
                 }
             }
         }

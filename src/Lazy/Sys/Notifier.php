@@ -29,11 +29,9 @@ class Notifier extends \SFW\Lazy\Sys
         $this->defaultStruct->e['defaults'] = self::$e['defaults'];
 
         register_shutdown_function(
-            function (string $cwd): void {
-                chdir($cwd);
-
+            function (): void {
                 $this->complete();
-            }, getcwd()
+            }
         );
     }
 

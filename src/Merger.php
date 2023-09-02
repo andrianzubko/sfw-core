@@ -206,10 +206,10 @@ class Merger extends Base
         $merged = $this->mergeFiles($files);
 
         if ($minify) {
-            $jsmin = new \JSMin\JSMin($merged);
-
+            $jsMin = new \JSMin\JSMin($merged);
+            
             try {
-                $merged = $jsmin->min();
+                $merged = $jsMin->min();
             } catch (\Exception $error) {
                 throw new Exception($error->getMessage());
             }

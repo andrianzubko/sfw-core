@@ -119,7 +119,7 @@ class Sys extends \SFW\Config
 
         /* Default cache (can be changed at runtime).
          *
-         * string 'Apc' or 'Memcached'
+         * string 'Nocache', 'Apc', 'Memcached' or 'Redis'
          */
         $sys['cacher']['default'] = 'Apc';
 
@@ -131,15 +131,23 @@ class Sys extends \SFW\Config
 
         /* Memcached.
          */
-        $sys['cacher']['memcached']['ttl'] = 3600;
+        $sys['cacher']['memcached']['ttl'] = $sys['cacher']['apc']['ttl'];
 
-        $sys['cacher']['memcached']['ns'] = md5(__FILE__);
+        $sys['cacher']['memcached']['ns'] = $sys['cacher']['apc']['ns'];
+
+        $sys['cacher']['memcached']['servers'] = [['127.0.0.1', 11211]];
 
         $sys['cacher']['memcached']['options'] = null;
 
-        $sys['cacher']['memcached']['servers'] = [
-            ['127.0.0.1', 11211],
-        ];
+        /* Redis.
+         */
+        $sys['cacher']['redis']['ttl'] = $sys['cacher']['apc']['ttl'];
+
+        $sys['cacher']['redis']['ns'] = $sys['cacher']['apc']['ns'];
+
+        $sys['cacher']['redis']['connect'] = ['127.0.0.1', 6379, 2.5];
+
+        $sys['cacher']['redis']['options'] = null;
 
         // }}}
         // {{{ templater

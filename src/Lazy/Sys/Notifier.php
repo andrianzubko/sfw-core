@@ -26,7 +26,7 @@ class Notifier extends \SFW\Lazy\Sys
 
         $this->defaultStruct->e['config'] = self::$e['config'];
 
-        $this->defaultStruct->e['defaults'] = self::$e['defaults'];
+        $this->defaultStruct->e['sys'] = self::$e['sys'];
 
         register_shutdown_function(
             function (): void {

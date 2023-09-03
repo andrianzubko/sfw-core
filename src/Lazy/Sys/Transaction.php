@@ -81,7 +81,9 @@ class Transaction extends \SFW\Lazy\Sys
                 }
 
                 return true;
-            } catch (\SFW\Databaser\Exception $error) {
+            } catch (
+                \SFW\Databaser\Exception $error
+            ) {
                 try {
                     $this->sys('Db')->rollback();
                 } catch (\SFW\Databaser\Exception) {}

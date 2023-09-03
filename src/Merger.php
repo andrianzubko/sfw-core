@@ -8,16 +8,6 @@ namespace SFW;
 class Merger extends Base
 {
     /**
-     * Merged dir.
-     */
-    protected string $mergedDir = APP_DIR . '/var/cache/merged';
-
-    /**
-     * Merged dir version file.
-     */
-    protected string $versionFile = APP_DIR . '/var/cache/merged.version.php';
-
-    /**
      * Passing parameters to properties.
      */
     public function __construct(protected array $sources) {}
@@ -27,7 +17,7 @@ class Merger extends Base
      */
     public function get(array $options = []): array
     {
-        $version = @include $this->versionFile;
+        $version = @include self::$config['sys']['merger']['version'];
 
         if ($version !== false
             && !($options['recheck'] ?? true)
@@ -44,7 +34,7 @@ class Merger extends Base
             );
         }
 
-        $version = @include $this->versionFile;
+        $version = @include self::$config['sys']['merger']['version'];
 
         $sources = $this->getSources();
 
@@ -122,8 +112,8 @@ class Merger extends Base
 
         $targets = [];
 
-        foreach (@$this->sys('Dir')->scan($this->mergedDir) as $item) {
-            if (is_file("$this->mergedDir/$item")
+        foreach (@$this->sys('Dir')->scan(self::$config['sys']['merger']['dir']) as $item) {
+            if (is_file(self::$config['sys']['merger']['dir'] . "/$item")
                 && preg_match('/^(\d+)\.(.+)$/', $item, $M)
                     && (int) $M[1] === $version['time']
             ) {
@@ -164,7 +154,7 @@ class Merger extends Base
      */
     protected function recombine(array $sources, bool $minify): array
     {
-        $this->sys('Dir')->clear($this->mergedDir);
+        $this->sys('Dir')->clear(self::$config['sys']['merger']['dir']);
 
         $version = [
             'time' => time(),
@@ -173,7 +163,7 @@ class Merger extends Base
 
         foreach (array_keys($sources) as $type) {
             foreach ($sources[$type] as $target => $files) {
-                $file = "$this->mergedDir/{$version['time']}.$target";
+                $file = self::$config['sys']['merger']['dir'] . "/{$version['time']}.$target";
 
                 if ($type === 'js') {
                     $contents = $this->mergeJs($files, $minify);
@@ -187,9 +177,13 @@ class Merger extends Base
             }
         }
 
-        if (@$this->sys('File')->putVar($this->versionFile, $version) === false) {
+        if (@$this->sys('File')->putVar(
+                self::$config['sys']['merger']['version'], $version) === false
+        ) {
             throw new Exception(
-                "Unable to write file $this->versionFile"
+                sprintf('Unable to write file %s',
+                    self::$config['sys']['merger']['version']
+                )
             );
         }
 
@@ -207,7 +201,7 @@ class Merger extends Base
 
         if ($minify) {
             $jsMin = new \JSMin\JSMin($merged);
-            
+
             try {
                 $merged = $jsMin->min();
             } catch (\Exception $error) {

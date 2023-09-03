@@ -8,7 +8,7 @@ namespace SFW;
 abstract class Router extends Base
 {
     /**
-     * Route from request url to entry point.
+     * Route from request url to Controller class.
      */
     abstract public function get(): string|false;
 }

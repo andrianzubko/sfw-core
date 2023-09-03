@@ -223,6 +223,21 @@ class Sys extends \SFW\Config
         $sys['file']['mode'] = 0666;
 
         // }}}
+        // {{{ merger
+
+        /* Target directory for merged JS and CSS files.
+         *
+         * string
+         */
+        $sys['merger']['dir'] = APP_DIR . '/var/cache/merged';
+
+        /* File with version of merged JS and CSS files.
+         *
+         * string
+         */
+        $sys['merger']['version'] = APP_DIR . '/var/cache/merged.version.php';
+
+        // }}}
         // {{{ paginator
 
         /* Name of page param in url for paginator.

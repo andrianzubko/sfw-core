@@ -88,21 +88,19 @@ class Out extends \SFW\Lazy\Sys
 
         header(
             sprintf('Last-Modified: %s',
-                gmdate('D, d M Y H:i:s \G\M\T', self::$e['defaults']['timestamp'])
+                gmdate('D, d M Y H:i:s \G\M\T',
+                    self::$e['sys']['timestamp']
+                )
             )
         );
 
-        header(
-            sprintf('Cache-Control: private, max-age=%s', $expire)
-        );
+        header("Cache-Control: private, max-age=$expire");
 
-        header(
-            sprintf('Content-Type: %s; charset=utf-8', $mime)
-        );
+        header("Content-Type: $mime; charset=utf-8");
 
         if (strlen($contents) > 32 * 1024
             && in_array($mime, self::$compress, true)
-            && str_contains($_SERVER['HTTP_ACCEPT_ENCODING'] ?? '', 'gzip')
+                && str_contains($_SERVER['HTTP_ACCEPT_ENCODING'] ?? '', 'gzip')
         ) {
             header('Content-Encoding: gzip');
 
@@ -118,12 +116,10 @@ class Out extends \SFW\Lazy\Sys
         );
 
         if (isset($filename)) {
-            header(
-                sprintf('Content-Disposition: %s; filename="%s"',
-                    $disposition, $filename
-                )
-            );
-        } elseif ($disposition === 'attachment') {
+            header("Content-Disposition: $disposition; filename=\"$filename\"");
+        } elseif (
+            $disposition === 'attachment'
+        ) {
             header('Content-Disposition: attachment');
         }
 
@@ -155,7 +151,9 @@ class Out extends \SFW\Lazy\Sys
     ): string|self {
         try {
             $contents = $this->sys('Templater')->transform($e, $template);
-        } catch (\SFW\Templater\Exception $error) {
+        } catch (
+            \SFW\Templater\Exception $error
+        ) {
             foreach (debug_backtrace() as $trace) {
                 if ($trace['file'] !== __FILE__) {
                     $this->sys('Abend')->error(
@@ -202,7 +200,7 @@ class Out extends \SFW\Lazy\Sys
         if (str_starts_with($url, '/')
             && !str_starts_with($url, '//')
         ) {
-            $url = self::$e['defaults']['url'] . $url;
+            $url = self::$e['sys']['url'] . $url;
         }
 
         http_response_code(302);

@@ -8,7 +8,7 @@ namespace SFW;
 abstract class Runner extends Base
 {
     /**
-     * Initializing environment and calling entry point.
+     * Initializing environment and calling Controller class.
      */
     final public function __construct()
     {
@@ -24,20 +24,18 @@ abstract class Runner extends Base
         self::$startedTime = gettimeofday(true);
 
         // }}}
-        // {{{ important php params.
+        // {{{ application dir
+
+        define('APP_DIR', dirname(__DIR__, 4));
+
+        // }}}
+        // {{{ important PHP params.
 
         ini_set('display_errors', PHP_SAPI === 'cli');
 
         ini_set('error_reporting', -1);
 
         ini_set('ignore_user_abort', true);
-
-        // }}}
-        // {{{ checking important constant
-
-        if (!defined('APP_DIR')) {
-            $this->sys('Abend')->error('Undefined constant APP_DIR');
-        }
 
         // }}}
         // {{{ configs
@@ -63,7 +61,7 @@ abstract class Runner extends Base
         // }}}
         // {{{ default timezone
 
-        if (date_default_timezone_set(self::$config['sys']['timezone']) === false) {
+        if (!date_default_timezone_set(self::$config['sys']['timezone'])) {
             $this->sys('Abend')->error();
         }
 
@@ -94,31 +92,31 @@ abstract class Runner extends Base
                 $this->sys('Abend')->error('Incorrect url in system config');
             }
 
-            self::$e['defaults']['url_scheme'] = $parsed['scheme'] ?? 'http';
+            self::$e['sys']['url_scheme'] = $parsed['scheme'] ?? 'http';
 
-            self::$e['defaults']['url_host'] = $parsed['host'];
+            self::$e['sys']['url_host'] = $parsed['host'];
         } else {
             if (empty($_SERVER['HTTPS'])
                 || $_SERVER['HTTPS'] === 'off'
             ) {
-                self::$e['defaults']['url_scheme'] = 'http';
+                self::$e['sys']['url_scheme'] = 'http';
             } else {
-                self::$e['defaults']['url_scheme'] = 'https';
+                self::$e['sys']['url_scheme'] = 'https';
             }
 
-            self::$e['defaults']['url_host'] = $_SERVER['HTTP_HOST'];
+            self::$e['sys']['url_host'] = $_SERVER['HTTP_HOST'];
         }
 
-        self::$e['defaults']['url'] = sprintf('%s://%s',
-            self::$e['defaults']['url_scheme'],
-            self::$e['defaults']['url_host']
+        self::$e['sys']['url'] = sprintf('%s://%s',
+            self::$e['sys']['url_scheme'],
+            self::$e['sys']['url_host']
         );
 
-        self::$e['defaults']['timestamp'] = (int) self::$startedTime;
+        self::$e['sys']['timestamp'] = (int) self::$startedTime;
 
-        self::$e['defaults']['point'] = (new \App\Router())->get();
+        $controller = self::$e['sys']['controller'] = (new \App\Router())->get();
 
-        if (self::$e['defaults']['point'] === false) {
+        if ($controller === false) {
             $this->sys('Abend')->errorPage(404);
         }
 
@@ -128,22 +126,22 @@ abstract class Runner extends Base
         $this->environment();
 
         // }}}
-        // {{{ calling entry point if this is not CLI
+        // {{{ calling Controller class or finish if cli
 
-        if (PHP_SAPI !== 'cli') {
-            $point = self::$e['defaults']['point'];
+        if (PHP_SAPI === 'cli') {
+            return;
+        }
 
-            $class = "App\\Point\\$point";
+        $class = "App\\Controller\\$controller";
 
-            if (!class_exists($class)) {
-                $this->sys('Abend')->errorPage(404);
-            }
+        if (!class_exists($class)) {
+            $this->sys('Abend')->errorPage(404);
+        }
 
-            try {
-                new $class();
-            } catch (\Error | \Exception $error) {
-                $this->sys('Abend')->error($error);
-            }
+        try {
+            new $class();
+        } catch (\Error | \Exception $error) {
+            $this->sys('Abend')->error($error);
         }
 
         // }}}

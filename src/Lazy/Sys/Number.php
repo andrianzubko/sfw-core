@@ -12,7 +12,9 @@ class Number extends \SFW\Lazy\Sys
      */
     public function cast(mixed $number, int $precision = 0, ?float $min = null, ?float $max = null): float
     {
-        if (isset($number) && is_scalar($number)) {
+        if (isset($number)
+            && is_scalar($number)
+        ) {
             if (is_string($number)) {
                 $number = strtr($number, ',', '.');
             }
@@ -22,11 +24,15 @@ class Number extends \SFW\Lazy\Sys
             $number = 0;
         }
 
-        if (isset($min) && $number < $min) {
+        if (isset($min)
+            && $number < $min
+        ) {
             $number = $min;
         }
 
-        if (isset($max) && $number > $max) {
+        if (isset($max)
+            && $number > $max
+        ) {
             $number = $max;
         }
 

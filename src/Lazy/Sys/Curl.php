@@ -44,7 +44,9 @@ class Curl extends \SFW\Lazy\Sys
             return false;
         }
 
-        $headers = preg_split('/\r\n/', array_pop($headers), flags: PREG_SPLIT_NO_EMPTY);
+        $headers = preg_split('/\r\n/',
+            array_pop($headers), flags: PREG_SPLIT_NO_EMPTY
+        );
 
         if ($info['header_size'] >= strlen($response)) {
             return '';

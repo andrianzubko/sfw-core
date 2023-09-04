@@ -70,6 +70,9 @@ abstract class Runner extends Base
 
         $_SERVER['HTTP_HOST'] ??= 'localhost';
 
+        $_SERVER['HTTP_SCHEME'] = empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off'
+            ? 'http' : 'https';
+
         $_SERVER['REMOTE_ADDR'] ??= '0.0.0.0';
 
         $_SERVER['REQUEST_METHOD'] ??= 'GET';
@@ -96,20 +99,14 @@ abstract class Runner extends Base
 
             self::$e['sys']['url_host'] = $parsed['host'];
         } else {
-            if (empty($_SERVER['HTTPS'])
-                || $_SERVER['HTTPS'] === 'off'
-            ) {
-                self::$e['sys']['url_scheme'] = 'http';
-            } else {
-                self::$e['sys']['url_scheme'] = 'https';
-            }
+            self::$e['sys']['url_scheme'] = $_SERVER['HTTP_SCHEME'];
 
             self::$e['sys']['url_host'] = $_SERVER['HTTP_HOST'];
         }
 
         self::$e['sys']['url'] = sprintf('%s://%s',
             self::$e['sys']['url_scheme'],
-            self::$e['sys']['url_host']
+                self::$e['sys']['url_host']
         );
 
         self::$e['sys']['timestamp'] = (int) self::$startedTime;

@@ -129,7 +129,9 @@ class Out extends \SFW\Lazy\Sys
 
         echo $contents;
 
-        ob_end_flush();
+        while (ob_get_level()) {
+            ob_end_flush();
+        }
 
         flush();
 

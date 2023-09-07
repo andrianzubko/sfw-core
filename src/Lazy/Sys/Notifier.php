@@ -42,7 +42,7 @@ class Notifier extends \SFW\Lazy\Sys
     {
         $this->notifies[] = &$notify;
 
-        $this->sys('Transaction')->onabort(
+        $this->sys('Transaction')->onAbort(
             function () use (&$notify): void {
                 $notify = null;
             }

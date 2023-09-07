@@ -10,7 +10,7 @@ class Out extends \SFW\Lazy\Sys
     /**
      * Mime types for compress via gzip.
      */
-    protected static array $compress = [
+    protected array $compress = [
         'text/html',
         'text/plain',
         'text/xml',
@@ -23,14 +23,9 @@ class Out extends \SFW\Lazy\Sys
     ];
 
     /**
-     * Sets default templater if needed.
+     * Used template processor.
      */
-    public function __construct(?string $templater = null)
-    {
-        if (isset($templater)) {
-            $this->sys('Templater', $templater);
-        }
-    }
+    protected string $templater = 'Templater';
 
     /**
      * Output string as attachment.
@@ -99,7 +94,7 @@ class Out extends \SFW\Lazy\Sys
         header("Content-Type: $mime; charset=utf-8");
 
         if (strlen($contents) > 32 * 1024
-            && in_array($mime, self::$compress, true)
+            && in_array($mime, $this->compress, true)
                 && str_contains($_SERVER['HTTP_ACCEPT_ENCODING'] ?? '', 'gzip')
         ) {
             header('Content-Encoding: gzip');
@@ -152,7 +147,7 @@ class Out extends \SFW\Lazy\Sys
         int $status = 200
     ): string|self {
         try {
-            $contents = $this->sys('Templater')->transform($e, $template);
+            $contents = $this->sys($this->templater)->transform($e, $template);
         } catch (
             \SFW\Templater\Exception $error
         ) {
@@ -199,9 +194,7 @@ class Out extends \SFW\Lazy\Sys
             $url = '/';
         }
 
-        if (str_starts_with($url, '/')
-            && !str_starts_with($url, '//')
-        ) {
+        if (str_starts_with($url, '/') && !str_starts_with($url, '//')) {
             $url = self::$e['sys']['url'] . $url;
         }
 
@@ -218,5 +211,21 @@ class Out extends \SFW\Lazy\Sys
     public function end(): void
     {
         exit;
+    }
+
+    /**
+     * Sets some options.
+     *
+     * @internal
+     */
+    public function setOptions(array $options): void
+    {
+        foreach ($options as $option) {
+            if ($option === 'Native' || $option === 'Xslt') {
+                $this->templater = $option;
+            } else {
+                $this->sys('Abend')->error("Unknown option $option");
+            }
+        }
     }
 }

@@ -26,39 +26,45 @@ abstract class Base
     /**
      * Instances of sys Lazy classes.
      */
-    private static array $sysLazyInstances = [];
+    protected static array $sysLazyClasses = [];
 
     /**
      * Instances of your Lazy classes.
      */
-    private static array $myLazyInstances = [];
+    protected static array $myLazyClasses = [];
 
     /**
      * Accessing system Lazy classes from anywhere except templates.
      *
      * $this->sys('SysLazyClass')->someMethod()
      */
-    public function sys(string $name, ...$arguments): object
+    public function sys(string $name): object
     {
-        if (isset(self::$sysLazyInstances[$name])
-            && !$arguments
-        ) {
-            return self::$sysLazyInstances[$name];
+        if ( isset(self::$sysLazyClasses[$name])) {
+            return self::$sysLazyClasses[$name];
         }
 
-        $class = "App\\Lazy\\Sys\\$name";
+        $options = explode(':', $name);
+
+        $pName = array_shift($options);
+
+        $class = "App\\Lazy\\Sys\\$pName";
 
         if (!class_exists($class)) {
-            $class = "SFW\\Lazy\\Sys\\$name";
+            $class = "SFW\\Lazy\\Sys\\$pName";
         }
 
-        $lazy = new $class(...$arguments);
+        $lazy = new $class();
 
         if (method_exists($lazy, 'getInstance')) {
             $lazy = $lazy->getInstance();
+        } elseif (
+            $options && method_exists($lazy, 'setOptions')
+        ) {
+            $lazy->setOptions($options);
         }
 
-        return self::$sysLazyInstances[$name] = $lazy;
+        return self::$sysLazyClasses[$name] = $lazy;
     }
 
     /**
@@ -66,22 +72,20 @@ abstract class Base
      *
      * $this->my('MyLazyClass')->someMethod()
      */
-    public function my(string $name, ...$arguments): object
+    public function my(string $name): object
     {
-        if (isset(self::$myLazyInstances[$name])
-            && !$arguments
-        ) {
-            return self::$myLazyInstances[$name];
+        if ( isset(self::$myLazyClasses[$name])) {
+            return self::$myLazyClasses[$name];
         }
 
         $class = "App\\Lazy\\My\\$name";
 
-        $lazy = new $class(...$arguments);
+        $lazy = new $class();
 
         if (method_exists($lazy, 'getInstance')) {
             $lazy = $lazy->getInstance();
         }
 
-        return self::$myLazyInstances[$name] = $lazy;
+        return self::$myLazyClasses[$name] = $lazy;
     }
 }

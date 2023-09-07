@@ -19,12 +19,16 @@ namespace PHPSTORM_META {
         'Notifier',
         'Number',
         'Out',
+        'Out:Native',
+        'Out:Xslt',
         'Paginator',
         'Pgsql',
         'Redis',
         'Templater',
         'Text',
         'Transaction',
+        'Transaction:Mysql',
+        'Transaction:Pgsql',
         'Xslt',
     );
 

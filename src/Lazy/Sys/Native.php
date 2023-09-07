@@ -19,30 +19,28 @@ class Native extends \SFW\Lazy\Sys
      */
     public function __construct()
     {
-        $text = $this->sys('Text');
-
         $this->properties = [
-            'lc' => [$text, 'lc'],
+            'lc' => [$this->sys('Text'), 'lc'],
 
-            'lcfirst' => [$text, 'lcfirst'],
+            'lcfirst' => [$this->sys('Text'), 'lcfirst'],
 
-            'uc' => [$text, 'uc'],
+            'uc' => [$this->sys('Text'), 'uc'],
 
-            'ucfirst' => [$text, 'ucfirst'],
+            'ucfirst' => [$this->sys('Text'), 'ucfirst'],
 
-            'trim' => [$text, 'trim'],
+            'trim' => [$this->sys('Text'), 'trim'],
 
-            'rtrim' => [$text, 'rtrim'],
+            'rtrim' => [$this->sys('Text'), 'rtrim'],
 
-            'ltrim' => [$text, 'ltrim'],
+            'ltrim' => [$this->sys('Text'), 'ltrim'],
 
-            'fulltrim' => [$text, 'fulltrim'],
+            'fulltrim' => [$this->sys('Text'), 'fulltrim'],
 
-            'multitrim' => [$text, 'multitrim'],
+            'multitrim' => [$this->sys('Text'), 'multitrim'],
 
-            'cut' => [$text, 'cut'],
+            'cut' => [$this->sys('Text'), 'cut'],
 
-            'random' => [$text, 'random'],
+            'random' => [$this->sys('Text'), 'random'],
         ];
     }
 

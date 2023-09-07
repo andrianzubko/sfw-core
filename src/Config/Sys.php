@@ -43,7 +43,7 @@ class Sys extends \SFW\Config
         // }}}
         // {{{ databaser
 
-        /* Default database (can be changed at runtime).
+        /* Default database.
          *
          * string 'Pgsql' or 'Mysql'
          */
@@ -117,7 +117,7 @@ class Sys extends \SFW\Config
         // }}}
         // {{{ cacher
 
-        /* Default cache (can be changed at runtime).
+        /* Default cache.
          *
          * string 'Nocache', 'Apc', 'Memcached' or 'Redis'
          */
@@ -152,7 +152,7 @@ class Sys extends \SFW\Config
         // }}}
         // {{{ templater
 
-        /* Default templater (can be changed at runtime).
+        /* Default templater.
          *
          * string 'Native' or 'Xslt'
          */

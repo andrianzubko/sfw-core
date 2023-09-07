@@ -10,25 +10,12 @@ class Transaction extends \SFW\Lazy\Sys
     /**
      * Registered callbacks for running on transaction abort.
      */
-    protected array $onabort = [];
+    protected array $onAbort = [];
 
     /**
-     * Sets default database if needed.
+     * Used database driver.
      */
-    public function __construct(?string $db = null)
-    {
-        if (isset($db)) {
-            $this->sys('Db', $db);
-        }
-    }
-
-    /**
-     * Do some action on transaction abort.
-     */
-    public function onabort(callable $event): void
-    {
-        $this->onabort[] = $event;
-    }
+    protected string $db = 'Db';
 
     /**
      * Run transaction and die on unexpected errors.
@@ -64,9 +51,11 @@ class Transaction extends \SFW\Lazy\Sys
         ?callable $onerror,
         string $mode
     ): bool {
+        $this->setDb();
+
         for ($retry = 1; $retry <= self::$config['sys']['transaction']['retries']; $retry++) {
             try {
-                $this->onabort = [];
+                $this->onAbort = [];
 
                 $this->sys('Db')->begin($isolation);
 
@@ -75,10 +64,12 @@ class Transaction extends \SFW\Lazy\Sys
                 } else {
                     $this->sys('Db')->rollback();
 
-                    foreach ($this->onabort as $event) {
+                    foreach ($this->onAbort as $event) {
                         $event();
                     }
                 }
+
+                $this->resetToDefaultDb();
 
                 return true;
             } catch (
@@ -88,7 +79,7 @@ class Transaction extends \SFW\Lazy\Sys
                     $this->sys('Db')->rollback();
                 } catch (\SFW\Databaser\Exception) {}
 
-                foreach ($this->onabort as $event) {
+                foreach ($this->onAbort as $event) {
                     $event();
                 }
 
@@ -103,11 +94,55 @@ class Transaction extends \SFW\Lazy\Sys
                 ) {
                     $this->sys('Abend')->$mode($error);
 
+                    $this->resetToDefaultDb();
+
                     return false;
                 }
             }
         }
 
+        $this->resetToDefaultDb();
+
         return true;
+    }
+
+    /**
+     * Sets database driver.
+     */
+    protected function setDb(): void
+    {
+        self::$sysLazyClasses['Db'] = $this->sys($this->db);
+    }
+
+    /**
+     * Resets database driver to default.
+     */
+    protected function resetToDefaultDb(): void
+    {
+        self::$sysLazyClasses['Db'] = $this->sys(self::$config['sys']['db']['default']);
+    }
+
+    /**
+     * Do some action on transaction abort.
+     */
+    public function onAbort(callable $event): void
+    {
+        $this->onAbort[] = $event;
+    }
+
+    /**
+     * Sets some options.
+     *
+     * @internal
+     */
+    public function setOptions(array $options): void
+    {
+        foreach ($options as $option) {
+            if ($option === 'Mysql' || $option === 'Pgsql') {
+                $this->db = $option;
+            } else {
+                $this->sys('Abend')->error("Unknown option $option");
+            }
+        }
     }
 }

@@ -8,77 +8,107 @@ namespace SFW\Lazy\Sys;
 class Abend extends \SFW\Lazy\Sys
 {
     /**
+     * Error document optional file pattern.
+     */
+    protected string $errorDocument = APP_DIR . '/public/.bin/errors/%s.php';
+
+    /**
      * Log error and show error page 500.
      */
-    public function error(\Exception|string|null $message = null, ?string $file = null, ?int $line = null): void
-    {
-        if ($message instanceof \Exception) {
-            $this->process(__FUNCTION__,
-                $message->getMessage(),
-                $message->getFile(),
-                $message->getLine()
-            );
-        } else {
-            $this->process(__FUNCTION__, $message, $file, $line);
-        }
+    public function error(
+        \Exception|string|null $message = null,
+        ?string $file = null,
+        ?int $line = null
+    ): void {
+        $this->process(__FUNCTION__, $message, $file, $line);
     }
 
     /**
      * Just log error without exiting.
      */
-    public function warn(\Exception|string|null $message = null, ?string $file = null, ?int $line = null): void
-    {
-        if ($message instanceof \Exception) {
-            $this->process(__FUNCTION__,
-                $message->getMessage(),
-                $message->getFile(),
-                $message->getLine()
-            );
-        } else {
-            $this->process(__FUNCTION__, $message, $file, $line);
-        }
+    public function warn(
+        \Exception|string|null $message = null,
+        ?string $file = null,
+        ?int $line = null
+    ): void {
+        $this->process(__FUNCTION__, $message, $file, $line);
     }
 
     /**
      * Base method.
      */
-    protected function process(string $mode, ?string $message, ?string $file, ?int $line): void
-    {
-        if (!isset($file, $line)) {
-            foreach (debug_backtrace() as $trace) {
-                if ($trace['file'] !== __FILE__) {
-                    $file = $trace['file'];
+    protected function process(
+        string $level,
+        \Exception|string|null $message = null,
+        ?string $file,
+        ?int $line
+    ): void {
+        if ($message instanceof \Exception) {
+            $lines = [];
 
-                    $line = $trace['line'];
+            $lines[] = sprintf(
+                $lever === 'error'
+                    ? '%s, stopped in %s:%s'
+                    : '%s in %s:%s',
 
-                    break;
+                transliterator_transliterate('Any-Latin; Latin-ASCII',
+                    $message->getMessage()
+                ),
+                $message->getFile(),
+                $message->getLine()
+            );
+
+            $lines[] = 'Stack trace:';
+
+            foreach ($message->getTrace() as $i => $trace) {
+                $lines[] = sprintf('#%d %s:%d: %s%s%s()',
+                    $i,
+                    $trace['file'],
+                    $trace['line'],
+                    $trace['class'],
+                    $trace['type'],
+                    $trace['function']
+                );
+            }
+
+            $message = implode("\n", $lines);
+        } else {
+            if (isset($message)
+                && $level === 'error'
+            ) {
+                $message = sprintf('%s, stopped',
+                    transliterator_transliterate('Any-Latin; Latin-ASCII',
+                        $message
+                    )
+                );
+            } elseif (isset($message)) {
+                $message = transliterator_transliterate('Any-Latin; Latin-ASCII',
+                    $message
+                );
+            } elseif ($level === 'error') {
+                $message = 'Stopped';
+            } else {
+                $message = 'Some problems';
+            }
+
+            if (!isset($file, $line)) {
+                foreach (debug_backtrace() as $trace) {
+                    if ($trace['file'] !== __FILE__) {
+                        $file = $trace['file'];
+
+                        $line = $trace['line'];
+
+                        break;
+                    }
                 }
             }
+
+            $message = sprintf('%s in %s:%s', $message, $file, $line);
         }
 
-        if (isset($message)) {
-            error_log(
-                sprintf(
-                    $mode === 'error'
-                        ? '%s, stopped at %s line %s'
-                        : '%s at %s line %s',
+        error_log($message);
 
-                    transliterator_transliterate('Any-Latin; Latin-ASCII', $message), $file, $line
-                )
-            );
-        } else {
-            error_log(
-                sprintf(
-                    $mode === 'error'
-                        ? 'Stopped at %s line %s'
-                        : 'Some problems at %s line %s',
-
-                    $file, $line
-                )
-            );
-        }
-
-        if ($mode === 'error') {
+        if ($level === 'error') {
             $this->errorPage(500);
         }
     }
@@ -92,7 +122,13 @@ class Abend extends \SFW\Lazy\Sys
             && !headers_sent()
             && !ob_get_length()
         ) {
-            include APP_DIR . "/public/.bin/errors/$code.php";
+            http_response_code($code);
+
+            $errorDocument = sprintf($this->errorDocument, $code);
+
+            if (is_file($errorDocument)) {
+                include $errorDocument;
+            }
         }
 
         exit;

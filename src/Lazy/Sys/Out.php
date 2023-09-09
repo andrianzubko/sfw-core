@@ -35,9 +35,9 @@ class Out extends \SFW\Lazy\Sys
         string $mime = 'text/plain',
         int $expire = 0,
         ?string $filename = null,
-        int $status = 200
+        int $code = 200
     ): self {
-        return $this->put('attachment', $contents, $mime, $expire, $filename, $status);
+        return $this->put('attachment', $contents, $mime, $expire, $filename, $code);
     }
 
     /**
@@ -48,9 +48,9 @@ class Out extends \SFW\Lazy\Sys
         string $mime = 'text/plain',
         int $expire = 0,
         ?string $filename = null,
-        int $status = 200
+        int $code = 200
     ): self {
-        return $this->put('inline', $contents, $mime, $expire, $filename, $status);
+        return $this->put('inline', $contents, $mime, $expire, $filename, $code);
     }
 
     /**
@@ -61,9 +61,9 @@ class Out extends \SFW\Lazy\Sys
         string $mime = 'text/plain',
         int $expire = 0,
         ?string $filename = null,
-        int $status = 200
+        int $code = 200
     ): self {
-        return $this->put('inline', json_encode($contents), $mime, $expire, $filename, $status);
+        return $this->put('inline', json_encode($contents), $mime, $expire, $filename, $code);
     }
 
     /**
@@ -75,11 +75,11 @@ class Out extends \SFW\Lazy\Sys
         string $mime,
         int $expire,
         ?string $filename,
-        int $status
+        int $code
     ): self {
         ini_set('zlib.output_compression', false);
 
-        http_response_code($status);
+        http_response_code($code);
 
         header(
             sprintf('Last-Modified: %s',
@@ -144,7 +144,7 @@ class Out extends \SFW\Lazy\Sys
         array $e,
         string $template,
         bool $toString = false,
-        int $status = 200
+        int $code = 200
     ): string|self {
         try {
             $contents = $this->sys($this->templater)->transform($e, $template);
@@ -180,7 +180,7 @@ class Out extends \SFW\Lazy\Sys
             );
         }
 
-        $this->inline($contents, 'text/html', status: $status);
+        $this->inline($contents, 'text/html', code: $code);
 
         return $this;
     }

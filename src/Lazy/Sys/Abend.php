@@ -39,7 +39,7 @@ class Abend extends \SFW\Lazy\Sys
      */
     protected function process(
         string $level,
-        \Exception|string|null $message = null,
+        \Exception|string|null $message,
         ?string $file,
         ?int $line
     ): void {
@@ -47,7 +47,7 @@ class Abend extends \SFW\Lazy\Sys
             $lines = [];
 
             $lines[] = sprintf(
-                $lever === 'error'
+                $level === 'error'
                     ? '%s, stopped in %s:%s'
                     : '%s in %s:%s',
 

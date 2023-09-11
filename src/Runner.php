@@ -137,7 +137,7 @@ abstract class Runner extends Base
 
         try {
             new $class();
-        } catch (\Error | \Exception $error) {
+        } catch (\Throwable $error) {
             $this->sys('Response')->error($error);
         }
 

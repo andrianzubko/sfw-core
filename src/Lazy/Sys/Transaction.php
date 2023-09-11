@@ -26,7 +26,7 @@ class Transaction extends \SFW\Lazy\Sys
         callable $body,
         ?callable $onerror = null
     ): bool {
-        return $this->process($isolation, $expected, $body, $onerror, 'error');
+        return $this->process(__FUNCTION__, $isolation, $expected, $body, $onerror);
     }
 
     /**
@@ -38,18 +38,18 @@ class Transaction extends \SFW\Lazy\Sys
         callable $body,
         ?callable $onerror = null
     ): bool {
-        return $this->process($isolation, $expected, $body, $onerror, 'warn');
+        return $this->process(__FUNCTION__, $isolation, $expected, $body, $onerror);
     }
 
     /**
      * Processing transaction with retries on expected errors.
      */
     protected function process(
+        string $caller,
         ?string $isolation,
         ?array $expected,
         callable $body,
-        ?callable $onerror,
-        string $mode
+        ?callable $onerror
     ): bool {
         $this->setDb();
 
@@ -87,12 +87,22 @@ class Transaction extends \SFW\Lazy\Sys
                     $onerror($error->getSqlState());
                 }
 
-                $this->sys('Logger')->transactionFail($error->getSqlState(), $retry);
+                $isExpected = in_array($error->getSqlState(), $expected ?? [], true);
 
-                if (!in_array($error->getSqlState(), $expected ?? [], true)
+                $this->sys('Logger')->logTransactionFail(
+                    $isExpected,
+                    $error->getSqlState(),
+                    $retry
+                );
+
+                if (!$isExpected
                     || $retry == self::$config['sys']['transaction']['retries']
                 ) {
-                    $this->sys('Abend')->$mode($error);
+                    if ($caller === 'run') {
+                        $this->sys('Response')->error($error);
+                    }
+
+                    $this->sys('Logger')->error($error);
 
                     $this->resetToDefaultDb();
 
@@ -141,7 +151,7 @@ class Transaction extends \SFW\Lazy\Sys
             if ($option === 'Mysql' || $option === 'Pgsql') {
                 $this->db = $option;
             } else {
-                $this->sys('Abend')->error("Unknown option $option");
+                $this->sys('Response')->error("Unknown option $option");
             }
         }
     }

@@ -62,7 +62,7 @@ abstract class Runner extends Base
         // {{{ default timezone
 
         if (!date_default_timezone_set(self::$config['sys']['timezone'])) {
-            $this->sys('Abend')->error();
+            $this->sys('Response')->error();
         }
 
         // }}}
@@ -92,7 +92,7 @@ abstract class Runner extends Base
             $parsed = parse_url(self::$config['sys']['url']);
 
             if (!isset($parsed['host'])) {
-                $this->sys('Abend')->error('Incorrect url in system config');
+                $this->sys('Response')->error('Incorrect url in system config');
             }
 
             self::$e['sys']['url_scheme'] = $parsed['scheme'] ?? 'http';
@@ -114,7 +114,7 @@ abstract class Runner extends Base
         $controller = self::$e['sys']['controller'] = (new \App\Router())->get();
 
         if ($controller === false) {
-            $this->sys('Abend')->errorPage(404);
+            $this->sys('Response')->errorPage(404);
         }
 
         // }}}
@@ -132,13 +132,13 @@ abstract class Runner extends Base
         $class = "App\\Controller\\$controller";
 
         if (!class_exists($class)) {
-            $this->sys('Abend')->errorPage(404);
+            $this->sys('Response')->errorPage(404);
         }
 
         try {
             new $class();
         } catch (\Error | \Exception $error) {
-            $this->sys('Abend')->error($error);
+            $this->sys('Response')->error($error);
         }
 
         // }}}

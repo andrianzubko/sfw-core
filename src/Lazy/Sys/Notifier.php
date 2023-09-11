@@ -2,6 +2,8 @@
 
 namespace SFW\Lazy\Sys;
 
+use PHPMailer\PHPMailer\PHPMailer;
+
 /**
  * Notifier.
  */
@@ -78,7 +80,7 @@ class Notifier extends \SFW\Lazy\Sys
      */
     protected function send(\SFW\NotifyStruct $struct): void
     {
-        $mailer = new \PHPMailer\PHPMailer\PHPMailer();
+        $mailer = new PHPMailer();
 
         $mailer->CharSet = 'utf-8';
 

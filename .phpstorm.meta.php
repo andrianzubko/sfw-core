@@ -2,7 +2,6 @@
 
 namespace PHPSTORM_META {
     expectedArguments(\SFW\Base::sys(0), 0,
-        'Abend',
         'Apc',
         'Cacher',
         'Curl',
@@ -18,12 +17,12 @@ namespace PHPSTORM_META {
         'Nocache',
         'Notifier',
         'Number',
-        'Out',
-        'Out:Native',
-        'Out:Xslt',
         'Paginator',
         'Pgsql',
         'Redis',
+        'Response',
+        'Response:Native',
+        'Response:Xslt',
         'Templater',
         'Text',
         'Transaction',

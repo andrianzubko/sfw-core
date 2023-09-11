@@ -2,6 +2,8 @@
 
 namespace SFW;
 
+use JSMin\JSMin;
+
 /**
  * JS and CSS merger.
  */
@@ -44,11 +46,7 @@ class Merger extends Base
             try {
                 $version = $this->recombine($sources, $options['minify'] ?? true);
             } catch (Exception $error) {
-                $this->sys('Abend')->error(
-                    $error->getMessage(),
-                    $error->getFile(),
-                    $error->getLine()
-                );
+                $this->sys('Response')->error($error);
             }
         }
 
@@ -200,7 +198,7 @@ class Merger extends Base
         $merged = $this->mergeFiles($files);
 
         if ($minify) {
-            $jsMin = new \JSMin\JSMin($merged);
+            $jsMin = new JSMin($merged);
 
             try {
                 $merged = $jsMin->min();

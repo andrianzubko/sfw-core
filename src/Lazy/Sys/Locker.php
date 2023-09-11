@@ -17,10 +17,12 @@ class Locker extends \SFW\Lazy\Sys
      */
     public function lock(string $key): bool
     {
-        $file = sprintf(self::$config['sys']['locker']['pattern'], $key);
+        $file = str_replace('{KEY}', $key,
+            self::$config['sys']['locker']['file']
+        );
 
         if ($this->sys('Dir')->create(dirname($file)) === false) {
-            $this->sys('Abend')->error();
+            $this->sys('Response')->error();
         }
 
         $handle = fopen($file, 'cb+');
@@ -41,10 +43,12 @@ class Locker extends \SFW\Lazy\Sys
      */
     public function unlock(string $key): void
     {
-        if (isset($this->locks[$key])) {
-            fclose($this->locks[$key]);
-
-            unset($this->locks[$key]);
+        if (!isset($this->locks[$key])) {
+            return;
         }
+
+        fclose($this->locks[$key]);
+
+        unset($this->locks[$key]);
     }
 }

@@ -3,9 +3,9 @@
 namespace SFW\Lazy\Sys;
 
 /**
- * Output control.
+ * Response.
  */
-class Out extends \SFW\Lazy\Sys
+class Response extends \SFW\Lazy\Sys
 {
     /**
      * Mime types for compress via gzip.
@@ -28,16 +28,16 @@ class Out extends \SFW\Lazy\Sys
     protected string $templater = 'Templater';
 
     /**
-     * Output string as attachment.
+     * Output some as inline json.
      */
-    public function attachment(
-        string $contents,
+    public function json(
+        mixed $contents,
         string $mime = 'text/plain',
         int $expire = 0,
         ?string $filename = null,
         int $code = 200
     ): self {
-        return $this->put('attachment', $contents, $mime, $expire, $filename, $code);
+        return $this->inline(json_encode($contents), $mime, $expire, $filename, $code);
     }
 
     /**
@@ -50,26 +50,26 @@ class Out extends \SFW\Lazy\Sys
         ?string $filename = null,
         int $code = 200
     ): self {
-        return $this->put('inline', $contents, $mime, $expire, $filename, $code);
+        return $this->output(__FUNCTION__, $contents, $mime, $expire, $filename, $code);
     }
 
     /**
-     * Output some as inline json.
+     * Output string as attachment.
      */
-    public function json(
-        mixed $contents,
+    public function attachment(
+        string $contents,
         string $mime = 'text/plain',
         int $expire = 0,
         ?string $filename = null,
         int $code = 200
     ): self {
-        return $this->put('inline', json_encode($contents), $mime, $expire, $filename, $code);
+        return $this->output(__FUNCTION__, $contents, $mime, $expire, $filename, $code);
     }
 
     /**
      * Output base.
      */
-    protected function put(
+    protected function output(
         string $disposition,
         string $contents,
         string $mime,
@@ -140,55 +140,98 @@ class Out extends \SFW\Lazy\Sys
     /**
      * Process and output template.
      */
-    public function template(
-        array $e,
-        string $template,
-        bool $toString = false,
-        int $code = 200
-    ): string|self {
+    public function template(array $e, string $template, int $code = 200): string|self
+    {
         try {
             $contents = $this->sys($this->templater)->transform($e, $template);
         } catch (
             \SFW\Templater\Exception $error
         ) {
-            foreach (debug_backtrace() as $trace) {
-                if ($trace['file'] !== __FILE__) {
-                    $this->sys('Abend')->error(
-                        $error->getMessage(),
-                        $trace['file'],
-                        $trace['line']
-                    );
-                }
-            }
+            $this->error($error);
         }
 
-        if ($toString) {
-            return $contents;
-        }
-
-        if (self::$config['sys']['templater']['stats']) {
+        if (isset(self::$config['sys']['response']['page_stats_pattern'])) {
             $timer = gettimeofday(true) - self::$startedTime;
 
-            $contents .= sprintf(
-                '<!-- script %.03f + sql(%s) %.03f + template(%s) %.03f = %.03f -->',
-                    $timer - $this->sys('Db')->getTimer() - $this->sys('Templater')->getTimer(),
+            $contents .= str_replace(
+                [
+                    '{SCR_T}',
+                    '{SQL_C}',
+                    '{SQL_T}',
+                    '{TPL_C}',
+                    '{TPL_T}',
+                    '{ALL_T}',
+                ], [
+                    sprintf('%.2f',
+                        $timer - $this->sys('Db')->getTimer() - $this->sys('Templater')->getTimer()
+                    ),
                     $this->sys('Db')->getCounter(),
-                    $this->sys('Db')->getTimer(),
+                    sprintf('%.2f',
+                        $this->sys('Db')->getTimer()
+                    ),
                     $this->sys('Templater')->getCounter(),
-                    $this->sys('Templater')->getTimer(),
-                    $timer
+                    sprintf('%.2f',
+                        $this->sys('Templater')->getTimer()
+                    ),
+                    sprintf('%.2f',
+                        $timer
+                    ),
+                ], self::$config['sys']['response']['page_stats_pattern']
             );
         }
 
-        $this->inline($contents, 'text/html', code: $code);
+        return $this->inline($contents, 'text/html', code: $code);
+    }
+
+    /**
+     * Shows error page.
+     */
+    public function errorPage(int $code, $end = true): self
+    {
+        if (PHP_SAPI !== 'cli'
+            && !headers_sent()
+            && !ob_get_length()
+        ) {
+            http_response_code($code);
+
+            $errorDocument = str_replace('{CODE}', $code,
+                self::$config['sys']['response']['error_document']
+            );
+
+            if (is_file($errorDocument)) {
+                include $errorDocument;
+            }
+        }
+
+        if ($end) {
+            $this->end();
+        }
 
         return $this;
     }
 
     /**
+     * Logs error and show error page 500.
+     */
+    public function error(string|\Stringable|null $message = null): void
+    {
+        $trace = debug_backtrace();
+
+        if (isset($message)) {
+            $this->sys('Logger')->error($message,
+                $message instanceof \Throwable ? [] : ['trace' => $trace]
+            );
+        }
+
+        $this->sys('Logger')->emergency('Aborted', ['trace' => $trace]);
+
+        $this->errorPage(500);
+    }
+
+    /**
      * Redirect.
      */
-    public function redirect(string $url): void
+    public function redirect(string $url, $end = true): self
     {
         if ($url === '') {
             $url = '/';
@@ -202,7 +245,11 @@ class Out extends \SFW\Lazy\Sys
 
         header("Location: $url");
 
-        exit;
+        if ($end) {
+            $this->end();
+        }
+
+        return $this;
     }
 
     /**
@@ -224,7 +271,7 @@ class Out extends \SFW\Lazy\Sys
             if ($option === 'Native' || $option === 'Xslt') {
                 $this->templater = $option;
             } else {
-                $this->sys('Abend')->error("Unknown option $option");
+                $this->error("Unknown option $option");
             }
         }
     }

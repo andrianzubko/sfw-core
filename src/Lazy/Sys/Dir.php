@@ -183,6 +183,6 @@ class Dir extends \SFW\Lazy\Sys
             }
         }
 
-        $this->sys('Abend')->error();
+        $this->sys('Response')->error();
     }
 }

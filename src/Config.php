@@ -26,7 +26,7 @@ abstract class Config
             $env = false;
 
             if (isset($_SERVER['APP_ENV'])) {
-                $env = @include APP_DIR . "/.env.{$_SERVER['APP_ENV']}.php";
+                $env = @include APP_DIR . sprintf('/.env.%s.php', $_SERVER['APP_ENV']);
             }
 
             if ($env === false) {

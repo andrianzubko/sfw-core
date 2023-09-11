@@ -46,12 +46,12 @@ abstract class Base
 
         $options = explode(':', $name);
 
-        $pName = array_shift($options);
+        $primary = array_shift($options);
 
-        $class = "App\\Lazy\\Sys\\$pName";
+        $class = "App\\Lazy\\Sys\\$primary";
 
         if (!class_exists($class)) {
-            $class = "SFW\\Lazy\\Sys\\$pName";
+            $class = "SFW\\Lazy\\Sys\\$primary";
         }
 
         $lazy = new $class();

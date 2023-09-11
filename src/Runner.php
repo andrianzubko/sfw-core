@@ -62,7 +62,11 @@ abstract class Runner extends Base
         // {{{ default timezone
 
         if (!date_default_timezone_set(self::$config['sys']['timezone'])) {
-            $this->sys('Response')->error();
+            $this->sys('Response')->error(
+                sprintf('Unable to set timezone %s',
+                    self::$config['sys']['timezone']
+                )
+            );
         }
 
         // }}}
@@ -120,7 +124,11 @@ abstract class Runner extends Base
         // }}}
         // {{{ additional environment
 
-        $this->environment();
+        try {
+            $this->environment();
+        } catch (\Throwable $error) {
+            $this->sys('Response')->error($error);
+        }
 
         // }}}
         // {{{ calling Controller class or finish if cli

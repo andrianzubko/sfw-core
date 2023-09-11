@@ -22,6 +22,7 @@
         "psr/log": "^3.0",
         "mrclay/jsmin-php": "^2.4",
         "phpmailer/phpmailer": "^v6.8",
+        "andrianzubko/sfw-exception": "^0",
         "andrianzubko/sfw-cacher": "^0",
         "andrianzubko/sfw-databaser": "^0",
         "andrianzubko/sfw-paginator": "^0",

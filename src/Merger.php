@@ -16,6 +16,8 @@ class Merger extends Base
 
     /**
      * Recombining if needed and returning merged paths.
+     *
+     * @throws RuntimeException
      */
     public function get(array $options = []): array
     {
@@ -43,11 +45,7 @@ class Merger extends Base
         $version = $this->checkVersion($version, $sources, $options['minify'] ?? true);
 
         if ($version === false) {
-            try {
-                $version = $this->recombine($sources, $options['minify'] ?? true);
-            } catch (Exception $error) {
-                $this->sys('Response')->error($error);
-            }
+            $version = $this->recombine($sources, $options['minify'] ?? true);
         }
 
         $this->sys('Locker')->unlock('merger');
@@ -148,7 +146,7 @@ class Merger extends Base
     /**
      * Recombining.
      *
-     * @throws Exception
+     * @throws RuntimeException
      */
     protected function recombine(array $sources, bool $minify): array
     {
@@ -170,7 +168,7 @@ class Merger extends Base
                 }
 
                 if (@$this->sys('File')->put($file, $contents) === false) {
-                    throw new Exception("Unable to write file $file");
+                    throw new RuntimeException("Unable to write file $file");
                 }
             }
         }
@@ -178,7 +176,7 @@ class Merger extends Base
         if (@$this->sys('File')->putVar(
                 self::$config['sys']['merger']['version'], $version) === false
         ) {
-            throw new Exception(
+            throw new RuntimeException(
                 sprintf('Unable to write file %s',
                     self::$config['sys']['merger']['version']
                 )
@@ -191,7 +189,7 @@ class Merger extends Base
     /**
      * Merging JS.
      *
-     * @throws Exception
+     * @throws RuntimeException
      */
     public function mergeJs(array $files, bool $minify): string
     {
@@ -203,7 +201,7 @@ class Merger extends Base
             try {
                 $merged = $jsMin->min();
             } catch (\Exception $error) {
-                throw new Exception($error->getMessage());
+                throw new RuntimeException($error->getMessage());
             }
         }
 
@@ -213,7 +211,7 @@ class Merger extends Base
     /**
      * Merging CSS.
      *
-     * @throws Exception
+     * @throws RuntimeException
      */
     public function mergeCss(array $files, bool $minify): string
     {
@@ -263,17 +261,17 @@ class Merger extends Base
     /**
      * Merging files.
      *
-     * @throws Exception
+     * @throws RuntimeException
      */
     public function mergeFiles(array $files): string
     {
         $merged = [];
 
         foreach ($files as $file) {
-            $contents = @$this->sys('File')->get($file);
+            $contents = $this->sys('File')->get($file);
 
             if ($contents === false) {
-                throw new Exception("Unable to read file $file");
+                throw new RuntimeException("Unable to read file $file");
             }
 
             $merged[] = $contents;

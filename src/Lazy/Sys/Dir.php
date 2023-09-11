@@ -162,6 +162,8 @@ class Dir extends \SFW\Lazy\Sys
 
     /**
      * Making temporary directory.
+     *
+     * @throws \SFW\RuntimeException;
      */
     public function temporary(): string
     {
@@ -183,6 +185,6 @@ class Dir extends \SFW\Lazy\Sys
             }
         }
 
-        $this->sys('Response')->error();
+        throw new \SFW\RuntimeException('Unable to create temporary directory');
     }
 }

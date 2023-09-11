@@ -139,6 +139,8 @@ class Response extends \SFW\Lazy\Sys
 
     /**
      * Process and output template.
+     *
+     * @throws \SFW\Templater\Exception
      */
     public function template(array $e, string $template, int $code = 200): string|self
     {
@@ -266,6 +268,8 @@ class Response extends \SFW\Lazy\Sys
     /**
      * Sets some options.
      *
+     * @throws \SFW\RuntimeException
+     *
      * @internal
      */
     public function setOptions(array $options): void
@@ -274,7 +278,7 @@ class Response extends \SFW\Lazy\Sys
             if ($option === 'Native' || $option === 'Xslt') {
                 $this->templater = $option;
             } else {
-                $this->error("Unknown option $option");
+                throw new \SFW\RuntimeException("Unknown option $option");
             }
         }
     }

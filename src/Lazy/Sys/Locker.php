@@ -2,6 +2,8 @@
 
 namespace SFW\Lazy\Sys;
 
+use SFW\Exception;
+
 /**
  * Locker.
  */
@@ -14,22 +16,26 @@ class Locker extends \SFW\Lazy\Sys
 
     /**
      * Lock.
+     *
+     * @throws RuntimeException
      */
     public function lock(string $key): bool
     {
-        $file = str_replace('{KEY}', $key,
-            self::$config['sys']['locker']['file']
-        );
+        $file = str_replace('{KEY}', $key, self::$config['sys']['locker']['file']);
 
-        if ($this->sys('Dir')->create(dirname($file)) === false) {
-            $this->sys('Response')->error();
+        $dir = dirname($file);
+
+        if ($this->sys('Dir')->create($dir) === false) {
+            throw new RuntimeException("Unable to create directory $dir");
         }
 
         $handle = fopen($file, 'cb+');
 
-        if ($handle === false
-            || flock($handle, LOCK_EX | LOCK_NB) === false
-        ) {
+        if ($handle === false) {
+            throw new RuntimeException("Unable to open file $file");
+        }
+
+        if (flock($handle, LOCK_EX | LOCK_NB) === false) {
             return false;
         }
 
@@ -40,6 +46,8 @@ class Locker extends \SFW\Lazy\Sys
 
     /**
      * Unlock.
+     *
+     * @throws RuntimeException
      */
     public function unlock(string $key): void
     {
@@ -47,7 +55,9 @@ class Locker extends \SFW\Lazy\Sys
             return;
         }
 
-        fclose($this->locks[$key]);
+        if (fclose($this->locks[$key]) === false) {
+            throw new RuntimeException("Unable to close file {$this->locks[$key]}");
+        }
 
         unset($this->locks[$key]);
     }

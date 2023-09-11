@@ -18,7 +18,9 @@ class Transaction extends \SFW\Lazy\Sys
     protected string $db = 'Db';
 
     /**
-     * Run transaction and die on unexpected errors.
+     * Run transaction and throw on unexpected errors.
+     *
+     * @throws \SFW\RuntimeException
      */
     public function run(
         ?string $isolation,
@@ -43,6 +45,8 @@ class Transaction extends \SFW\Lazy\Sys
 
     /**
      * Processing transaction with retries on expected errors.
+     *
+     * @throws \SFW\RuntimeException
      */
     protected function process(
         string $caller,
@@ -99,7 +103,7 @@ class Transaction extends \SFW\Lazy\Sys
                     || $retry == self::$config['sys']['transaction']['retries']
                 ) {
                     if ($caller === 'run') {
-                        $this->sys('Response')->error($error);
+                        throw new \SFW\RuntimeException($error->getMessage());
                     }
 
                     $this->sys('Logger')->error($error);
@@ -143,6 +147,8 @@ class Transaction extends \SFW\Lazy\Sys
     /**
      * Sets some options.
      *
+     * @throws \SFW\RuntimeException
+     *
      * @internal
      */
     public function setOptions(array $options): void
@@ -151,7 +157,7 @@ class Transaction extends \SFW\Lazy\Sys
             if ($option === 'Mysql' || $option === 'Pgsql') {
                 $this->db = $option;
             } else {
-                $this->sys('Response')->error("Unknown option $option");
+                throw new \SFW\RuntimeException("Unknown option $option");
             }
         }
     }

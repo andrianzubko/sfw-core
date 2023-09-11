@@ -140,6 +140,10 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
         }
 
         if (isset($context['destination'])) {
+            $this->sys('Dir')->create(
+                dirname($context['destination'])
+            );
+
             error_log(
                 sprintf("[%s] %s\n",
                     date('d-M-Y H:i:s e'), $message

@@ -142,13 +142,7 @@ class Response extends \SFW\Lazy\Sys
      */
     public function template(array $e, string $template, int $code = 200): string|self
     {
-        try {
-            $contents = $this->sys($this->templater)->transform($e, $template);
-        } catch (
-            \SFW\Templater\Exception $error
-        ) {
-            $this->error($error);
-        }
+        $contents = $this->sys($this->templater)->transform($e, $template);
 
         if (isset(self::$config['sys']['response']['page_stats_pattern'])) {
             $timer = gettimeofday(true) - self::$startedTime;
@@ -215,15 +209,24 @@ class Response extends \SFW\Lazy\Sys
      */
     public function error(string|\Stringable|null $message = null): void
     {
-        $trace = debug_backtrace();
+        if ($message instanceof \Throwable) {
+            $this->sys('Logger')->error($message);
 
-        if (isset($message)) {
-            $this->sys('Logger')->error($message,
-                $message instanceof \Throwable ? [] : ['trace' => $trace]
+            $this->sys('Logger')->emergency('Aborted',
+                [
+                    'file' => $message->getFile(),
+                    'line' => $message->getLine(),
+                ]
             );
-        }
+        } else {
+            $trace = debug_backtrace();
 
-        $this->sys('Logger')->emergency('Aborted', ['trace' => $trace]);
+            if (isset($message)) {
+                $this->sys('Logger')->error($message, ['trace' => $trace]);
+            }
+
+            $this->sys('Logger')->emergency('Aborted', ['trace' => $trace]);
+        }
 
         $this->errorPage(500);
     }

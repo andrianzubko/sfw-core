@@ -167,18 +167,24 @@ class Merger extends Base
                     $contents = $this->mergeCss($files, $minify);
                 }
 
-                if (@$this->sys('File')->put($file, $contents) === false) {
-                    throw new RuntimeException("Unable to write file $file");
+                if ($this->sys('File')->put($file, $contents) === false) {
+                    throw new RuntimeException(
+                        sprintf(
+                            'Unable to write file %s',
+                                $file
+                        )
+                    );
                 }
             }
         }
 
-        if (@$this->sys('File')->putVar(
+        if ($this->sys('File')->putVar(
                 self::$config['sys']['merger']['version'], $version) === false
         ) {
             throw new RuntimeException(
-                sprintf('Unable to write file %s',
-                    self::$config['sys']['merger']['version']
+                sprintf(
+                    'Unable to write file %s',
+                        self::$config['sys']['merger']['version']
                 )
             );
         }
@@ -196,12 +202,12 @@ class Merger extends Base
         $merged = $this->mergeFiles($files);
 
         if ($minify) {
-            $jsMin = new JSMin($merged);
-
             try {
-                $merged = $jsMin->min();
+                $merged = (new JSMin($merged))->min();
             } catch (\Exception $error) {
-                throw new RuntimeException($error->getMessage());
+                throw (new RuntimeException($error->getMessage()))
+                    ->setFile($error->getFile())
+                    ->setLine($error->getLine());
             }
         }
 
@@ -271,7 +277,12 @@ class Merger extends Base
             $contents = $this->sys('File')->get($file);
 
             if ($contents === false) {
-                throw new RuntimeException("Unable to read file $file");
+                throw new RuntimeException(
+                    sprintf(
+                        'Unable to read file %s',
+                            $file
+                    )
+                );
             }
 
             $merged[] = $contents;

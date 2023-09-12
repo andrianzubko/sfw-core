@@ -2,87 +2,14 @@
 
 namespace SFW\Lazy\Sys;
 
-use Psr\Log\{LoggerInterface, LogLevel};
+use Psr\Log\{LoggerInterface, LoggerTrait, LogLevel};
 
 /**
  * Logger.
  */
 class Logger extends \SFW\Lazy\Sys implements LoggerInterface
 {
-    /**
-     * System is unusable.
-     */
-    public function emergency(string|\Stringable $message, array $context = []): void
-    {
-        $this->log(LogLevel::EMERGENCY, $message, $context);
-    }
-
-    /**
-     * Action must be taken immediately.
-     *
-     * Example: Entire website down, database unavailable, etc. This should
-     * trigger the SMS alerts and wake you up.
-     */
-    public function alert(string|\Stringable $message, array $context = []): void
-    {
-        $this->log(LogLevel::ALERT, $message, $context);
-    }
-
-    /**
-     * Critical conditions.
-     *
-     * Example: Application component unavailable, unexpected exception.
-     */
-    public function critical(string|\Stringable $message, array $context = []): void
-    {
-        $this->log(LogLevel::CRITICAL, $message, $context);
-    }
-
-    /**
-     * Runtime errors that do not require immediate action but should typically
-     * be logged and monitored.
-     */
-    public function error(string|\Stringable $message, array $context = []): void
-    {
-        $this->log(LogLevel::ERROR, $message, $context);
-    }
-
-    /**
-     * Exceptional occurrences that are not errors.
-     *
-     * Example: Use of deprecated APIs, poor use of an API, undesirable things
-     * that are not necessarily wrong.
-     */
-    public function warning(string|\Stringable $message, array $context = []): void
-    {
-        $this->log(LogLevel::WARNING, $message, $context);
-    }
-
-    /**
-     * Normal but significant events.
-     */
-    public function notice(string|\Stringable $message, array $context = []): void
-    {
-        $this->log(LogLevel::NOTICE, $message, $context);
-    }
-
-    /**
-     * Interesting events.
-     *
-     * Example: User logs in, SQL logs.
-     */
-    public function info(string|\Stringable $message, array $context = []): void
-    {
-        $this->log(LogLevel::INFO, $message, $context);
-    }
-
-    /**
-     * Detailed debug information.
-     */
-    public function debug(string|\Stringable $message, array $context = []): void
-    {
-        $this->log(LogLevel::DEBUG, $message, $context);
-    }
+    use LoggerTrait;
 
     /**
      * Logs with an arbitrary level.
@@ -113,8 +40,12 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
                     $context['trace'][0]['line']
                 );
             } else {
+                $psrLogDir = dirname(
+                    (new \ReflectionClass(LoggerTrait::class))->getFileName()
+                );
+
                 foreach (debug_backtrace() as $item) {
-                    if ($item['file'] !== __FILE__) {
+                    if (!str_starts_with($item['file'], $psrLogDir)) {
                         $message = sprintf('%s in %s:%s',
                             $message,
                             $item['file'],
@@ -127,7 +58,7 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
             }
         }
 
-        $message = sprintf("SFW %s: %s", ucfirst($level), $message);
+        $message = sprintf("[SFW %s] %s", ucfirst($level), $message);
 
         $context['timezone'] ??= self::$config['sys']['timezone'];
 
@@ -169,19 +100,20 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
             return;
         }
 
-        $this->info(
-            sprintf("[%.2f] %s%s\n\t%s\n",
-                $timer,
+        $message = sprintf("[%.2f] %s\n\t%s\n",
+            $timer,
 
-                idn_to_utf8($_SERVER['HTTP_HOST']),
-                    $_SERVER['REQUEST_URI'],
+            idn_to_utf8($_SERVER['HTTP_HOST']) . $_SERVER['REQUEST_URI'],
 
-                implode("\n\t",
-                    array_map(
-                        fn($a) => $this->sys('Text')->fulltrim($a), $queries
-                    )
+            implode("\n\t",
+                array_map(
+                    fn($a) => $this->sys('Text')->fulltrim($a), $queries
                 )
-            ), [
+            )
+        );
+
+        $this->info($message,
+            [
                 'destination' => self::$config['sys']['db']['slow_queries_log'],
 
                 'append_file_and_line' => false,
@@ -192,24 +124,21 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
     /**
      * Logs transactions fails.
      */
-    public function logTransactionFail(bool $isExpected, string $state, int $retry): void
+    public function logTransactionFail(string $level, string $state, int $retry): void
     {
         if (!isset(self::$config['sys']['transaction']['fails_log'])) {
             return;
         }
 
-        $this->log(
-            $isExpected
-                ? LogLevel::INFO
-                : LogLevel::ERROR,
+        $message = sprintf("[%s] [%d] %s",
+            $state,
+            $retry,
 
-            sprintf("[%s] [%d] %s%s",
-                $state,
-                $retry,
+            idn_to_utf8($_SERVER['HTTP_HOST']) . $_SERVER['REQUEST_URI']
+        );
 
-                idn_to_utf8($_SERVER['HTTP_HOST']),
-                    $_SERVER['REQUEST_URI']
-            ), [
+        $this->log($level, $message,
+            [
                 'destination' => self::$config['sys']['transaction']['fails_log'],
 
                 'append_file_and_line' => false,

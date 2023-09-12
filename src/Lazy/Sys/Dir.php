@@ -161,7 +161,7 @@ class Dir extends \SFW\Lazy\Sys
     }
 
     /**
-     * Making temporary directory.
+     * Makes temporary directory.
      *
      * @throws \SFW\RuntimeException;
      */

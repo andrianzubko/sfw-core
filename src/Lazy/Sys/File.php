@@ -94,18 +94,18 @@ class File extends \SFW\Lazy\Sys
     {
         $stat = @stat($file) ?: [];
 
-        $imagesize = @getimagesize($file) ?: [];
+        $imageSize = @getimagesize($file) ?: [];
 
         return [
             'name' => basename($file),
 
             'size' => $stat['size'] ?? 0,
 
-            'w' => $imagesize[0] ?? 0,
+            'w' => $imageSize[0] ?? 0,
 
-            'h' => $imagesize[1] ?? 0,
+            'h' => $imageSize[1] ?? 0,
 
-            'mime' => $imagesize['mime'] ?? false,
+            'mime' => $imageSize['mime'] ?? false,
 
             'modified' => $stat['mtime'] ?? 0,
 

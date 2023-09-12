@@ -10,7 +10,7 @@ class Response extends \SFW\Lazy\Sys
     /**
      * Mime types for compress via gzip.
      */
-    protected array $compress = [
+    protected static array $compress = [
         'text/html',
         'text/plain',
         'text/xml',
@@ -94,7 +94,7 @@ class Response extends \SFW\Lazy\Sys
         header("Content-Type: $mime; charset=utf-8");
 
         if (strlen($contents) > 32 * 1024
-            && in_array($mime, $this->compress, true)
+            && in_array($mime, self::$compress, true)
                 && str_contains($_SERVER['HTTP_ACCEPT_ENCODING'] ?? '', 'gzip')
         ) {
             header('Content-Encoding: gzip');
@@ -207,33 +207,6 @@ class Response extends \SFW\Lazy\Sys
     }
 
     /**
-     * Logs error and show error page 500.
-     */
-    public function error(string|\Stringable|null $message = null): void
-    {
-        if ($message instanceof \Throwable) {
-            $this->sys('Logger')->error($message);
-
-            $this->sys('Logger')->emergency('Aborted',
-                [
-                    'file' => $message->getFile(),
-                    'line' => $message->getLine(),
-                ]
-            );
-        } else {
-            $trace = debug_backtrace();
-
-            if (isset($message)) {
-                $this->sys('Logger')->error($message, ['trace' => $trace]);
-            }
-
-            $this->sys('Logger')->emergency('Aborted', ['trace' => $trace]);
-        }
-
-        $this->errorPage(500);
-    }
-
-    /**
      * Redirect.
      */
     public function redirect(string $url, $end = true): self
@@ -268,7 +241,7 @@ class Response extends \SFW\Lazy\Sys
     /**
      * Sets some options.
      *
-     * @throws \SFW\RuntimeException
+     * @throws \SFW\InvalidArgumentException
      *
      * @internal
      */
@@ -278,7 +251,7 @@ class Response extends \SFW\Lazy\Sys
             if ($option === 'Native' || $option === 'Xslt') {
                 $this->templater = $option;
             } else {
-                throw new \SFW\RuntimeException("Unknown option $option");
+                throw new \SFW\InvalidArgumentException("Unknown option $option");
             }
         }
     }

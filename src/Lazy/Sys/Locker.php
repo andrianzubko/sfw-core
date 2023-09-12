@@ -2,8 +2,6 @@
 
 namespace SFW\Lazy\Sys;
 
-use SFW\Exception;
-
 /**
  * Locker.
  */
@@ -17,7 +15,7 @@ class Locker extends \SFW\Lazy\Sys
     /**
      * Lock.
      *
-     * @throws RuntimeException
+     * @throws \SFW\RuntimeException
      */
     public function lock(string $key): bool
     {
@@ -26,13 +24,23 @@ class Locker extends \SFW\Lazy\Sys
         $dir = dirname($file);
 
         if ($this->sys('Dir')->create($dir) === false) {
-            throw new RuntimeException("Unable to create directory $dir");
+            throw new \SFW\RuntimeException(
+                sprintf(
+                    'Unable to create directory %s',
+                        $dir
+                )
+            );
         }
 
         $handle = fopen($file, 'cb+');
 
         if ($handle === false) {
-            throw new RuntimeException("Unable to open file $file");
+            throw new \SFW\RuntimeException(
+                sprintf(
+                    'Unable to open file %s',
+                        $file
+                )
+            );
         }
 
         if (flock($handle, LOCK_EX | LOCK_NB) === false) {
@@ -47,7 +55,7 @@ class Locker extends \SFW\Lazy\Sys
     /**
      * Unlock.
      *
-     * @throws RuntimeException
+     * @throws \SFW\RuntimeException
      */
     public function unlock(string $key): void
     {
@@ -56,7 +64,12 @@ class Locker extends \SFW\Lazy\Sys
         }
 
         if (fclose($this->locks[$key]) === false) {
-            throw new RuntimeException("Unable to close file {$this->locks[$key]}");
+            throw new \SFW\RuntimeException(
+                sprintf(
+                    'Unable to close file %s',
+                        $this->locks[$key]
+                )
+            );
         }
 
         unset($this->locks[$key]);

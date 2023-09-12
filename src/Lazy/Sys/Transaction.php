@@ -2,6 +2,8 @@
 
 namespace SFW\Lazy\Sys;
 
+use Psr\Log\LogLevel;
+
 /**
  * Transaction.
  */
@@ -10,7 +12,7 @@ class Transaction extends \SFW\Lazy\Sys
     /**
      * Registered callbacks for running on transaction abort.
      */
-    protected array $onAbort = [];
+    protected static array $onAbort = [];
 
     /**
      * Used database driver.
@@ -20,7 +22,7 @@ class Transaction extends \SFW\Lazy\Sys
     /**
      * Run transaction and throw on unexpected errors.
      *
-     * @throws \SFW\RuntimeException
+     * @throws \SFW\Databaser\Exception
      */
     public function run(
         ?string $isolation,
@@ -46,7 +48,7 @@ class Transaction extends \SFW\Lazy\Sys
     /**
      * Processing transaction with retries on expected errors.
      *
-     * @throws \SFW\RuntimeException
+     * @throws \SFW\Databaser\Exception
      */
     protected function process(
         string $caller,
@@ -59,7 +61,7 @@ class Transaction extends \SFW\Lazy\Sys
 
         for ($retry = 1; $retry <= self::$config['sys']['transaction']['retries']; $retry++) {
             try {
-                $this->onAbort = [];
+                self::$onAbort = [];
 
                 $this->sys('Db')->begin($isolation);
 
@@ -68,7 +70,7 @@ class Transaction extends \SFW\Lazy\Sys
                 } else {
                     $this->sys('Db')->rollback();
 
-                    foreach ($this->onAbort as $event) {
+                    foreach (self::$onAbort as $event) {
                         $event();
                     }
                 }
@@ -83,7 +85,7 @@ class Transaction extends \SFW\Lazy\Sys
                     $this->sys('Db')->rollback();
                 } catch (\SFW\Databaser\Exception) {}
 
-                foreach ($this->onAbort as $event) {
+                foreach (self::$onAbort as $event) {
                     $event();
                 }
 
@@ -91,19 +93,19 @@ class Transaction extends \SFW\Lazy\Sys
                     $onerror($error->getSqlState());
                 }
 
-                $isExpected = in_array($error->getSqlState(), $expected ?? [], true);
-
-                $this->sys('Logger')->logTransactionFail(
-                    $isExpected,
-                    $error->getSqlState(),
-                    $retry
-                );
-
-                if (!$isExpected
-                    || $retry == self::$config['sys']['transaction']['retries']
+                if (in_array($error->getSqlState(), $expected ?? [], true)
+                    && $retry < self::$config['sys']['transaction']['retries']
                 ) {
+                    $this->sys('Logger')->logTransactionFail(
+                        LogLevel::INFO, $error->getSqlState(), $retry
+                    );
+                } else {
+                    $this->sys('Logger')->logTransactionFail(
+                        LogLevel::ERROR, $error->getSqlState(), $retry
+                    );
+
                     if ($caller === 'run') {
-                        throw new \SFW\RuntimeException($error->getMessage());
+                        throw $error;
                     }
 
                     $this->sys('Logger')->error($error);
@@ -141,13 +143,13 @@ class Transaction extends \SFW\Lazy\Sys
      */
     public function onAbort(callable $event): void
     {
-        $this->onAbort[] = $event;
+        self::$onAbort[] = $event;
     }
 
     /**
      * Sets some options.
      *
-     * @throws \SFW\RuntimeException
+     * @throws \SFW\InvalidArgumentException
      *
      * @internal
      */
@@ -157,7 +159,7 @@ class Transaction extends \SFW\Lazy\Sys
             if ($option === 'Mysql' || $option === 'Pgsql') {
                 $this->db = $option;
             } else {
-                throw new \SFW\RuntimeException("Unknown option $option");
+                throw new \SFW\InvalidArgumentException("Unknown option $option");
             }
         }
     }

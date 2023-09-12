@@ -12,144 +12,151 @@ abstract class Runner extends Base
      */
     final public function __construct()
     {
-        // {{{ prevent multiple initializations
+        try {
+            // {{{ prevent multiple initializations
 
-        if (isset(self::$startedTime)) {
-            return;
-        }
-
-        // }}}
-        // {{{ started time
-
-        self::$startedTime = gettimeofday(true);
-
-        // }}}
-        // {{{ application dir
-
-        define('APP_DIR', dirname(__DIR__, 4));
-
-        // }}}
-        // {{{ important PHP params.
-
-        ini_set('display_errors', PHP_SAPI === 'cli');
-
-        ini_set('error_reporting', -1);
-
-        ini_set('ignore_user_abort', true);
-
-        // }}}
-        // {{{ configs
-
-        self::$config['sys'] = \App\Config\Sys::get();
-
-        self::$config['my'] = \App\Config\My::get();
-
-        self::$config['shared'] = \App\Config\Shared::get();
-
-        self::$e['config'] = &self::$config['shared'];
-
-        // }}}
-        // {{{ default locale
-
-        setlocale(LC_ALL, 'C');
-
-        // }}}
-        // {{{ default encoding
-
-        mb_internal_encoding('UTF-8');
-
-        // }}}
-        // {{{ default timezone
-
-        if (!date_default_timezone_set(self::$config['sys']['timezone'])) {
-            $this->sys('Response')->error(
-                sprintf('Unable to set timezone %s',
-                    self::$config['sys']['timezone']
-                )
-            );
-        }
-
-        // }}}
-        // {{{ some parameters correcting
-
-        $_SERVER['HTTP_HOST'] ??= 'localhost';
-
-        $_SERVER['HTTP_SCHEME'] = empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off'
-            ? 'http' : 'https';
-
-        $_SERVER['REMOTE_ADDR'] ??= '0.0.0.0';
-
-        $_SERVER['REQUEST_METHOD'] ??= 'GET';
-
-        $_SERVER['REQUEST_URI'] = $_SERVER['REDIRECT_REQUEST_URI'] ?? $_SERVER['REQUEST_URI'] ?? '/';
-
-        $chunks = explode('?', $_SERVER['REQUEST_URI'], 2);
-
-        $_SERVER['REQUEST_URL'] = $chunks[0];
-
-        $_SERVER['REQUEST_QUERY'] = $chunks[1] ?? '';
-
-        // }}}
-        // {{{ default environment
-
-        if (isset(self::$config['sys']['url'])) {
-            $parsed = parse_url(self::$config['sys']['url']);
-
-            if (!isset($parsed['host'])) {
-                $this->sys('Response')->error('Incorrect url in system config');
+            if (isset(self::$startedTime)) {
+                return;
             }
 
-            self::$e['sys']['url_scheme'] = $parsed['scheme'] ?? 'http';
+            // }}}
+            // {{{ started time
 
-            self::$e['sys']['url_host'] = $parsed['host'];
-        } else {
-            self::$e['sys']['url_scheme'] = $_SERVER['HTTP_SCHEME'];
+            self::$startedTime = gettimeofday(true);
 
-            self::$e['sys']['url_host'] = $_SERVER['HTTP_HOST'];
-        }
+            // }}}
+            // {{{ application dir
 
-        self::$e['sys']['url'] = sprintf('%s://%s',
-            self::$e['sys']['url_scheme'],
+            define('APP_DIR', dirname(__DIR__, 4));
+
+            // }}}
+            // {{{ important PHP params.
+
+            ini_set('display_errors', PHP_SAPI === 'cli');
+
+            ini_set('error_reporting', -1);
+
+            ini_set('ignore_user_abort', true);
+
+            // }}}
+            // {{{ configs
+
+            self::$config['sys'] = \App\Config\Sys::get();
+
+            self::$config['my'] = \App\Config\My::get();
+
+            self::$config['shared'] = \App\Config\Shared::get();
+
+            self::$e['config'] = &self::$config['shared'];
+
+            // }}}
+            // {{{ default locale
+
+            setlocale(LC_ALL, 'C');
+
+            // }}}
+            // {{{ default encoding
+
+            mb_internal_encoding('UTF-8');
+
+            // }}}
+            // {{{ default timezone
+
+            if (!date_default_timezone_set(self::$config['sys']['timezone'])) {
+                throw new BadConfigurationException(
+                    sprintf(
+                        'Unable to set timezone %s',
+                            self::$config['sys']['timezone']
+                    )
+                );
+            }
+
+            // }}}
+            // {{{ some parameters correcting
+
+            $_SERVER['HTTP_HOST'] ??= 'localhost';
+
+            $_SERVER['HTTP_SCHEME'] = empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off'
+                ? 'http' : 'https';
+
+            $_SERVER['REMOTE_ADDR'] ??= '0.0.0.0';
+
+            $_SERVER['REQUEST_METHOD'] ??= 'GET';
+
+            $_SERVER['REQUEST_URI'] = $_SERVER['REDIRECT_REQUEST_URI'] ?? $_SERVER['REQUEST_URI'] ?? '/';
+
+            $chunks = explode('?', $_SERVER['REQUEST_URI'], 2);
+
+            $_SERVER['REQUEST_URL'] = $chunks[0];
+
+            $_SERVER['REQUEST_QUERY'] = $chunks[1] ?? '';
+
+            // }}}
+            // {{{ default environment
+
+            if (isset(self::$config['sys']['url'])) {
+                $parsed = parse_url(self::$config['sys']['url']);
+
+                if (!isset($parsed['host'])) {
+                    throw new BadConfigurationException('Incorrect url in system config');
+                }
+
+                self::$e['sys']['url_scheme'] = $parsed['scheme'] ?? 'http';
+
+                self::$e['sys']['url_host'] = $parsed['host'];
+            } else {
+                self::$e['sys']['url_scheme'] = $_SERVER['HTTP_SCHEME'];
+
+                self::$e['sys']['url_host'] = $_SERVER['HTTP_HOST'];
+            }
+
+            self::$e['sys']['url'] = sprintf('%s://%s',
+                self::$e['sys']['url_scheme'],
                 self::$e['sys']['url_host']
-        );
+            );
 
-        self::$e['sys']['timestamp'] = (int) self::$startedTime;
+            self::$e['sys']['timestamp'] = (int) self::$startedTime;
 
-        $controller = self::$e['sys']['controller'] = (new \App\Router())->get();
+            $controller = self::$e['sys']['controller'] = (new \App\Router())->get();
 
-        if ($controller === false) {
-            $this->sys('Response')->errorPage(404);
-        }
+            if ($controller === false) {
+                $this->sys('Response')->errorPage(404);
+            }
 
-        // }}}
-        // {{{ additional environment
+            // }}}
+            // {{{ additional environment
 
-        try {
             $this->environment();
-        } catch (\Throwable $error) {
-            $this->sys('Response')->error($error);
-        }
 
-        // }}}
-        // {{{ calling Controller class or finish if cli
+            // }}}
+            // {{{ calling Controller class or finish if cli
 
-        if (PHP_SAPI === 'cli') {
-            return;
-        }
+            if (PHP_SAPI === 'cli') {
+                return;
+            }
 
-        $class = "App\\Controller\\$controller";
+            $class = "App\\Controller\\$controller";
 
-        if (!class_exists($class)) {
-            $this->sys('Response')->errorPage(404);
-        }
+            if (!class_exists($class)) {
+                $this->sys('Response')->errorPage(404);
+            }
 
-        try {
             new $class();
-        } catch (\Throwable $error) {
-            $this->sys('Response')->error($error);
-        }
 
-        // }}}
+            // }}}
+        } catch (\Throwable $error) {
+            // {{{ something wrong
+
+            $this->sys('Logger')->error($error);
+
+            $this->sys('Logger')->emergency('Application terminated!',
+                ['append_file_and_line' => false]
+            );
+
+            $this->sys('Response')->errorPage(500);
+
+            // }}}
+        }
     }
 
     /**

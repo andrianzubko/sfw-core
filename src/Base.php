@@ -46,22 +46,24 @@ abstract class Base
 
         $options = explode(':', $name);
 
-        $primary = array_shift($options);
+        $primaryName = array_shift($options);
 
-        $class = "App\\Lazy\\Sys\\$primary";
+        $class = "App\\Lazy\\Sys\\$primaryName";
 
         if (!class_exists($class)) {
-            $class = "SFW\\Lazy\\Sys\\$primary";
+            $class = "SFW\\Lazy\\Sys\\$primaryName";
         }
 
         $lazy = new $class();
 
         if (method_exists($lazy, 'getInstance')) {
             $lazy = $lazy->getInstance();
-        } elseif (
-            $options && method_exists($lazy, 'setOptions')
-        ) {
-            $lazy->setOptions($options);
+        } elseif ($options) {
+            if (method_exists($lazy, 'setOptions')) {
+                $lazy->setOptions($options);
+            }
+
+            self::$sysLazyClasses[$primaryName] ??= new $class();
         }
 
         return self::$sysLazyClasses[$name] = $lazy;

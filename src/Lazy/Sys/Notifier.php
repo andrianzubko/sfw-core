@@ -2,7 +2,7 @@
 
 namespace SFW\Lazy\Sys;
 
-use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\{PHPMailer, Exception AS PHPMailerException};
 
 /**
  * Notifier.
@@ -59,18 +59,22 @@ class Notifier extends \SFW\Lazy\Sys
         while ($this->notifies) {
             $notify = array_shift($this->notifies);
 
-            if (isset($notify)) {
-                $structs = $notify->build(clone $this->defaultStruct);
+            if (!isset($notify)) {
+                continue;
+            }
 
-                if (self::$config['sys']['notifier']['enabled']) {
-                    foreach ($structs as $struct) {
-                        if (isset(self::$config['sys']['notifier']['recipients'])) {
-                            $struct->recipients = self::$config['sys']['notifier']['recipients'];
-                        }
+            $structs = $notify->build(clone $this->defaultStruct);
 
-                        $this->send($struct);
-                    }
+            if (!self::$config['sys']['notifier']['enabled']) {
+                continue;
+            }
+
+            foreach ($structs as $struct) {
+                if (isset(self::$config['sys']['notifier']['recipients'])) {
+                    $struct->recipients = self::$config['sys']['notifier']['recipients'];
                 }
+
+                $this->send($struct);
             }
         }
     }
@@ -80,62 +84,68 @@ class Notifier extends \SFW\Lazy\Sys
      */
     protected function send(\SFW\NotifyStruct $struct): void
     {
-        $mailer = new PHPMailer();
+        try {
+            $mailer = new PHPMailer(true);
 
-        $mailer->CharSet = 'utf-8';
+            $mailer->CharSet = 'utf-8';
 
-        if (isset($struct->subject)) {
-            $mailer->Subject = $struct->subject;
-        }
+            if (isset($struct->subject)) {
+                $mailer->Subject = $struct->subject;
+            }
 
-        if (isset($struct->body)) {
-            $mailer->msgHTML($struct->body);
-        }
+            if (isset($struct->body)) {
+                $mailer->msgHTML($struct->body);
+            }
 
-        if (is_array($struct->sender)) {
-            $mailer->setFrom(...$struct->sender);
-        } else {
-            $mailer->setFrom($struct->sender);
-        }
-
-        foreach ($struct->recipients as $recipient) {
-            if (is_array($recipient)) {
-                $mailer->addAddress(...$recipient);
+            if (is_array($struct->sender)) {
+                $mailer->setFrom(...$struct->sender);
             } else {
-                $mailer->addAddress($recipient);
+                $mailer->setFrom($struct->sender);
             }
-        }
 
-        foreach ($struct->replies as $reply) {
-            if (is_array($reply)) {
-                $mailer->addReplyTo(...$reply);
-            } else {
-                $mailer->addReplyTo($reply);
+            foreach ($struct->recipients as $recipient) {
+                try {
+                    if (is_array($recipient)) {
+                        $mailer->addAddress(...$recipient);
+                    } else {
+                        $mailer->addAddress($recipient);
+                    }
+                } catch (PHPMailerException) {}
             }
-        }
 
-        foreach ($struct->customHeaders as $header) {
-            if (is_array($header)) {
-                $mailer->addCustomHeader(...$header);
-            } else {
-                $mailer->addCustomHeader($header);
+            foreach ($struct->replies as $reply) {
+                try {
+                    if (is_array($reply)) {
+                        $mailer->addReplyTo(...$reply);
+                    } else {
+                        $mailer->addReplyTo($reply);
+                    }
+                } catch (PHPMailerException) {}
             }
-        }
 
-        foreach ($struct->attachmentsFiles as $attachment) {
-            if (is_array($attachment)) {
-                $mailer->addAttachment(...$attachment);
-            } else {
-                $mailer->addAttachment($attachment);
+            foreach ($struct->customHeaders as $header) {
+                if (is_array($header)) {
+                    $mailer->addCustomHeader(...$header);
+                } else {
+                    $mailer->addCustomHeader($header);
+                }
             }
-        }
 
-        foreach ($struct->attachmentsStrings as $attachment) {
-            if (is_array($attachment)) {
-                $mailer->addStringAttachment(...$attachment);
+            foreach ($struct->attachmentsFiles as $attachment) {
+                if (is_array($attachment)) {
+                    $mailer->addAttachment(...$attachment);
+                } else {
+                    $mailer->addAttachment($attachment);
+                }
             }
-        }
 
-        $mailer->send();
+            foreach ($struct->attachmentsStrings as $attachment) {
+                if (is_array($attachment)) {
+                    $mailer->addStringAttachment(...$attachment);
+                }
+            }
+
+            $mailer->send();
+        } catch (PHPMailerException) {}
     }
 }

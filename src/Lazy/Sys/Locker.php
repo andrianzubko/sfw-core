@@ -10,15 +10,24 @@ class Locker extends \SFW\Lazy\Sys
     /**
      * Already created locks.
      */
-    protected array $locks = [];
+    protected static array $locks = [];
 
     /**
      * Lock.
      *
-     * @throws \SFW\RuntimeException
+     * @throws \SFW\RuntimeException|\SFW\LogicException
      */
     public function lock(string $key): bool
     {
+        if (isset(self::$locks[$key])) {
+            throw new \SFW\LogicException(
+                sprintf(
+                    'Lock with key %s is already in use',
+                        $key
+                )
+            );
+        }
+
         $file = str_replace('{KEY}', $key, self::$config['sys']['locker']['file']);
 
         $dir = dirname($file);
@@ -47,7 +56,7 @@ class Locker extends \SFW\Lazy\Sys
             return false;
         }
 
-        $this->locks[$key] = $handle;
+        self::$locks[$key] = $handle;
 
         return true;
     }
@@ -55,23 +64,28 @@ class Locker extends \SFW\Lazy\Sys
     /**
      * Unlock.
      *
-     * @throws \SFW\RuntimeException
+     * @throws \SFW\RuntimeException|\SFW\LogicException
      */
     public function unlock(string $key): void
     {
-        if (!isset($this->locks[$key])) {
-            return;
-        }
-
-        if (fclose($this->locks[$key]) === false) {
-            throw new \SFW\RuntimeException(
+        if (!isset(self::$locks[$key])) {
+            throw new \SFW\LogicException(
                 sprintf(
-                    'Unable to close file %s',
-                        $this->locks[$key]
+                    'Lock with key %s is not exists',
+                        $key
                 )
             );
         }
 
-        unset($this->locks[$key]);
+        if (fclose(self::$locks[$key]) === false) {
+            throw new \SFW\RuntimeException(
+                sprintf(
+                    'Unable to close file %s',
+                        self::$locks[$key]
+                )
+            );
+        }
+
+        unset(self::$locks[$key]);
     }
 }

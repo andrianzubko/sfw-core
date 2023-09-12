@@ -129,19 +129,19 @@ abstract class Runner extends Base
             $this->environment();
 
             // }}}
-            // {{{ calling Controller class or finish if cli
+            // {{{ calling Controller class if not cli mode
 
-            if (PHP_SAPI === 'cli') {
-                return;
+            if (PHP_SAPI !== 'cli') {
+                $class = "App\\Controller\\$controller";
+
+                if (!class_exists($class)) {
+                    $this->sys('Response')->errorPage(404);
+                }
+
+                new $class();
+            } else {
+                set_time_limit(0);
             }
-
-            $class = "App\\Controller\\$controller";
-
-            if (!class_exists($class)) {
-                $this->sys('Response')->errorPage(404);
-            }
-
-            new $class();
 
             // }}}
         } catch (\Throwable $error) {

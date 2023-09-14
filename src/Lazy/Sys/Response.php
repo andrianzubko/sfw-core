@@ -10,7 +10,7 @@ class Response extends \SFW\Lazy\Sys
     /**
      * Mime types for compress via gzip.
      */
-    protected array $compress = [
+    protected static array $compress = [
         'text/html',
         'text/plain',
         'text/xml',
@@ -83,9 +83,7 @@ class Response extends \SFW\Lazy\Sys
 
         header(
             sprintf('Last-Modified: %s',
-                gmdate('D, d M Y H:i:s \G\M\T',
-                    self::$e['sys']['timestamp']
-                )
+                gmdate('D, d M Y H:i:s \G\M\T', self::$e['sys']['timestamp'])
             )
         );
 
@@ -94,7 +92,7 @@ class Response extends \SFW\Lazy\Sys
         header("Content-Type: $mime; charset=utf-8");
 
         if (strlen($contents) > 32 * 1024
-            && in_array($mime, $this->compress, true)
+            && in_array($mime, self::$compress, true)
                 && str_contains($_SERVER['HTTP_ACCEPT_ENCODING'] ?? '', 'gzip')
         ) {
             header('Content-Encoding: gzip');
@@ -105,9 +103,7 @@ class Response extends \SFW\Lazy\Sys
         }
 
         header(
-            sprintf('Content-Length: %s',
-                strlen($contents)
-            )
+            sprintf('Content-Length: %s', strlen($contents))
         );
 
         if (isset($filename)) {
@@ -118,7 +114,9 @@ class Response extends \SFW\Lazy\Sys
             header('Content-Disposition: attachment');
         }
 
-        if (!function_exists('fastcgi_finish_request')) {
+        $ffrExists = function_exists('fastcgi_finish_request');
+
+        if ($ffrExists) {
             header('Connection: close');
         }
 
@@ -130,7 +128,7 @@ class Response extends \SFW\Lazy\Sys
 
         flush();
 
-        if (function_exists('fastcgi_finish_request')) {
+        if ($ffrExists) {
             fastcgi_finish_request();
         }
 

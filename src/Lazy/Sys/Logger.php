@@ -14,9 +14,11 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
     /**
      * Logs with an arbitrary level.
      */
-    public function log($level, string|\Stringable $message, array $context = []): void
+    public function log(mixed $level, string|\Stringable $message, array $context = []): void
     {
-        if (!isset($level) || !is_string($level)) {
+        if (!isset($level)
+            || !is_string($level)
+        ) {
             $level = LogLevel::ERROR;
         }
 

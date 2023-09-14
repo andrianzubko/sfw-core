@@ -17,7 +17,7 @@ class Merger extends Base
     /**
      * Recombining if needed and returning merged paths.
      *
-     * @throws RuntimeException
+     * @throws RuntimeException|LogicException
      */
     public function get(array $options = []): array
     {
@@ -146,7 +146,7 @@ class Merger extends Base
     /**
      * Recombining.
      *
-     * @throws RuntimeException
+     * @throws RuntimeException|LogicException
      */
     protected function recombine(array $sources, bool $minify): array
     {
@@ -195,7 +195,7 @@ class Merger extends Base
     /**
      * Merging JS.
      *
-     * @throws RuntimeException
+     * @throws RuntimeException|LogicException
      */
     public function mergeJs(array $files, bool $minify): string
     {
@@ -205,7 +205,7 @@ class Merger extends Base
             try {
                 $merged = (new JSMin($merged))->min();
             } catch (\Exception $error) {
-                throw (new RuntimeException($error->getMessage()))
+                throw (new LogicException($error->getMessage()))
                     ->setFile($error->getFile())
                     ->setLine($error->getLine());
             }

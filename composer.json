@@ -18,6 +18,8 @@
         "php": "^8.2",
         "ext-curl": "*",
         "ext-gd": "*",
+        "ext-intl": "*",
+        "ext-zlib": "*",
         "ext-mbstring": "*",
         "psr/log": "^3.0",
         "mrclay/jsmin-php": "^2.4",

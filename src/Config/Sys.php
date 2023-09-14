@@ -49,18 +49,6 @@ class Sys extends \SFW\Config
          */
         $sys['db']['default'] = 'Pgsql';
 
-        /* Log slow queries.
-         *
-         * ?string
-         */
-        $sys['db']['slow_queries_log'] = APP_DIR . '/var/log/slow.queries.log';
-
-        /* Log slow queries with minimal time in seconds.
-         *
-         * float
-         */
-        $sys['db']['slow_queries_min'] = 0.5;
-
         /**
          * Pgsql.
          */
@@ -98,6 +86,18 @@ class Sys extends \SFW\Config
         $sys['db']['mysql']['charset'] = 'utf8mb4';
 
         $sys['db']['mysql']['mode'] = \SFW\Databaser::ASSOC;
+
+        /* Log slow queries.
+         *
+         * ?string
+         */
+        $sys['db']['slow_queries_log'] = APP_DIR . '/var/log/slow.queries.log';
+
+        /* Log slow queries with minimal time in seconds.
+         *
+         * float
+         */
+        $sys['db']['slow_queries_min'] = 0.5;
 
         // }}}
         // {{{ transaction
@@ -249,7 +249,7 @@ class Sys extends \SFW\Config
         // }}}
         // {{{ paginator
 
-        /* Name of page param in url for paginator.
+        /* Name of page parameter in url for paginator.
          *
          * string
          */

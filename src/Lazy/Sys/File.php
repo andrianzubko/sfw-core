@@ -40,7 +40,9 @@ class File extends \SFW\Lazy\Sys
 
         $success = $this->put($file, "<?php\n\nreturn $var;\n");
 
-        if ($success) {
+        if ($success
+            && extension_loaded('zend-opcache')
+        ) {
             opcache_invalidate($file, true);
         }
 
@@ -52,7 +54,11 @@ class File extends \SFW\Lazy\Sys
      */
     public function remove(string $file): bool
     {
-        return unlink($file);
+        if (is_file($file)) {
+            return unlink($file);
+        }
+
+        return true;
     }
 
     /**

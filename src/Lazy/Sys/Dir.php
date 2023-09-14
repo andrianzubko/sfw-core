@@ -19,17 +19,21 @@ class Dir extends \SFW\Lazy\Sys
     {
         $scanned = [];
 
-        if (($items = scandir($dir, $order)) !== false) {
+        if (is_dir($dir)
+            && ($items = scandir($dir, $order)) !== false
+        ) {
             foreach ($items as $item) {
                 if ($item === '.' || $item === '..') {
+                    continue;
+                }
 
-                } elseif (!$recursive
+                if (!$recursive
                     || is_file("$dir/$item")
                 ) {
                     $scanned[] = $item;
                 } else {
-                    foreach ($this->scan("$dir/$item", true, $order) as $subitem) {
-                        $scanned[] = "$item/$subitem";
+                    foreach ($this->scan("$dir/$item", true, $order) as $subItem) {
+                        $scanned[] = "$item/$subItem";
                     }
                 }
             }
@@ -68,8 +72,10 @@ class Dir extends \SFW\Lazy\Sys
                 if (($items = scandir($dir)) !== false) {
                     foreach ($items as $item) {
                         if ($item === '.' || $item === '..') {
+                            continue;
+                        }
 
-                        } elseif (is_dir("$dir/$item")) {
+                        if (is_dir("$dir/$item")) {
                             if ($this->remove("$dir/$item") === false) {
                                 $status = false;
                             }
@@ -101,8 +107,10 @@ class Dir extends \SFW\Lazy\Sys
             if (($items = scandir($dir)) !== false) {
                 foreach ($items as $item) {
                     if ($item === '.' || $item === '..') {
+                        continue;
+                    }
 
-                    } elseif (is_dir("$dir/$item")) {
+                    if (is_dir("$dir/$item")) {
                         if ($this->remove("$dir/$item", $recursive) === false) {
                             $status = false;
                         }
@@ -130,8 +138,10 @@ class Dir extends \SFW\Lazy\Sys
         ) {
             foreach ($items as $item) {
                 if ($item === '.' || $item === '..') {
+                    continue;
+                }
 
-                } elseif (is_dir("$source/$item")) {
+                if (is_dir("$source/$item")) {
                     if ($this->copy("$source/$item", "$target/$item") === false) {
                         $status = false;
                     }
@@ -171,7 +181,7 @@ class Dir extends \SFW\Lazy\Sys
             self::$temporary = realpath(sys_get_temp_dir());
         }
 
-        for ($i = 1; $i <= 10; $i++) {
+        for ($i = 1; $i <= 7; $i++) {
             $dir = sprintf('%s/%s', self::$temporary, $this->sys('Text')->random());
 
             if (@mkdir($dir, 0600, true)) {

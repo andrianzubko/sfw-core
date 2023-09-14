@@ -47,17 +47,17 @@ class Dir extends \SFW\Lazy\Sys
      */
     public function create(string $dir): bool
     {
-        if (!is_dir($dir)) {
-            $success = mkdir($dir, recursive: true);
-
-            if ($success) {
-                @chmod($dir, self::$config['sys']['dir']['mode']);
-            }
-
-            return $success;
+        if (is_dir($dir)) {
+            return true;
         }
 
-        return true;
+        $success = mkdir($dir, recursive: true);
+
+        if ($success) {
+            @chmod($dir, self::$config['sys']['dir']['mode']);
+        }
+
+        return $success;
     }
 
     /**
@@ -65,7 +65,7 @@ class Dir extends \SFW\Lazy\Sys
      */
     public function remove(string $dir, bool $recursive = true): bool
     {
-        $status = true;
+        $success = true;
 
         if (is_dir($dir)) {
             if ($recursive) {
@@ -76,24 +76,24 @@ class Dir extends \SFW\Lazy\Sys
                         }
 
                         if (is_dir("$dir/$item")) {
-                            if ($this->remove("$dir/$item") === false) {
-                                $status = false;
+                            if (!$this->remove("$dir/$item")) {
+                                $success = false;
                             }
-                        } elseif ($this->sys('File')->remove("$dir/$item") === false) {
-                            $status = false;
+                        } elseif (!unlink("$dir/$item")) {
+                            $success = false;
                         }
                     }
                 } else {
-                    $status = false;
+                    $success = false;
                 }
             }
 
-            if (rmdir($dir) === false) {
-                $status = false;
+            if ($success && !rmdir($dir)) {
+                $success = false;
             }
         }
 
-        return $status;
+        return $success;
     }
 
     /**
@@ -101,7 +101,7 @@ class Dir extends \SFW\Lazy\Sys
      */
     public function clear(string $dir, bool $recursive = true): bool
     {
-        $status = true;
+        $success = true;
 
         if (is_dir($dir)) {
             if (($items = scandir($dir)) !== false) {
@@ -111,19 +111,19 @@ class Dir extends \SFW\Lazy\Sys
                     }
 
                     if (is_dir("$dir/$item")) {
-                        if ($this->remove("$dir/$item", $recursive) === false) {
-                            $status = false;
+                        if (!$this->remove("$dir/$item", $recursive)) {
+                            $success = false;
                         }
-                    } elseif ($this->sys('File')->remove("$dir/$item") === false) {
-                        $status = false;
+                    } elseif (!unlink("$dir/$item")) {
+                        $success = false;
                     }
                 }
             } else {
-                $status = false;
+                $success = false;
             }
         }
 
-        return $status;
+        return $success;
     }
 
     /**
@@ -131,9 +131,9 @@ class Dir extends \SFW\Lazy\Sys
      */
     public function copy(string $source, string $target): bool
     {
-        $status = true;
+        $success = true;
 
-        if ($this->create($target) !== false
+        if ($this->create($target)
             && ($items = scandir($source)) !== false
         ) {
             foreach ($items as $item) {
@@ -142,18 +142,18 @@ class Dir extends \SFW\Lazy\Sys
                 }
 
                 if (is_dir("$source/$item")) {
-                    if ($this->copy("$source/$item", "$target/$item") === false) {
-                        $status = false;
+                    if (!$this->copy("$source/$item", "$target/$item")) {
+                        $success = false;
                     }
-                } elseif ($this->sys('File')->copy("$source/$item", "$target/$item", false) === false) {
-                    $status = false;
+                } elseif (!$this->sys('File')->copy("$source/$item", "$target/$item", false)) {
+                    $success = false;
                 }
             }
         } else {
-            $status = false;
+            $success = false;
         }
 
-        return $status;
+        return $success;
     }
 
     /**
@@ -161,13 +161,7 @@ class Dir extends \SFW\Lazy\Sys
      */
     public function move(string $source, string $target): bool
     {
-        if ($this->create(dirname($target)) === false
-            || rename($source, $target) === false
-        ) {
-            return false;
-        }
-
-        return true;
+        return $this->create(dirname($target)) && rename($source, $target);
     }
 
     /**

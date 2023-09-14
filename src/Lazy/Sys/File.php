@@ -20,7 +20,7 @@ class File extends \SFW\Lazy\Sys
     public function put(string $file, mixed $contents, int $flags = 0, bool $createDir = true): bool
     {
         if ($createDir
-            && $this->sys('Dir')->create(dirname($file)) === false
+            && !$this->sys('Dir')->create(dirname($file))
                 || file_put_contents($file, $contents, $flags) === false
         ) {
             return false;
@@ -67,8 +67,8 @@ class File extends \SFW\Lazy\Sys
     public function copy(string $source, string $target, bool $createDir = true): bool
     {
         if ($createDir
-            && $this->sys('Dir')->create(dirname($target)) === false
-                || copy($source, $target) === false
+            && !$this->sys('Dir')->create(dirname($target))
+                || !copy($source, $target)
         ) {
             return false;
         }
@@ -84,8 +84,8 @@ class File extends \SFW\Lazy\Sys
     public function move(string $source, string $target, bool $createDir = true): bool
     {
         if ($createDir
-            && $this->sys('Dir')->create(dirname($target)) === false
-                || rename($source, $target) === false
+            && !$this->sys('Dir')->create(dirname($target))
+                || !rename($source, $target)
         ) {
             return false;
         }

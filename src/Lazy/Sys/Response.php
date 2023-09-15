@@ -10,7 +10,7 @@ class Response extends \SFW\Lazy\Sys
     /**
      * Mime types for compress via gzip.
      */
-    protected static array $compress = [
+    protected array $compress = [
         'text/html',
         'text/plain',
         'text/xml',
@@ -92,7 +92,7 @@ class Response extends \SFW\Lazy\Sys
         header("Content-Type: $mime; charset=utf-8");
 
         if (strlen($contents) > 32 * 1024
-            && in_array($mime, self::$compress, true)
+            && in_array($mime, $this->compress, true)
                 && str_contains($_SERVER['HTTP_ACCEPT_ENCODING'] ?? '', 'gzip')
         ) {
             header('Content-Encoding: gzip');
@@ -107,7 +107,13 @@ class Response extends \SFW\Lazy\Sys
         );
 
         if (isset($filename)) {
-            header("Content-Disposition: $disposition; filename=\"$filename\"");
+            header(
+                sprintf(
+                    'Content-Disposition: %s; filename="%s"',
+                        $disposition,
+                        $filename
+                )
+            );
         } elseif (
             $disposition === 'attachment'
         ) {

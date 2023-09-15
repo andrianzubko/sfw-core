@@ -22,7 +22,7 @@ class Transaction extends \SFW\Lazy\Sys
     /**
      * Run transaction and throw on unexpected errors.
      *
-     * @throws \SFW\Databaser\RuntimeException
+     * @throws \SFW\Databaser\Exception
      */
     public function run(
         ?string $isolation,
@@ -48,7 +48,7 @@ class Transaction extends \SFW\Lazy\Sys
     /**
      * Processing transaction with retries on expected errors.
      *
-     * @throws \SFW\Databaser\RuntimeException
+     * @throws \SFW\Databaser\Exception
      */
     protected function process(
         string $caller,
@@ -79,11 +79,11 @@ class Transaction extends \SFW\Lazy\Sys
 
                 return true;
             } catch (
-                \SFW\Databaser\RuntimeException $error
+                \SFW\Databaser\Exception $error
             ) {
                 try {
                     $this->sys('Db')->rollback();
-                } catch (\SFW\Databaser\RuntimeException) {}
+                } catch (\SFW\Databaser\Exception) {}
 
                 foreach (self::$onAbort as $event) {
                     $event();

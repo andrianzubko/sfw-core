@@ -12,7 +12,7 @@ class Redis extends \SFW\Lazy\Sys
     /**
      * Redis module instance.
      *
-     * @throws \SFW\Cacher\CacheException
+     * @throws \SFW\Cacher\Exception
      *
      * @internal
      */

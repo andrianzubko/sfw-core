@@ -15,7 +15,8 @@ class Locker extends \SFW\Lazy\Sys
     /**
      * Lock.
      *
-     * @throws \SFW\RuntimeException|\SFW\LogicException
+     * @throws \SFW\LogicException
+     * @throws \SFW\RuntimeException
      */
     public function lock(string $key): bool
     {
@@ -64,7 +65,8 @@ class Locker extends \SFW\Lazy\Sys
     /**
      * Unlock.
      *
-     * @throws \SFW\RuntimeException|\SFW\LogicException
+     * @throws \SFW\LogicException
+     * @throws \SFW\RuntimeException
      */
     public function unlock(string $key): void
     {

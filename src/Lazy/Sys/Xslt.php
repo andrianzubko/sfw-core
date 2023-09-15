@@ -12,15 +12,7 @@ class Xslt extends \SFW\Lazy\Sys
     /**
      * Properties for templates.
      */
-    protected array $properties;
-
-    /**
-     * Setting default properties.
-     */
-    public function __construct()
-    {
-        $this->properties = [];
-    }
+    protected array $properties = [];
 
     /**
      * Xslt templater instance.

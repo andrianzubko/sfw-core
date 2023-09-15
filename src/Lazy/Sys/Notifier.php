@@ -12,37 +12,33 @@ class Notifier extends \SFW\Lazy\Sys
     /**
      * Default structure.
      */
-    protected \SFW\NotifyStruct $defaultStruct;
+    protected static \SFW\NotifyStruct $defaultStruct;
 
     /**
      * Prepared notifies.
      */
-    protected array $notifies = [];
-
-    /**
-     * Initializing default structure and registering shutdown function to build and send all messages.
-     */
-    public function __construct()
-    {
-        $this->defaultStruct = new \SFW\NotifyStruct();
-
-        $this->defaultStruct->e['config'] = self::$e['config'];
-
-        $this->defaultStruct->e['sys'] = self::$e['sys'];
-
-        register_shutdown_function(
-            function (): void {
-                $this->complete();
-            }
-        );
-    }
+    protected static array $notifies = [];
 
     /**
      * Adding notify to pool.
      */
     public function add(\SFW\Notify $notify): void
     {
-        $this->notifies[] = &$notify;
+        if (!isset(self::$defaultStruct)) {
+            self::$defaultStruct = new \SFW\NotifyStruct();
+
+            self::$defaultStruct->e['config'] = self::$e['config'];
+
+            self::$defaultStruct->e['sys'] = self::$e['sys'];
+
+            register_shutdown_function(
+                function (): void {
+                    $this->complete();
+                }
+            );
+        }
+
+        self::$notifies[] = &$notify;
 
         $this->sys('Transaction')->onAbort(
             function () use (&$notify): void {
@@ -56,14 +52,14 @@ class Notifier extends \SFW\Lazy\Sys
      */
     protected function complete(): void
     {
-        while ($this->notifies) {
-            $notify = array_shift($this->notifies);
+        while (self::$notifies) {
+            $notify = array_shift(self::$notifies);
 
             if (!isset($notify)) {
                 continue;
             }
 
-            $structs = $notify->build(clone $this->defaultStruct);
+            $structs = $notify->build(clone self::$defaultStruct);
 
             if (!self::$config['sys']['notifier']['enabled']) {
                 continue;

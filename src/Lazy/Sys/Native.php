@@ -12,36 +12,32 @@ class Native extends \SFW\Lazy\Sys
     /**
      * Properties for templates.
      */
-    protected array $properties;
+    protected array $properties = [];
 
     /**
      * Setting default properties.
      */
     public function __construct()
     {
-        $this->properties = [
-            'lc' => [$this->sys('Text'), 'lc'],
+        $text = $this->sys('Text');
 
-            'lcfirst' => [$this->sys('Text'), 'lcfirst'],
-
-            'uc' => [$this->sys('Text'), 'uc'],
-
-            'ucfirst' => [$this->sys('Text'), 'ucfirst'],
-
-            'trim' => [$this->sys('Text'), 'trim'],
-
-            'rtrim' => [$this->sys('Text'), 'rtrim'],
-
-            'ltrim' => [$this->sys('Text'), 'ltrim'],
-
-            'fulltrim' => [$this->sys('Text'), 'fulltrim'],
-
-            'multitrim' => [$this->sys('Text'), 'multitrim'],
-
-            'cut' => [$this->sys('Text'), 'cut'],
-
-            'random' => [$this->sys('Text'), 'random'],
-        ];
+        foreach (
+            [
+                'lc',
+                'lcfirst',
+                'uc',
+                'ucfirst',
+                'trim',
+                'rtrim',
+                'ltrim',
+                'fulltrim',
+                'multitrim',
+                'cut',
+                'random',
+            ] as $methodName
+        ) {
+            $this->properties[$methodName] = [$text, $methodName];
+        }
     }
 
     /**
@@ -52,11 +48,11 @@ class Native extends \SFW\Lazy\Sys
     public function getInstance(): \SFW\Templater\Processor
     {
         $templater = new \SFW\Templater\Native(
-            array_merge(self::$config['sys']['templater']['native'],
-                [
-                    'debug' => self::$config['sys']['debug'],
-                ]
-            )
+            [
+                ...self::$config['sys']['templater']['native'],
+
+                'debug' => self::$config['sys']['debug'],
+            ]
         );
 
         $templater->addProperties($this->properties);

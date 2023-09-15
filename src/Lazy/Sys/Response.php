@@ -116,7 +116,7 @@ class Response extends \SFW\Lazy\Sys
 
         $ffrExists = function_exists('fastcgi_finish_request');
 
-        if ($ffrExists) {
+        if (!$ffrExists) {
             header('Connection: close');
         }
 

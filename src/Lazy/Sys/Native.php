@@ -10,35 +10,9 @@ namespace SFW\Lazy\Sys;
 class Native extends \SFW\Lazy\Sys
 {
     /**
-     * Properties for templates.
+     * Additional properties for templates.
      */
     protected array $properties = [];
-
-    /**
-     * Setting default properties.
-     */
-    public function __construct()
-    {
-        $text = $this->sys('Text');
-
-        foreach (
-            [
-                'lc',
-                'lcfirst',
-                'uc',
-                'ucfirst',
-                'trim',
-                'rtrim',
-                'ltrim',
-                'fulltrim',
-                'multitrim',
-                'cut',
-                'random',
-            ] as $methodName
-        ) {
-            $this->properties[$methodName] = [$text, $methodName];
-        }
-    }
 
     /**
      * Native templater instance.
@@ -47,6 +21,8 @@ class Native extends \SFW\Lazy\Sys
      */
     public function getInstance(): \SFW\Templater\Processor
     {
+        $text = $this->sys('Text');
+
         $templater = new \SFW\Templater\Native(
             [
                 ...self::$config['sys']['templater']['native'],
@@ -55,7 +31,33 @@ class Native extends \SFW\Lazy\Sys
             ]
         );
 
-        $templater->addProperties($this->properties);
+        $templater->addProperties(
+            [
+                'lc' => [$text, 'lc'],
+
+                'lcFirst' => [$text, 'lcFirst'],
+
+                'uc' => [$text, 'uc'],
+
+                'ucFirst' => [$text, 'ucFirst'],
+
+                'trim' => [$text, 'trim'],
+
+                'rTrim' => [$text, 'rTrim'],
+
+                'lTrim' => [$text, 'lTrim'],
+
+                'fullTrim' => [$text, 'fullTrim'],
+
+                'multiTrim' => [$text, 'multiTrim'],
+
+                'cut' => [$text, 'cut'],
+
+                'random' => [$text, 'random'],
+
+                ...$this->properties,
+            ]
+        );
 
         return $templater;
     }

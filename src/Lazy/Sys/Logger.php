@@ -109,7 +109,7 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
 
             implode("\n\t",
                 array_map(
-                    fn($a) => $this->sys('Text')->fulltrim($a), $queries
+                    fn($a) => $this->sys('Text')->fullTrim($a), $queries
                 )
             )
         );

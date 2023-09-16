@@ -10,7 +10,7 @@ namespace SFW\Lazy\Sys;
 class Xslt extends \SFW\Lazy\Sys
 {
     /**
-     * Properties for templates.
+     * Additional properties for templates.
      */
     protected array $properties = [];
 

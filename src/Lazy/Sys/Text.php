@@ -27,7 +27,7 @@ class Text extends \SFW\Lazy\Sys
     /**
      * First char to lower case.
      */
-    public function lcfirst(?string $string): string
+    public function lcFirst(?string $string): string
     {
         if (!isset($string)) {
             return '';
@@ -51,7 +51,7 @@ class Text extends \SFW\Lazy\Sys
     /**
      * First char to upper case.
      */
-    public function ucfirst(?string $string): string
+    public function ucFirst(?string $string): string
     {
         if (!isset($string)) {
             return '';
@@ -75,7 +75,7 @@ class Text extends \SFW\Lazy\Sys
     /**
      * Trim right side.
      */
-    public function rtrim(?string $string): string
+    public function rTrim(?string $string): string
     {
         if (!isset($string)) {
             return '';
@@ -87,7 +87,7 @@ class Text extends \SFW\Lazy\Sys
     /**
      * Trim left side.
      */
-    public function ltrim(?string $string): string
+    public function lTrim(?string $string): string
     {
         if (!isset($string)) {
             return '';
@@ -99,7 +99,7 @@ class Text extends \SFW\Lazy\Sys
     /**
      * Trim both sides and convert all sequential spaces to one.
      */
-    public function fulltrim(?string $string, int $limit = 0): string
+    public function fullTrim(?string $string, int $limit = 0): string
     {
         if (!isset($string)) {
             return '';
@@ -121,7 +121,7 @@ class Text extends \SFW\Lazy\Sys
     /**
      * Trim both sides and convert all sequential spaces to one, but leave new lines.
      */
-    public function multitrim(?string $string, int $limit = 0): string
+    public function multiTrim(?string $string, int $limit = 0): string
     {
         if (!isset($string)) {
             return '';

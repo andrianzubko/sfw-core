@@ -150,7 +150,7 @@ class Response extends \SFW\Lazy\Sys
     {
         $contents = $this->sys($this->templater)->transform($e, $template);
 
-        if (isset(self::$config['sys']['response']['page_stats_pattern'])) {
+        if (isset(self::$config['sys']['response']['stats'])) {
             $timer = gettimeofday(true) - self::$startedTime;
 
             $contents .= str_replace(
@@ -176,7 +176,7 @@ class Response extends \SFW\Lazy\Sys
                     sprintf('%.2f',
                         $timer
                     ),
-                ], self::$config['sys']['response']['page_stats_pattern']
+                ], self::$config['sys']['response']['stats']
             );
         }
 

@@ -240,13 +240,13 @@ class Sys extends \SFW\Config
          */
         $sys['merger']['version_file'] = APP_DIR . '/var/cache/merged.version.php';
 
-        /* Directory for merged JS and CSS files.
+        /* Target directory for merged JS and CSS files.
          *
          * string
          */
-        $sys['merger']['dir'] = APP_DIR . '/var/cache/merged';
+        $sys['merger']['target_dir'] = APP_DIR . '/var/cache/merged';
 
-        /* Directory for merged JS and CSS files relatively to public directory.
+        /* Directory with merged JS and CSS files relatively to public directory.
          *
          * string
          */

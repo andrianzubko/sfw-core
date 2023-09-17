@@ -10,7 +10,7 @@ class Locker extends \SFW\Lazy\Sys
     /**
      * Already created locks.
      */
-    protected static array $locks = [];
+    protected array $locks = [];
 
     /**
      * Lock.
@@ -20,7 +20,7 @@ class Locker extends \SFW\Lazy\Sys
      */
     public function lock(string $key): bool
     {
-        if (isset(self::$locks[$key])) {
+        if (isset($this->locks[$key])) {
             throw new \SFW\LogicException(
                 sprintf(
                     'Lock with key %s is already in use',
@@ -57,7 +57,7 @@ class Locker extends \SFW\Lazy\Sys
             return false;
         }
 
-        self::$locks[$key] = $handle;
+        $this->locks[$key] = $handle;
 
         return true;
     }
@@ -70,7 +70,7 @@ class Locker extends \SFW\Lazy\Sys
      */
     public function unlock(string $key): void
     {
-        if (!isset(self::$locks[$key])) {
+        if (!isset($this->locks[$key])) {
             throw new \SFW\LogicException(
                 sprintf(
                     'Lock with key %s is not exists',
@@ -79,15 +79,15 @@ class Locker extends \SFW\Lazy\Sys
             );
         }
 
-        if (fclose(self::$locks[$key]) === false) {
+        if (fclose($this->locks[$key]) === false) {
             throw new \SFW\RuntimeException(
                 sprintf(
                     'Unable to close file %s',
-                        self::$locks[$key]
+                        $this->locks[$key]
                 )
             );
         }
 
-        unset(self::$locks[$key]);
+        unset($this->locks[$key]);
     }
 }

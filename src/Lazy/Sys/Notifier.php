@@ -12,24 +12,24 @@ class Notifier extends \SFW\Lazy\Sys
     /**
      * Default structure.
      */
-    protected static \SFW\NotifyStruct $defaultStruct;
+    protected \SFW\NotifyStruct $defaultStruct;
 
     /**
      * Prepared notifies.
      */
-    protected static array $notifies = [];
+    protected array $notifies = [];
 
     /**
      * Adding notify to pool.
      */
     public function add(\SFW\Notify $notify): void
     {
-        if (!isset(self::$defaultStruct)) {
-            self::$defaultStruct = new \SFW\NotifyStruct();
+        if (!isset($this->defaultStruct)) {
+            $this->defaultStruct = new \SFW\NotifyStruct();
 
-            self::$defaultStruct->e['config'] = self::$e['config'];
+            $this->defaultStruct->e['config'] = self::$e['config'];
 
-            self::$defaultStruct->e['sys'] = self::$e['sys'];
+            $this->defaultStruct->e['sys'] = self::$e['sys'];
 
             register_shutdown_function(
                 function (): void {
@@ -38,7 +38,7 @@ class Notifier extends \SFW\Lazy\Sys
             );
         }
 
-        self::$notifies[] = &$notify;
+        $this->notifies[] = &$notify;
 
         $this->sys('Transaction')->onAbort(
             function () use (&$notify): void {
@@ -52,14 +52,14 @@ class Notifier extends \SFW\Lazy\Sys
      */
     protected function complete(): void
     {
-        while (self::$notifies) {
-            $notify = array_shift(self::$notifies);
+        while ($this->notifies) {
+            $notify = array_shift($this->notifies);
 
             if (!isset($notify)) {
                 continue;
             }
 
-            $structs = $notify->build(clone self::$defaultStruct);
+            $structs = $notify->build(clone $this->defaultStruct);
 
             if (!self::$config['sys']['notifier']['enabled']) {
                 continue;

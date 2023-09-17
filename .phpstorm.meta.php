@@ -21,13 +21,9 @@ namespace PHPSTORM_META {
         'Pgsql',
         'Redis',
         'Response',
-        'Response:Native',
-        'Response:Xslt',
         'Templater',
         'Text',
         'Transaction',
-        'Transaction:Mysql',
-        'Transaction:Pgsql',
         'Xslt',
     );
 

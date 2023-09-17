@@ -85,11 +85,10 @@ abstract class Runner extends Base
 
             $_SERVER['REQUEST_URI'] = $_SERVER['REDIRECT_REQUEST_URI'] ?? $_SERVER['REQUEST_URI'] ?? '/';
 
-            $chunks = explode('?', $_SERVER['REQUEST_URI'], 2);
-
-            $_SERVER['REQUEST_URL'] = $chunks[0];
-
-            $_SERVER['REQUEST_QUERY'] = $chunks[1] ?? '';
+            [
+                $_SERVER['REQUEST_URL'],
+                $_SERVER['REQUEST_QUERY']
+            ] = array_pad(explode('?', $_SERVER['REQUEST_URI'], 2), 2, '');
 
             // }}}
             // {{{ default environment

@@ -15,14 +15,14 @@ class Merger extends Base
     protected string $versionFile;
 
     /**
-     * Directory for merged JS and CSS files.
+     * Target directory for merged JS and CSS files.
      */
-    protected string $dir;
+    protected string $targetDir;
 
     /**
-     * Directory for merged JS and CSS files relatively to public directory.
+     * Directory with merged JS and CSS files relatively to public directory.
      */
-    protected string $pubDir;
+    protected string $publicDir;
 
     /**
      * Passing parameters to properties.
@@ -31,9 +31,9 @@ class Merger extends Base
     {
         $this->versionFile = self::$config['sys']['merger']['version_file'];
 
-        $this->dir = self::$config['sys']['merger']['dir'];
+        $this->targetDir = self::$config['sys']['merger']['target_dir'];
 
-        $this->pubDir = self::$config['sys']['merger']['public_dir'];
+        $this->publicDir = self::$config['sys']['merger']['public_dir'];
     }
 
     /**
@@ -85,7 +85,7 @@ class Merger extends Base
 
         foreach ($this->sources as $targets) {
             foreach ((array) $targets as $target) {
-                $paths[$target] = "$this->pubDir/$time.$target";
+                $paths[$target] = "$this->publicDir/$time.$target";
             }
         }
 
@@ -131,8 +131,8 @@ class Merger extends Base
 
         $targets = [];
 
-        foreach (@$this->sys('Dir')->scan($this->dir) as $item) {
-            if (is_file("$this->dir/$item")
+        foreach (@$this->sys('Dir')->scan($this->targetDir) as $item) {
+            if (is_file("$this->targetDir/$item")
                 && preg_match('/^(\d+)\.(.+)$/', $item, $M)
                     && (int) $M[1] === $version['time']
             ) {
@@ -174,7 +174,7 @@ class Merger extends Base
      */
     protected function recombine(array $sources, bool $minify): array
     {
-        $this->sys('Dir')->clear($this->dir);
+        $this->sys('Dir')->clear($this->targetDir);
 
         $version = [
             'time' => time(),
@@ -183,7 +183,7 @@ class Merger extends Base
 
         foreach (array_keys($sources) as $type) {
             foreach ($sources[$type] as $target => $files) {
-                $file = "$this->dir/{$version['time']}.$target";
+                $file = "$this->targetDir/{$version['time']}.$target";
 
                 if ($type === 'js') {
                     $contents = $this->mergeJs($files, $minify);

@@ -10,7 +10,7 @@ class Dir extends \SFW\Lazy\Sys
     /**
      * For temporary directory.
      */
-    protected static ?string $temporary;
+    protected ?string $temporary;
 
     /**
      * Directory scanning.
@@ -171,12 +171,12 @@ class Dir extends \SFW\Lazy\Sys
      */
     public function temporary(): string
     {
-        if (!isset(self::$temporary)) {
-            self::$temporary = realpath(sys_get_temp_dir());
+        if (!isset($this->temporary)) {
+            $this->temporary = realpath(sys_get_temp_dir());
         }
 
         for ($i = 1; $i <= 7; $i++) {
-            $dir = sprintf('%s/%s', self::$temporary, $this->sys('Text')->random());
+            $dir = sprintf('%s/%s', $this->temporary, $this->sys('Text')->random());
 
             if (@mkdir($dir, 0600, true)) {
                 register_shutdown_function(

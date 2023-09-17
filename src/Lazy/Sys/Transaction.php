@@ -12,37 +12,42 @@ class Transaction extends \SFW\Lazy\Sys
     /**
      * Registered callbacks for running on transaction abort.
      */
-    protected static array $onAbort = [];
+    protected array $onAbort = [];
 
     /**
-     * Used database driver.
+     * Do some action on transaction abort.
      */
-    protected string $db = 'Db';
-
-    /**
-     * Run transaction and throw on unexpected errors.
-     *
-     * @throws \SFW\Databaser\Exception
-     */
-    public function run(
-        ?string $isolation,
-        ?array $expected,
-        callable $body,
-        ?callable $onerror = null
-    ): bool {
-        return $this->process(__FUNCTION__, $isolation, $expected, $body, $onerror);
+    public function onAbort(callable $event): void
+    {
+        $this->onAbort[] = $event;
     }
 
     /**
-     * Run transaction and just warn on unexpected errors.
+     * Processing pgsql transaction with retries on expected errors.
+     *
+     * @throws \SFW\Databaser\Exception
      */
-    public function quiet(
+    public function pgsql(
         ?string $isolation,
         ?array $expected,
         callable $body,
         ?callable $onerror = null
     ): bool {
-        return $this->process(__FUNCTION__, $isolation, $expected, $body, $onerror);
+        return $this->run($isolation, $expected, $body, $onerror, 'Pgsql');
+    }
+
+    /**
+     * Processing mysql transaction with retries on expected errors.
+     *
+     * @throws \SFW\Databaser\Exception
+     */
+    public function mysql(
+        ?string $isolation,
+        ?array $expected,
+        callable $body,
+        ?callable $onerror = null
+    ): bool {
+        return $this->run($isolation, $expected, $body, $onerror, 'Mysql');
     }
 
     /**
@@ -50,18 +55,18 @@ class Transaction extends \SFW\Lazy\Sys
      *
      * @throws \SFW\Databaser\Exception
      */
-    protected function process(
-        string $caller,
+    public function run(
         ?string $isolation,
         ?array $expected,
         callable $body,
-        ?callable $onerror
+        ?callable $onerror = null,
+        string $driver = 'Db'
     ): bool {
-        $this->setDb();
+        $this->setDriver($driver);
 
         for ($retry = 1; $retry <= self::$config['sys']['transaction']['retries']; $retry++) {
             try {
-                self::$onAbort = [];
+                $this->onAbort = [];
 
                 $this->sys('Db')->begin($isolation);
 
@@ -70,12 +75,12 @@ class Transaction extends \SFW\Lazy\Sys
                 } else {
                     $this->sys('Db')->rollback();
 
-                    foreach (self::$onAbort as $event) {
+                    foreach ($this->onAbort as $event) {
                         $event();
                     }
                 }
 
-                $this->resetToDefaultDb();
+                $this->resetToDefaultDriver();
 
                 return true;
             } catch (
@@ -85,7 +90,7 @@ class Transaction extends \SFW\Lazy\Sys
                     $this->sys('Db')->rollback();
                 } catch (\SFW\Databaser\Exception) {}
 
-                foreach (self::$onAbort as $event) {
+                foreach ($this->onAbort as $event) {
                     $event();
                 }
 
@@ -104,20 +109,14 @@ class Transaction extends \SFW\Lazy\Sys
                         LogLevel::ERROR, $error->getSqlState(), $retry
                     );
 
-                    if ($caller === 'run') {
-                        throw $error;
-                    }
+                    $this->resetToDefaultDriver();
 
-                    $this->sys('Logger')->error($error);
-
-                    $this->resetToDefaultDb();
-
-                    return false;
+                    throw $error;
                 }
             }
         }
 
-        $this->resetToDefaultDb();
+        $this->resetToDefaultDriver();
 
         return true;
     }
@@ -125,42 +124,16 @@ class Transaction extends \SFW\Lazy\Sys
     /**
      * Sets database driver.
      */
-    protected function setDb(): void
+    protected function setDriver(string $driver): void
     {
-        self::$sysLazyClasses['Db'] = $this->sys($this->db);
+        self::$sysLazies['Db'] = $this->sys($driver);
     }
 
     /**
      * Resets database driver to default.
      */
-    protected function resetToDefaultDb(): void
+    protected function resetToDefaultDriver(): void
     {
-        self::$sysLazyClasses['Db'] = $this->sys(self::$config['sys']['db']['default']);
-    }
-
-    /**
-     * Do some action on transaction abort.
-     */
-    public function onAbort(callable $event): void
-    {
-        self::$onAbort[] = $event;
-    }
-
-    /**
-     * Sets some options.
-     *
-     * @throws \SFW\InvalidArgumentException
-     *
-     * @internal
-     */
-    public function setOptions(array $options): void
-    {
-        foreach ($options as $option) {
-            if ($option === 'Mysql' || $option === 'Pgsql') {
-                $this->db = $option;
-            } else {
-                throw new \SFW\InvalidArgumentException("Unknown option $option");
-            }
-        }
+        self::$sysLazies['Db'] = $this->sys(self::$config['sys']['db']['default']);
     }
 }

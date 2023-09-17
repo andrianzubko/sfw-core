@@ -23,11 +23,6 @@ class Response extends \SFW\Lazy\Sys
     ];
 
     /**
-     * Used template processor.
-     */
-    protected string $templater = 'Templater';
-
-    /**
      * Output some as inline json.
      */
     public function json(
@@ -142,13 +137,33 @@ class Response extends \SFW\Lazy\Sys
     }
 
     /**
+     * Process and output native template.
+     *
+     * @throws \SFW\Templater\Exception
+     */
+    public function native(array $e, string $template, int $code = 200): self
+    {
+        return $this->template($e, $template, $code, 'Native');
+    }
+
+    /**
+     * Process and output xslt template.
+     *
+     * @throws \SFW\Templater\Exception
+     */
+    public function xslt(array $e, string $template, int $code = 200): self
+    {
+        return $this->template($e, $template, $code, 'Xslt');
+    }
+
+    /**
      * Process and output template.
      *
      * @throws \SFW\Templater\Exception
      */
-    public function template(array $e, string $template, int $code = 200): string|self
+    public function template(array $e, string $template, int $code = 200, string $processor = 'Templater'): self
     {
-        $contents = $this->sys($this->templater)->transform($e, $template);
+        $contents = $this->sys($processor)->transform($e, $template);
 
         if (isset(self::$config['sys']['response']['stats'])) {
             $timer = gettimeofday(true) - self::$startedTime;
@@ -216,10 +231,11 @@ class Response extends \SFW\Lazy\Sys
     public function redirect(string $url, $end = true): self
     {
         if ($url === '') {
-            $url = '/';
-        }
-
-        if (str_starts_with($url, '/') && !str_starts_with($url, '//')) {
+            $url = self::$e['sys']['url'] . '/';
+        } elseif (
+                str_starts_with($url, '/')
+            && !str_starts_with($url, '//')
+        ) {
             $url = self::$e['sys']['url'] . $url;
         }
 
@@ -240,23 +256,5 @@ class Response extends \SFW\Lazy\Sys
     public function end(): void
     {
         exit;
-    }
-
-    /**
-     * Sets some options.
-     *
-     * @throws \SFW\InvalidArgumentException
-     *
-     * @internal
-     */
-    public function setOptions(array $options): void
-    {
-        foreach ($options as $option) {
-            if ($option === 'Native' || $option === 'Xslt') {
-                $this->templater = $option;
-            } else {
-                throw new \SFW\InvalidArgumentException("Unknown option $option");
-            }
-        }
     }
 }

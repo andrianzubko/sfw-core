@@ -249,12 +249,4 @@ class Response extends \SFW\Lazy\Sys
 
         return $this;
     }
-
-    /**
-     * Just exit for fluent syntax.
-     */
-    public function end(): void
-    {
-        exit;
-    }
 }

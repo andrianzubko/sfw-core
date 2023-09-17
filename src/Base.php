@@ -68,4 +68,12 @@ abstract class Base
 
         return self::$myLazies[$name];
     }
+
+    /**
+     * Just exit with status.
+     */
+    public function end(string|int $status = 0): void
+    {
+        exit($status);
+    }
 }

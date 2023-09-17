@@ -19,7 +19,7 @@ class Mysql extends \SFW\Lazy\Sys
         return new \SFW\Databaser\Mysql(
             self::$config['sys']['db']['mysql'],
 
-            profiler: [$this->sys('Logger'), 'logDbSlowQuery']
+            $this->sys('Logger')->logDbSlowQuery(...)
         );
     }
 }

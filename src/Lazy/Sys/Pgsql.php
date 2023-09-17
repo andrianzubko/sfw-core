@@ -19,7 +19,7 @@ class Pgsql extends \SFW\Lazy\Sys
         return new \SFW\Databaser\Pgsql(
             self::$config['sys']['db']['pgsql'],
 
-            profiler: [$this->sys('Logger'), 'logDbSlowQuery']
+            $this->sys('Logger')->logDbSlowQuery(...)
         );
     }
 }

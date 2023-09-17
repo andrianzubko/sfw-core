@@ -21,8 +21,6 @@ class Native extends \SFW\Lazy\Sys
      */
     public function getInstance(): \SFW\Templater\Processor
     {
-        $text = $this->sys('Text');
-
         $templater = new \SFW\Templater\Native(
             [
                 ...self::$config['sys']['templater']['native'],
@@ -33,27 +31,27 @@ class Native extends \SFW\Lazy\Sys
 
         $templater->addProperties(
             [
-                'lc' => [$text, 'lc'],
+                'lc' => $this->sys('Text')->lc(...),
 
-                'lcFirst' => [$text, 'lcFirst'],
+                'lcFirst' => $this->sys('Text')->lcFirst(...),
 
-                'uc' => [$text, 'uc'],
+                'uc' => $this->sys('Text')->uc(...),
 
-                'ucFirst' => [$text, 'ucFirst'],
+                'ucFirst' => $this->sys('Text')->ucFirst(...),
 
-                'trim' => [$text, 'trim'],
+                'trim' => $this->sys('Text')->trim(...),
 
-                'rTrim' => [$text, 'rTrim'],
+                'rTrim' => $this->sys('Text')->rTrim(...),
 
-                'lTrim' => [$text, 'lTrim'],
+                'lTrim' => $this->sys('Text')->lTrim(...),
 
-                'fullTrim' => [$text, 'fullTrim'],
+                'fullTrim' => $this->sys('Text')->fullTrim(...),
 
-                'multiTrim' => [$text, 'multiTrim'],
+                'multiTrim' => $this->sys('Text')->multiTrim(...),
 
-                'cut' => [$text, 'cut'],
+                'cut' => $this->sys('Text')->cut(...),
 
-                'random' => [$text, 'random'],
+                'random' => $this->sys('Text')->random(...),
 
                 ...$this->properties,
             ]

@@ -84,6 +84,18 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
             );
         } else {
             error_log($message);
+
+            if (isset(self::$config['sys']['logger']['file'])) {
+                $this->sys('Dir')->create(
+                    dirname(self::$config['sys']['logger']['file'])
+                );
+
+                error_log(
+                    sprintf("[%s] %s\n",
+                        date('d-M-Y H:i:s e'), $message
+                    ), 3, self::$config['sys']['logger']['file']
+                );
+            }
         }
 
         if (isset($tzPrev)) {

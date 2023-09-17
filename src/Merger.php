@@ -24,7 +24,7 @@ class Merger extends Base
      */
     public function get(array $options = []): array
     {
-        $version = @include self::$config['sys']['merger']['version_file'];
+        $version = @include self::$config['sys']['merger']['version'];
 
         if ($version !== false
             && !($options['recheck'] ?? true)
@@ -41,7 +41,7 @@ class Merger extends Base
             );
         }
 
-        $version = @include self::$config['sys']['merger']['version_file'];
+        $version = @include self::$config['sys']['merger']['version'];
 
         $sources = $this->getSources();
 
@@ -65,7 +65,7 @@ class Merger extends Base
 
         foreach ($this->sources as $targets) {
             foreach ((array) $targets as $target) {
-                $paths[$target] = self::$config['sys']['merger']['public_dir'] . "/$time.$target";
+                $paths[$target] = self::$config['sys']['merger']['location'] . "/$time.$target";
             }
         }
 
@@ -111,8 +111,8 @@ class Merger extends Base
 
         $targets = [];
 
-        foreach (@$this->sys('Dir')->scan(self::$config['sys']['merger']['target_dir']) as $item) {
-            if (is_file(self::$config['sys']['merger']['target_dir'] . "/$item")
+        foreach (@$this->sys('Dir')->scan(self::$config['sys']['merger']['dir']) as $item) {
+            if (is_file(self::$config['sys']['merger']['dir'] . "/$item")
                 && preg_match('/^(\d+)\.(.+)$/', $item, $M)
                     && (int) $M[1] === $version['time']
             ) {
@@ -154,7 +154,7 @@ class Merger extends Base
      */
     protected function recombine(array $sources, bool $minify): array
     {
-        $this->sys('Dir')->clear(self::$config['sys']['merger']['target_dir']);
+        $this->sys('Dir')->clear(self::$config['sys']['merger']['dir']);
 
         $version = [
             'time' => time(),
@@ -163,7 +163,7 @@ class Merger extends Base
 
         foreach (array_keys($sources) as $type) {
             foreach ($sources[$type] as $target => $files) {
-                $file = self::$config['sys']['merger']['target_dir'] . "/{$version['time']}.$target";
+                $file = self::$config['sys']['merger']['dir'] . "/{$version['time']}.$target";
 
                 if ($type === 'js') {
                     $contents = $this->mergeJs($files, $minify);
@@ -182,11 +182,11 @@ class Merger extends Base
             }
         }
 
-        if ($this->sys('File')->putVar(self::$config['sys']['merger']['version_file'], $version) === false) {
+        if ($this->sys('File')->putVar(self::$config['sys']['merger']['version'], $version) === false) {
             throw new RuntimeException(
                 sprintf(
                     'Unable to write file %s',
-                        self::$config['sys']['merger']['version_file']
+                        self::$config['sys']['merger']['version']
                 )
             );
         }

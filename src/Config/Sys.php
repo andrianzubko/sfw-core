@@ -199,6 +199,15 @@ class Sys extends \SFW\Config
         $sys['locker']['file'] = APP_DIR . '/var/locks/{KEY}.lock';
 
         // }}}
+        // {{{ logger
+
+        /* Additional errors log file.
+         *
+         * ?string
+         */
+        $sys['logger']['file'] = APP_DIR . '/var/log/errors.log';
+
+        // }}}
         // {{{ response
 
         /* Optional error documents.
@@ -238,19 +247,19 @@ class Sys extends \SFW\Config
          *
          * string
          */
-        $sys['merger']['version_file'] = APP_DIR . '/var/cache/merged.version.php';
+        $sys['merger']['version'] = APP_DIR . '/var/cache/merged.version.php';
 
-        /* Target directory for merged JS and CSS files.
+        /* Directory for merged JS and CSS files.
          *
          * string
          */
-        $sys['merger']['target_dir'] = APP_DIR . '/var/cache/merged';
+        $sys['merger']['dir'] = APP_DIR . '/var/cache/merged';
 
-        /* Directory with merged JS and CSS files relatively to public directory.
+        /* URL location with merged JS and CSS files.
          *
          * string
          */
-        $sys['merger']['public_dir'] = '/.merged';
+        $sys['merger']['location'] = '/.merged';
 
         // }}}
         // {{{ paginator

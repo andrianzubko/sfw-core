@@ -12,7 +12,9 @@ class Merger extends Base
     /**
      * Passing parameters to properties.
      */
-    public function __construct(protected array $sources) {}
+    public function __construct(protected array $sources)
+    {
+    }
 
     /**
      * Recombining if needed and returning merged paths.

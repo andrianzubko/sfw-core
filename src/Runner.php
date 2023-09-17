@@ -72,7 +72,7 @@ abstract class Runner extends Base
             }
 
             // }}}
-            // {{{ some parameters correcting
+            // {{{ server parameters correcting
 
             $_SERVER['HTTP_HOST'] ??= 'localhost';
 
@@ -91,7 +91,7 @@ abstract class Runner extends Base
             ] = array_pad(explode('?', $_SERVER['REQUEST_URI'], 2), 2, '');
 
             // }}}
-            // {{{ default environment
+            // {{{ initializing default environment
 
             if (isset(self::$config['sys']['url'])) {
                 $parsed = parse_url(self::$config['sys']['url']);
@@ -110,36 +110,43 @@ abstract class Runner extends Base
             }
 
             self::$e['sys']['url'] = sprintf('%s://%s',
-                self::$e['sys']['url_scheme'],
-                self::$e['sys']['url_host']
+                self::$e['sys']['url_scheme'], self::$e['sys']['url_host']
             );
 
             self::$e['sys']['timestamp'] = (int) self::$startedTime;
 
-            $controller = self::$e['sys']['controller'] = (new \App\Router())->get();
+            // }}}
+            // {{{ initializing additional environment
 
-            if ($controller === false) {
-                $this->sys('Response')->errorPage(404);
-            }
+            $this->additionalEnvironment();
 
             // }}}
-            // {{{ additional environment
+            // {{{ calling Command or Controller class
 
-            $this->environment();
+            if (PHP_SAPI === 'cli') {
+                $command = self::$e['sys']['command'] = (new \App\Router())->getCommand();
 
-            // }}}
-            // {{{ calling Controller class if not cli mode
+                if ($command !== false) {
+                    $class = "App\\Command\\$command";
 
-            if (PHP_SAPI !== 'cli') {
-                $class = "App\\Controller\\$controller";
+                    set_time_limit(0);
 
-                if (!class_exists($class)) {
+                    (new $class())->end();
+                }
+            } else {
+                $controller = self::$e['sys']['controller'] = (new \App\Router())->getController();
+
+                if ($controller !== false) {
+                    $class = "App\\Controller\\$controller";
+
+                    if (class_exists($class)) {
+                        new $class();
+                    } else {
+                        $this->sys('Response')->errorPage(404);
+                    }
+                } else {
                     $this->sys('Response')->errorPage(404);
                 }
-
-                new $class();
-            } else {
-                set_time_limit(0);
             }
 
             // }}}
@@ -152,7 +159,9 @@ abstract class Runner extends Base
                 ['append_file_and_line' => false]
             );
 
-            $this->sys('Response')->errorPage(500);
+            if (PHP_SAPI !== 'cli') {
+                $this->sys('Response')->errorPage(500);
+            }
 
             // }}}
         }
@@ -161,5 +170,5 @@ abstract class Runner extends Base
     /**
      * Initializing additional environment.
      */
-    abstract protected function environment(): void;
+    abstract protected function additionalEnvironment(): void;
 }

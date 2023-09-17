@@ -21,42 +21,41 @@ class Native extends \SFW\Lazy\Sys
      */
     public function getInstance(): \SFW\Templater\Processor
     {
-        $templater = new \SFW\Templater\Native(
-            [
-                ...self::$config['sys']['templater']['native'],
+        return
+            (new \SFW\Templater\Native(
+                    [
+                        ...self::$config['sys']['templater']['native'],
 
-                'debug' => self::$config['sys']['debug'],
-            ]
-        );
+                        'debug' => self::$config['sys']['debug'],
+                    ]
+                )
+            )
+            ->addProperties(
+                [
+                    'lc' => $this->sys('Text')->lc(...),
 
-        $templater->addProperties(
-            [
-                'lc' => $this->sys('Text')->lc(...),
+                    'lcFirst' => $this->sys('Text')->lcFirst(...),
 
-                'lcFirst' => $this->sys('Text')->lcFirst(...),
+                    'uc' => $this->sys('Text')->uc(...),
 
-                'uc' => $this->sys('Text')->uc(...),
+                    'ucFirst' => $this->sys('Text')->ucFirst(...),
 
-                'ucFirst' => $this->sys('Text')->ucFirst(...),
+                    'trim' => $this->sys('Text')->trim(...),
 
-                'trim' => $this->sys('Text')->trim(...),
+                    'rTrim' => $this->sys('Text')->rTrim(...),
 
-                'rTrim' => $this->sys('Text')->rTrim(...),
+                    'lTrim' => $this->sys('Text')->lTrim(...),
 
-                'lTrim' => $this->sys('Text')->lTrim(...),
+                    'fullTrim' => $this->sys('Text')->fullTrim(...),
 
-                'fullTrim' => $this->sys('Text')->fullTrim(...),
+                    'multiTrim' => $this->sys('Text')->multiTrim(...),
 
-                'multiTrim' => $this->sys('Text')->multiTrim(...),
+                    'cut' => $this->sys('Text')->cut(...),
 
-                'cut' => $this->sys('Text')->cut(...),
+                    'random' => $this->sys('Text')->random(...),
 
-                'random' => $this->sys('Text')->random(...),
-
-                ...$this->properties,
-            ]
-        );
-
-        return $templater;
+                    ...$this->properties,
+                ]
+            );
     }
 }

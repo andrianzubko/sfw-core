@@ -8,7 +8,7 @@ namespace SFW;
 abstract class Lazy extends Base
 {
     /**
-     * Each Lazy class can turn into some other class if needed.
+     * Each Lazy class can be turned into some other class if needed.
      *
      * @internal
      */

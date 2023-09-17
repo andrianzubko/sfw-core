@@ -32,9 +32,7 @@ class Notifier extends \SFW\Lazy\Sys
             $this->defaultStruct->e['sys'] = self::$e['sys'];
 
             register_shutdown_function(
-                function (): void {
-                    $this->complete();
-                }
+                $this->complete(...)
             );
         }
 
@@ -59,7 +57,13 @@ class Notifier extends \SFW\Lazy\Sys
                 continue;
             }
 
-            $structs = $notify->build(clone $this->defaultStruct);
+            try {
+                $structs = $notify->build(clone $this->defaultStruct);
+            } catch (\Throwable $error) {
+                $this->sys('Logger')->error($error);
+
+                continue;
+            }
 
             if (!self::$config['sys']['notifier']['enabled']) {
                 continue;

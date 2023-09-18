@@ -212,7 +212,7 @@ class Sys extends \SFW\Config
 
         /* Optional error documents.
          *
-         * string
+         * ?string
          */
         $sys['response']['error_document'] = APP_DIR . '/public/.bin/errors/{CODE}.php';
 

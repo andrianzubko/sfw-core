@@ -70,9 +70,9 @@ abstract class Base
     }
 
     /**
-     * Just exit with status.
+     * Useful for fluent syntax exit.
      */
-    public function end(string|int $status = 0): void
+    public function exit(string|int $status = 0): void
     {
         exit($status);
     }

@@ -7,6 +7,7 @@ namespace PHPSTORM_META {
         'Curl',
         'Db',
         'Dir',
+        'Event',
         'File',
         'Image',
         'Locker',

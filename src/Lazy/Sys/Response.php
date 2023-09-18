@@ -201,25 +201,24 @@ class Response extends \SFW\Lazy\Sys
     /**
      * Shows error page.
      */
-    public function errorPage(int $code, $end = true): self
+    public function errorPage(int $code, $exit = true): self
     {
-        if (PHP_SAPI !== 'cli'
-            && !headers_sent()
-            && !ob_get_length()
-        ) {
+        if (!headers_sent() && !ob_get_length()) {
             http_response_code($code);
 
-            $errorDocument = str_replace('{CODE}', $code,
-                self::$config['sys']['response']['error_document']
-            );
+            if (isset(self::$config['sys']['response']['error_document'])) {
+                $errorDocument = str_replace('{CODE}', $code,
+                    self::$config['sys']['response']['error_document']
+                );
 
-            if (is_file($errorDocument)) {
-                include $errorDocument;
+                if (is_file($errorDocument)) {
+                    include $errorDocument;
+                }
             }
         }
 
-        if ($end) {
-            $this->end();
+        if ($exit) {
+            $this->exit(1);
         }
 
         return $this;
@@ -228,7 +227,7 @@ class Response extends \SFW\Lazy\Sys
     /**
      * Redirect.
      */
-    public function redirect(string $url, $end = true): self
+    public function redirect(string $url, $exit = true): self
     {
         if ($url === '') {
             $url = self::$e['sys']['url'] . '/';
@@ -243,8 +242,8 @@ class Response extends \SFW\Lazy\Sys
 
         header("Location: $url");
 
-        if ($end) {
-            $this->end();
+        if ($exit) {
+            $this->exit();
         }
 
         return $this;

@@ -131,7 +131,7 @@ abstract class Runner extends Base
 
                     set_time_limit(0);
 
-                    (new $class())->end();
+                    (new $class())->exit();
                 }
             } else {
                 $controller = self::$e['sys']['controller'] = (new \App\Router())->getController();
@@ -159,7 +159,9 @@ abstract class Runner extends Base
                 ['append_file_and_line' => false]
             );
 
-            if (PHP_SAPI !== 'cli') {
+            if (PHP_SAPI === 'cli') {
+                $this->exit(1);
+            } else {
                 $this->sys('Response')->errorPage(500);
             }
 

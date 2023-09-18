@@ -127,11 +127,11 @@ abstract class Runner extends Base
                 $command = self::$e['sys']['command'] = (new \App\Router())->getCommand();
 
                 if ($command !== false) {
-                    $class = "App\\Command\\$command";
-
                     set_time_limit(0);
 
-                    (new $class())->exit();
+                    $class = "App\\Command\\$command";
+
+                    new $class();
                 }
             } else {
                 $controller = self::$e['sys']['controller'] = (new \App\Router())->getController();
@@ -152,6 +152,8 @@ abstract class Runner extends Base
             // }}}
         } catch (\Throwable $error) {
             // {{{ something wrong
+
+            $this->sys('Shutdown')->unregisterAll();
 
             $this->sys('Logger')->error($error);
 

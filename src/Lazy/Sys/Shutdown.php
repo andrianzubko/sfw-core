@@ -1,0 +1,65 @@
+<?php
+
+namespace SFW\Lazy\Sys;
+
+/**
+ * Registers and unregisters shutdown callbacks.
+ */
+class Shutdown extends \SFW\Lazy\Sys
+{
+    /**
+     * Registered callbacks.
+     */
+    protected array $callbacks;
+
+    /**
+     * Registers shutdown callback.
+     */
+    public function register(callable $callback, ?string $name = null): self
+    {
+        if (!isset($this->callbacks)) {
+            register_shutdown_function(
+                function (): void {
+                    foreach ($this->callbacks as $callback) {
+                        try {
+                            $callback();
+                        } catch (\Throwable $error) {
+                            $this->sys('Logger')->error($error);
+                        }
+                    }
+                }
+            );
+        }
+
+        if (isset($name)) {
+            $this->callbacks[$name] = $callback;
+        } else {
+            $this->callbacks[] = $callback;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Unregisters shutdown callback by name.
+     */
+    public function unregister(string $name): self
+    {
+        unset($this->callbacks[$name]);
+
+        return $this;
+    }
+
+    /**
+     * Unregisters all shutdown callbacks.
+     *
+     * Basically intended for cleaning up after fatal errors.
+     * Better don't use this method for other reasons.
+     */
+    public function unregisterAll(): self
+    {
+        $this->callbacks = [];
+
+        return $this;
+    }
+}

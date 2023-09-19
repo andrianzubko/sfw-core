@@ -227,7 +227,7 @@ class Merger extends Base
         $merged = $this->mergeFiles($files);
 
         if ($minify) {
-            $merged = $this->sys('Text')->fullTrim(
+            $merged = $this->sys('Text')->fTrim(
                 preg_replace('~/\*(.*?)\*/~us', '', $merged)
             );
         }

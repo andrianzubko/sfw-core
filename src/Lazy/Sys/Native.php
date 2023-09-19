@@ -46,9 +46,9 @@ class Native extends \SFW\Lazy\Sys
 
                     'lTrim' => $this->sys('Text')->lTrim(...),
 
-                    'fullTrim' => $this->sys('Text')->fullTrim(...),
+                    'fTrim' => $this->sys('Text')->fTrim(...),
 
-                    'multiTrim' => $this->sys('Text')->multiTrim(...),
+                    'mTrim' => $this->sys('Text')->mTrim(...),
 
                     'cut' => $this->sys('Text')->cut(...),
 

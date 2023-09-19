@@ -8,11 +8,6 @@ namespace SFW\Lazy\Sys;
 class Text extends \SFW\Lazy\Sys
 {
     /**
-     * UTF-8 spaces for trim.
-     */
-    protected string $spaces = " \t\n\r\0\x0B\x0C\u{A0}\u{FEFF}";
-
-    /**
      * To lower case.
      */
     public function lc(?string $string): string
@@ -69,7 +64,7 @@ class Text extends \SFW\Lazy\Sys
             return '';
         }
 
-        return trim($string, $this->spaces);
+        return trim($string, " \t\n\r\0\x0B\x0C\u{A0}\u{FEFF}");
     }
 
     /**
@@ -81,7 +76,7 @@ class Text extends \SFW\Lazy\Sys
             return '';
         }
 
-        return rtrim($string, $this->spaces);
+        return rtrim($string, " \t\n\r\0\x0B\x0C\u{A0}\u{FEFF}");
     }
 
     /**
@@ -93,51 +88,51 @@ class Text extends \SFW\Lazy\Sys
             return '';
         }
 
-        return ltrim($string, $this->spaces);
+        return ltrim($string, " \t\n\r\0\x0B\x0C\u{A0}\u{FEFF}");
     }
 
     /**
      * Trim both sides and convert all sequential spaces to one.
      */
-    public function fullTrim(?string $string, int $limit = 0): string
+    public function fTrim(?string $string, int $limit = 0): string
     {
         if (!isset($string)) {
             return '';
         }
 
-        $string = trim(
-            preg_replace('/\s+/u', ' ', $string)
-        );
+        $string = preg_replace("/(?: |\t|\n|\r|\0|\x0B|\x0C|\u{A0}|\u{FEFF})+/S", ' ', $string);
 
-        if ($limit > 0) {
-            return rtrim(
-                mb_substr($string, 0, $limit)
-            );
+        $string = trim($string);
+
+        if ($limit <= 0) {
+            return $string;
         }
 
-        return $string;
+        $string = mb_substr($string, 0, $limit);
+
+        return rtrim($string);
     }
 
     /**
      * Trim both sides and convert all sequential spaces to one, but leave new lines.
      */
-    public function multiTrim(?string $string, int $limit = 0): string
+    public function mTrim(?string $string, int $limit = 0): string
     {
         if (!isset($string)) {
             return '';
         }
 
-        $string = trim(
-            preg_replace(['/\h+/u', '/\s*\v\s*/u'], [' ', "\n"], $string)
-        );
+        $string = preg_replace(['/\h+/u', '/\s*\v\s*/u'], [' ', "\n"], $string);
 
-        if ($limit > 0) {
-            return rtrim(
-                mb_substr($string, 0, $limit)
-            );
+        $string = trim($string);
+
+        if ($limit <= 0) {
+            return $string;
         }
 
-        return $string;
+        $string = mb_substr($string, 0, $limit);
+
+        return rtrim($string);
     }
 
     /**
@@ -149,23 +144,23 @@ class Text extends \SFW\Lazy\Sys
             return '';
         }
 
-        $string = trim(
-            preg_replace('/\s+/u', ' ', $string)
-        );
+        $string = preg_replace("/(?: |\t|\n|\r|\0|\x0B|\x0C|\u{A0}|\u{FEFF})+/S", ' ', $string);
+
+        $string = trim($string);
 
         if (mb_strlen($string) > $min) {
             if (isset($max)) {
                 if (preg_match(sprintf('/^(.{%d,%d}?)[^\p{L}\d]/u', $min, $max - 1), $string, $M)) {
                     $string = $M[1];
                 } else {
-                    $string = rtrim(
-                        mb_substr($string, 0, $max - 1)
-                    );
+                    $string = mb_substr($string, 0, $max - 1);
+
+                    $string = rtrim($string);
                 }
             } else {
-                $string = rtrim(
-                    mb_substr($string, 0, $min - 1)
-                );
+                $string = mb_substr($string, 0, $min - 1);
+
+                $string = rtrim($string);
             }
 
             $string .= '...';

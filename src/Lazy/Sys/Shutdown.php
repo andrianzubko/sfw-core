@@ -19,7 +19,7 @@ class Shutdown extends \SFW\Lazy\Sys
     {
         if (!isset($this->callbacks)) {
             register_shutdown_function(
-                function (): void {
+                function () {
                     foreach ($this->callbacks as $callback) {
                         try {
                             $callback();
@@ -52,9 +52,6 @@ class Shutdown extends \SFW\Lazy\Sys
 
     /**
      * Unregisters all shutdown callbacks.
-     *
-     * Basically intended for cleaning up after fatal errors.
-     * Better don't use this method for other reasons.
      */
     public function unregisterAll(): self
     {

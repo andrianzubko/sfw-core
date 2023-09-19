@@ -31,15 +31,19 @@ class Notifier extends \SFW\Lazy\Sys
 
             $this->defaultStruct->e['sys'] = self::$e['sys'];
 
-            $this->sys('Shutdown')->register(
-                $this->complete(...)
+            register_shutdown_function(
+                function () {
+                    register_shutdown_function(
+                        $this->processAll(...)
+                    );
+                }
             );
         }
 
         $this->notifies[] = &$notify;
 
         $this->sys('Transaction')->onAbort(
-            function () use (&$notify): void {
+            function () use (&$notify) {
                 $notify = null;
             }
         );
@@ -48,7 +52,7 @@ class Notifier extends \SFW\Lazy\Sys
     /**
      * Call build() method at all notifies and send all messages.
      */
-    protected function complete(): void
+    protected function processAll(): void
     {
         while ($this->notifies) {
             $notify = array_shift($this->notifies);
@@ -77,6 +81,14 @@ class Notifier extends \SFW\Lazy\Sys
                 $this->send($struct);
             }
         }
+    }
+
+    /**
+     * Remove all notifies from queue.
+     */
+    public function removeAll(): void
+    {
+        $this->notifies = [];
     }
 
     /**

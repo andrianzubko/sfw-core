@@ -180,7 +180,7 @@ class Dir extends \SFW\Lazy\Sys
 
             if (@mkdir($dir, 0600, true)) {
                 register_shutdown_function(
-                    function () use ($dir): void {
+                    function () use ($dir) {
                         $this->remove($dir);
                     }
                 );

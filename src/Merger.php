@@ -233,7 +233,7 @@ class Merger extends Base
         }
 
         return preg_replace_callback('/url\(\s*(.+?)\s*\)/u',
-            function (array $M): string {
+            function (array $M) {
                 $data = $type = false;
 
                 if (preg_match('/\.(gif|png|jpg|jpeg|svg|woff|woff2)$/ui', $M[1], $N)

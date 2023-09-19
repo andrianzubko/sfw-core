@@ -153,7 +153,7 @@ abstract class Runner extends Base
         } catch (\Throwable $error) {
             // {{{ something wrong
 
-            $this->sys('Shutdown')->unregisterAll();
+            $this->sys('Notifier')->removeAll();
 
             $this->sys('Logger')->error($error);
 

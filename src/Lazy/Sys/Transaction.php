@@ -10,17 +10,9 @@ use Psr\Log\LogLevel;
 class Transaction extends \SFW\Lazy\Sys
 {
     /**
-     * Registered callbacks for running on transaction abort.
+     * Registered callbacks.
      */
-    protected array $onAbort = [];
-
-    /**
-     * Do some action on transaction abort.
-     */
-    public function onAbort(callable $event): void
-    {
-        $this->onAbort[] = $event;
-    }
+    protected array $callbacks = [];
 
     /**
      * Processing pgsql transaction with retries on expected errors.
@@ -59,25 +51,25 @@ class Transaction extends \SFW\Lazy\Sys
         ?string $isolation,
         ?array $expected,
         callable $body,
-        ?callable $onerror = null,
+        ?callable $onAbort = null,
         string $driver = 'Db'
     ): bool {
         $this->setDriver($driver);
 
         for ($retry = 1; $retry <= self::$config['sys']['transaction']['retries']; $retry++) {
             try {
-                $this->onAbort = [];
+                $this->callbacks['success'] = [];
 
                 $this->sys('Db')->begin($isolation);
 
                 if ($body()) {
                     $this->sys('Db')->commit();
+
+                    foreach ($this->callbacks['success'] as $callback) {
+                        $callback();
+                    }
                 } else {
                     $this->sys('Db')->rollback();
-
-                    foreach ($this->onAbort as $event) {
-                        $event();
-                    }
                 }
 
                 $this->resetToDefaultDriver();
@@ -90,12 +82,8 @@ class Transaction extends \SFW\Lazy\Sys
                     $this->sys('Db')->rollback();
                 } catch (\SFW\Databaser\Exception) {}
 
-                foreach ($this->onAbort as $event) {
-                    $event();
-                }
-
-                if (isset($onerror)) {
-                    $onerror($error->getSqlState());
+                if (isset($onAbort)) {
+                    $onAbort($error->getSqlState());
                 }
 
                 if (in_array($error->getSqlState(), $expected ?? [], true)
@@ -119,6 +107,20 @@ class Transaction extends \SFW\Lazy\Sys
         $this->resetToDefaultDriver();
 
         return true;
+    }
+
+    /**
+     * Do some action on successful commit.
+     *
+     * If here is no active transaction, then callback will be called immediately.
+     */
+    public function onSuccess(callable $callback): void
+    {
+        if ($this->sys('Db')->isInTrans()) {
+            $this->callbacks['success'][] = $callback;
+        } else {
+            $callback();
+        }
     }
 
     /**

@@ -40,11 +40,9 @@ class Notifier extends \SFW\Lazy\Sys
             );
         }
 
-        $this->notifies[] = &$notify;
-
-        $this->sys('Transaction')->onAbort(
-            function () use (&$notify) {
-                $notify = null;
+        $this->sys('Transaction')->onSuccess(
+            function () use ($notify) {
+                $this->notifies[] = $notify;
             }
         );
     }
@@ -54,13 +52,7 @@ class Notifier extends \SFW\Lazy\Sys
      */
     protected function processAll(): void
     {
-        while ($this->notifies) {
-            $notify = array_shift($this->notifies);
-
-            if (!isset($notify)) {
-                continue;
-            }
-
+        while ($notify = array_shift($this->notifies)) {
             try {
                 $structs = $notify->build(clone $this->defaultStruct);
             } catch (\Throwable $error) {
@@ -69,16 +61,14 @@ class Notifier extends \SFW\Lazy\Sys
                 continue;
             }
 
-            if (!self::$config['sys']['notifier']['enabled']) {
-                continue;
-            }
+            if (self::$config['sys']['notifier']['enabled']) {
+                foreach ($structs as $struct) {
+                    if (isset(self::$config['sys']['notifier']['recipients'])) {
+                        $struct->recipients = self::$config['sys']['notifier']['recipients'];
+                    }
 
-            foreach ($structs as $struct) {
-                if (isset(self::$config['sys']['notifier']['recipients'])) {
-                    $struct->recipients = self::$config['sys']['notifier']['recipients'];
+                    $this->send($struct);
                 }
-
-                $this->send($struct);
             }
         }
     }

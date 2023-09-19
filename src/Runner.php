@@ -140,6 +140,8 @@ abstract class Runner extends Base
 
             $this->sys('Notifier')->removeAll();
 
+            $this->sys('Shutdown')->unregisterAll();
+
             $this->sys('Logger')->error($error);
 
             $this->sys('Logger')->emergency('Application terminated!', [

@@ -74,22 +74,24 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
             $tzPrev = null;
         }
 
+        $destination = null;
+
         if (isset($context['destination'])) {
-            $this->sys('File')->put($context['destination'],
+            $destination = $context['destination'];
+        } else {
+            if (isset(self::$config['sys']['logger']['file'])) {
+                $destination = self::$config['sys']['logger']['file'];
+            }
+
+            error_log($message);
+        }
+
+        if (isset($destination)) {
+            $this->sys('File')->put($destination,
                 sprintf("[%s] %s\n",
                     date('d-M-Y H:i:s e'), $message
                 ), FILE_APPEND
             );
-        } else {
-            error_log($message);
-
-            if (isset(self::$config['sys']['logger']['file'])) {
-                $this->sys('File')->put(self::$config['sys']['logger']['file'],
-                    sprintf("[%s] %s\n",
-                        date('d-M-Y H:i:s e'), $message
-                    ), FILE_APPEND
-                );
-            }
         }
 
         if (isset($tzPrev)) {

@@ -34,7 +34,7 @@ abstract class Runner extends Base
 
             ini_set('display_errors', PHP_SAPI === 'cli');
 
-            ini_set('error_reporting', -1);
+            ini_set('error_reporting', E_ALL);
 
             ini_set('ignore_user_abort', true);
 
@@ -91,29 +91,14 @@ abstract class Runner extends Base
             ] = array_pad(explode('?', $_SERVER['REQUEST_URI'], 2), 2, '');
 
             // }}}
+            // {{{ custom error handler
+
+            set_error_handler($this->errorHandler(...), E_ALL);
+
+            // }}}
             // {{{ initializing default environment
 
-            if (isset(self::$config['sys']['url'])) {
-                $parsed = parse_url(self::$config['sys']['url']);
-
-                if (!isset($parsed['host'])) {
-                    throw new BadConfigurationException('Incorrect url in system config');
-                }
-
-                self::$e['sys']['url_scheme'] = $parsed['scheme'] ?? 'http';
-
-                self::$e['sys']['url_host'] = $parsed['host'];
-            } else {
-                self::$e['sys']['url_scheme'] = $_SERVER['HTTP_SCHEME'];
-
-                self::$e['sys']['url_host'] = $_SERVER['HTTP_HOST'];
-            }
-
-            self::$e['sys']['url'] = sprintf('%s://%s',
-                self::$e['sys']['url_scheme'], self::$e['sys']['url_host']
-            );
-
-            self::$e['sys']['timestamp'] = (int) self::$startedTime;
+            $this->defaultEnvironment();
 
             // }}}
             // {{{ initializing additional environment
@@ -157,9 +142,9 @@ abstract class Runner extends Base
 
             $this->sys('Logger')->error($error);
 
-            $this->sys('Logger')->emergency('Application terminated!',
-                ['append_file_and_line' => false]
-            );
+            $this->sys('Logger')->emergency('Application terminated!', [
+                'append_file_and_line' => false
+            ]);
 
             if (PHP_SAPI === 'cli') {
                 $this->exit(1);
@@ -169,6 +154,70 @@ abstract class Runner extends Base
 
             // }}}
         }
+    }
+
+    /**
+     * Custom error handler.
+     *
+     * @throws LogicException
+     */
+    private function errorHandler(int $code, string $message, string $file, int $line): bool
+    {
+        if (   $code === E_NOTICE
+            || $code === E_USER_NOTICE
+        ) {
+            $this->sys('Logger')->notice($message, [
+                'file' => $file,
+                'line' => $line
+            ]);
+        } elseif (
+               $code === E_WARNING
+            || $code === E_USER_WARNING
+            || $code === E_DEPRECATED
+            || $code === E_USER_DEPRECATED
+        ) {
+            $this->sys('Logger')->warning($message, [
+                'file' => $file,
+                'line' => $line
+            ]);
+        } else {
+            throw (new LogicException($message))
+                ->setFile($file)
+                ->setLine($line);
+        }
+
+        return true;
+    }
+
+    /**
+     * Initializing default environment.
+     *
+     * @throws BadConfigurationException
+     */
+    private function defaultEnvironment(): void
+    {
+        self::$e['sys']['timestamp'] = (int) self::$startedTime;
+
+        if (isset(self::$config['sys']['url'])) {
+            $parsed = parse_url(self::$config['sys']['url']);
+
+            if (!isset($parsed['host'])) {
+                throw new BadConfigurationException('Incorrect url in system config');
+            }
+
+            self::$e['sys']['url_scheme'] = $parsed['scheme'] ?? 'http';
+
+            self::$e['sys']['url_host'] = $parsed['host'];
+        } else {
+            self::$e['sys']['url_scheme'] = $_SERVER['HTTP_SCHEME'];
+
+            self::$e['sys']['url_host'] = $_SERVER['HTTP_HOST'];
+        }
+
+        self::$e['sys']['url'] = sprintf('%s://%s',
+            self::$e['sys']['url_scheme'],
+            self::$e['sys']['url_host']
+        );
     }
 
     /**

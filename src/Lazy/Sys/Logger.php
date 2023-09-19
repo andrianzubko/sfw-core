@@ -16,6 +16,8 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
      */
     public function log(mixed $level, string|\Stringable $message, array $context = []): void
     {
+        set_error_handler(fn() => true);
+
         if (!isset($level)
             || !is_string($level)
         ) {
@@ -66,34 +68,26 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
 
         $tzPrev = date_default_timezone_get();
 
-        if ($tzPrev === $context['timezone']) {
+        if ($tzPrev === $context['timezone']
+            || !date_default_timezone_set($context['timezone'])
+        ) {
             $tzPrev = null;
-        } else {
-            date_default_timezone_set($context['timezone']);
         }
 
         if (isset($context['destination'])) {
-            $this->sys('Dir')->create(
-                dirname($context['destination'])
-            );
-
-            error_log(
+            $this->sys('File')->put($context['destination'],
                 sprintf("[%s] %s\n",
                     date('d-M-Y H:i:s e'), $message
-                ), 3, $context['destination']
+                ), FILE_APPEND
             );
         } else {
             error_log($message);
 
             if (isset(self::$config['sys']['logger']['file'])) {
-                $this->sys('Dir')->create(
-                    dirname(self::$config['sys']['logger']['file'])
-                );
-
-                error_log(
+                $this->sys('File')->put(self::$config['sys']['logger']['file'],
                     sprintf("[%s] %s\n",
                         date('d-M-Y H:i:s e'), $message
-                    ), 3, self::$config['sys']['logger']['file']
+                    ), FILE_APPEND
                 );
             }
         }
@@ -101,6 +95,8 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
         if (isset($tzPrev)) {
             date_default_timezone_set($tzPrev);
         }
+
+        restore_error_handler();
     }
 
     /**

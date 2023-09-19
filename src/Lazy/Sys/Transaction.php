@@ -112,15 +112,17 @@ class Transaction extends \SFW\Lazy\Sys
     /**
      * Do some action on successful commit.
      *
-     * If here is no active transaction, then callback will be called immediately.
+     * If there is no active transaction, then callback will be called immediately.
      */
-    public function onSuccess(callable $callback): void
+    public function onSuccess(callable $callback): self
     {
         if ($this->sys('Db')->isInTrans()) {
             $this->callbacks['success'][] = $callback;
         } else {
             $callback();
         }
+
+        return $this;
     }
 
     /**

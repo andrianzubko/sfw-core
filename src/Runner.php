@@ -60,6 +60,11 @@ abstract class Runner extends Base
             mb_internal_encoding('UTF-8');
 
             // }}}
+            // {{{ custom error handler
+
+            set_error_handler($this->errorHandler(...));
+
+            // }}}
             // {{{ default timezone
 
             if (!date_default_timezone_set(self::$config['sys']['timezone'])) {
@@ -89,11 +94,6 @@ abstract class Runner extends Base
                 $_SERVER['REQUEST_URL'],
                 $_SERVER['REQUEST_QUERY']
             ] = array_pad(explode('?', $_SERVER['REQUEST_URI'], 2), 2, '');
-
-            // }}}
-            // {{{ custom error handler
-
-            set_error_handler($this->errorHandler(...), E_ALL);
 
             // }}}
             // {{{ initializing default environment
@@ -163,27 +163,30 @@ abstract class Runner extends Base
      */
     private function errorHandler(int $code, string $message, string $file, int $line): bool
     {
-        if (   $code === E_NOTICE
-            || $code === E_USER_NOTICE
-        ) {
-            $this->sys('Logger')->notice($message, [
-                'file' => $file,
-                'line' => $line
-            ]);
-        } elseif (
-               $code === E_WARNING
-            || $code === E_USER_WARNING
-            || $code === E_DEPRECATED
-            || $code === E_USER_DEPRECATED
-        ) {
-            $this->sys('Logger')->warning($message, [
-                'file' => $file,
-                'line' => $line
-            ]);
-        } else {
-            throw (new LogicException($message))
-                ->setFile($file)
-                ->setLine($line);
+        if (error_reporting() & $code) {
+            switch ($code) {
+                case E_NOTICE:
+                case E_USER_NOTICE:
+                    $this->sys('Logger')->notice($message, [
+                        'file' => $file,
+                        'line' => $line
+                    ]);
+                    break;
+                case E_WARNING:
+                case E_USER_WARNING:
+                case E_DEPRECATED:
+                case E_USER_DEPRECATED:
+                case E_STRICT:
+                    $this->sys('Logger')->warning($message, [
+                        'file' => $file,
+                        'line' => $line
+                    ]);
+                    break;
+                default:
+                    throw (new LogicException($message))
+                        ->setFile($file)
+                        ->setLine($line);
+            }
         }
 
         return true;
@@ -215,8 +218,7 @@ abstract class Runner extends Base
         }
 
         self::$e['sys']['url'] = sprintf('%s://%s',
-            self::$e['sys']['url_scheme'],
-            self::$e['sys']['url_host']
+            self::$e['sys']['url_scheme'], self::$e['sys']['url_host']
         );
     }
 

@@ -86,14 +86,18 @@ class Transaction extends \SFW\Lazy\Sys
                     && $retry < self::$config['sys']['transaction']['retries']
                 ) {
                     $this->sys('Logger')->logTransactionFail(
-                        LogLevel::INFO, $error->getSqlState(), $retry
+                        LogLevel::INFO,
+                        $error->getSqlState(),
+                        $retry
                     );
 
                     continue;
                 }
 
                 $this->sys('Logger')->logTransactionFail(
-                    LogLevel::ERROR, $error->getSqlState(), $retry
+                    LogLevel::ERROR,
+                    $error->getSqlState(),
+                    $retry
                 );
 
                 self::$sysLazies['Db'] = $this->sys(

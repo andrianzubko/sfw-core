@@ -54,7 +54,7 @@ class Transaction extends \SFW\Lazy\Sys
         ?callable $onAbort = null,
         string $driver = 'Db'
     ): self {
-        $this->setDriver($driver);
+        self::$sysLazies['Db'] = $this->sys($driver);
 
         for ($retry = 1; $retry <= self::$config['sys']['transaction']['retries']; $retry++) {
             try {
@@ -72,10 +72,8 @@ class Transaction extends \SFW\Lazy\Sys
                     $this->sys('Db')->rollback();
                 }
 
-                return $this->resetToDefaultDriver();
-            } catch (
-                \SFW\Databaser\Exception $error
-            ) {
+                break;
+            } catch (\SFW\Databaser\Exception $error) {
                 try {
                     $this->sys('Db')->rollback();
                 } catch (\SFW\Databaser\Exception) {}
@@ -90,19 +88,27 @@ class Transaction extends \SFW\Lazy\Sys
                     $this->sys('Logger')->logTransactionFail(
                         LogLevel::INFO, $error->getSqlState(), $retry
                     );
-                } else {
-                    $this->sys('Logger')->logTransactionFail(
-                        LogLevel::ERROR, $error->getSqlState(), $retry
-                    );
 
-                    $this->resetToDefaultDriver();
-
-                    throw $error;
+                    continue;
                 }
+
+                $this->sys('Logger')->logTransactionFail(
+                    LogLevel::ERROR, $error->getSqlState(), $retry
+                );
+
+                self::$sysLazies['Db'] = $this->sys(
+                    self::$config['sys']['db']['default']
+                );
+
+                throw $error;
             }
         }
 
-        return $this->resetToDefaultDriver();
+        self::$sysLazies['Db'] = $this->sys(
+            self::$config['sys']['db']['default']
+        );
+
+        return $this;
     }
 
     /**
@@ -117,26 +123,6 @@ class Transaction extends \SFW\Lazy\Sys
         } else {
             $callback();
         }
-
-        return $this;
-    }
-
-    /**
-     * Sets database driver.
-     */
-    protected function setDriver(string $driver): self
-    {
-        self::$sysLazies['Db'] = $this->sys($driver);
-
-        return $this;
-    }
-
-    /**
-     * Resets database driver to default.
-     */
-    protected function resetToDefaultDriver(): self
-    {
-        self::$sysLazies['Db'] = $this->sys(self::$config['sys']['db']['default']);
 
         return $this;
     }

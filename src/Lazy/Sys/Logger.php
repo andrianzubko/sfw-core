@@ -2,14 +2,87 @@
 
 namespace SFW\Lazy\Sys;
 
-use Psr\Log\{LoggerInterface, LoggerTrait, LogLevel};
+use Psr\Log\{LoggerInterface, LogLevel};
 
 /**
  * Logger.
  */
 class Logger extends \SFW\Lazy\Sys implements LoggerInterface
 {
-    use LoggerTrait;
+    /**
+     * System is unusable.
+     */
+    public function emergency(string|\Stringable $message, array $context = []): void
+    {
+        $this->log(LogLevel::EMERGENCY, $message, $context);
+    }
+
+    /**
+     * Action must be taken immediately.
+     *
+     * Example: Entire website down, database unavailable, etc. This should
+     * trigger the SMS alerts and wake you up.
+     */
+    public function alert(string|\Stringable $message, array $context = []): void
+    {
+        $this->log(LogLevel::ALERT, $message, $context);
+    }
+
+    /**
+     * Critical conditions.
+     *
+     * Example: Application component unavailable, unexpected exception.
+     */
+    public function critical(string|\Stringable $message, array $context = []): void
+    {
+        $this->log(LogLevel::CRITICAL, $message, $context);
+    }
+
+    /**
+     * Runtime errors that do not require immediate action but should typically
+     * be logged and monitored.
+     */
+    public function error(string|\Stringable $message, array $context = []): void
+    {
+        $this->log(LogLevel::ERROR, $message, $context);
+    }
+
+    /**
+     * Exceptional occurrences that are not errors.
+     *
+     * Example: Use of deprecated APIs, poor use of an API, undesirable things
+     * that are not necessarily wrong.
+     */
+    public function warning(string|\Stringable $message, array $context = []): void
+    {
+        $this->log(LogLevel::WARNING, $message, $context);
+    }
+
+    /**
+     * Normal but significant events.
+     */
+    public function notice(string|\Stringable $message, array $context = []): void
+    {
+        $this->log(LogLevel::NOTICE, $message, $context);
+    }
+
+    /**
+     * Interesting events.
+     *
+     * Example: User logs in, SQL logs.
+     */
+    public function info(string|\Stringable $message, array $context = []): void
+    {
+        $this->log(LogLevel::INFO, $message, $context);
+    }
+
+    /**
+     * Detailed debug information.
+     */
+    public function debug(string|\Stringable $message, array $context = []): void
+    {
+        $this->log(LogLevel::DEBUG, $message, $context);
+    }
 
     /**
      * Logs with an arbitrary level.
@@ -44,12 +117,8 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
                     $context['trace'][0]['line']
                 );
             } else {
-                $psrLogDir = dirname(
-                    (new \ReflectionClass(LoggerTrait::class))->getFileName()
-                );
-
-                foreach (debug_backtrace() as $item) {
-                    if (!str_starts_with($item['file'], $psrLogDir)) {
+                foreach (debug_backtrace(2) as $item) {
+                    if ($item['file'] !== __FILE__) {
                         $message = sprintf('%s in %s:%s',
                             $message,
                             $item['file'],
@@ -74,20 +143,16 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
             $tzPrev = null;
         }
 
-        $destination = null;
-
-        if (isset($context['destination'])) {
-            $destination = $context['destination'];
-        } else {
-            if (isset(self::$config['sys']['logger']['file'])) {
-                $destination = self::$config['sys']['logger']['file'];
-            }
-
+        if (!isset($context['destination'])) {
             error_log($message);
+
+            if (isset(self::$config['sys']['logger']['file'])) {
+                $context['destination'] = self::$config['sys']['logger']['file'];
+            }
         }
 
-        if (isset($destination)) {
-            $this->sys('File')->put($destination,
+        if (isset($context['destination'])) {
+            $this->sys('File')->put($context['destination'],
                 sprintf("[%s] %s\n",
                     date('d-M-Y H:i:s e'), $message
                 ), FILE_APPEND

@@ -24,7 +24,7 @@ class Transaction extends \SFW\Lazy\Sys
         ?array $expected,
         callable $body,
         ?callable $onerror = null
-    ): bool {
+    ): self {
         return $this->run($isolation, $expected, $body, $onerror, 'Pgsql');
     }
 
@@ -38,7 +38,7 @@ class Transaction extends \SFW\Lazy\Sys
         ?array $expected,
         callable $body,
         ?callable $onerror = null
-    ): bool {
+    ): self {
         return $this->run($isolation, $expected, $body, $onerror, 'Mysql');
     }
 
@@ -53,7 +53,7 @@ class Transaction extends \SFW\Lazy\Sys
         callable $body,
         ?callable $onAbort = null,
         string $driver = 'Db'
-    ): bool {
+    ): self {
         $this->setDriver($driver);
 
         for ($retry = 1; $retry <= self::$config['sys']['transaction']['retries']; $retry++) {
@@ -72,9 +72,7 @@ class Transaction extends \SFW\Lazy\Sys
                     $this->sys('Db')->rollback();
                 }
 
-                $this->resetToDefaultDriver();
-
-                return true;
+                return $this->resetToDefaultDriver();
             } catch (
                 \SFW\Databaser\Exception $error
             ) {
@@ -104,9 +102,7 @@ class Transaction extends \SFW\Lazy\Sys
             }
         }
 
-        $this->resetToDefaultDriver();
-
-        return true;
+        return $this->resetToDefaultDriver();
     }
 
     /**
@@ -128,16 +124,20 @@ class Transaction extends \SFW\Lazy\Sys
     /**
      * Sets database driver.
      */
-    protected function setDriver(string $driver): void
+    protected function setDriver(string $driver): self
     {
         self::$sysLazies['Db'] = $this->sys($driver);
+
+        return $this;
     }
 
     /**
      * Resets database driver to default.
      */
-    protected function resetToDefaultDriver(): void
+    protected function resetToDefaultDriver(): self
     {
         self::$sysLazies['Db'] = $this->sys(self::$config['sys']['db']['default']);
+
+        return $this;
     }
 }

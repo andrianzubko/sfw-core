@@ -22,7 +22,7 @@ class Notifier extends \SFW\Lazy\Sys
     /**
      * Adding notify to pool.
      */
-    public function add(\SFW\Notify $notify): void
+    public function add(\SFW\Notify $notify): self
     {
         if (!isset($this->defaultStruct)) {
             $this->defaultStruct = new \SFW\NotifyStruct();
@@ -45,6 +45,8 @@ class Notifier extends \SFW\Lazy\Sys
                 $this->notifies[] = $notify;
             }
         );
+
+        return $this;
     }
 
     /**
@@ -76,9 +78,11 @@ class Notifier extends \SFW\Lazy\Sys
     /**
      * Remove all notifies from queue.
      */
-    public function removeAll(): void
+    public function removeAll(): self
     {
         $this->notifies = [];
+
+        return $this;
     }
 
     /**

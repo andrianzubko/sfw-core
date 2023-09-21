@@ -126,7 +126,7 @@ class Controller extends \SFW\Router
                         ];
 
                         if ($instance->methods) {
-                            $path['methods'] = $instance->methods;
+                            $route['methods'] = $instance->methods;
                         }
 
                         $cache['routes'][] = $route;

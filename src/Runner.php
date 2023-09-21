@@ -68,7 +68,7 @@ abstract class Runner extends Base
             // {{{ default timezone
 
             if (!date_default_timezone_set(self::$config['sys']['timezone'])) {
-                throw new BadConfigurationException(
+                throw new LogicException(
                     sprintf(
                         'Unable to set timezone %s',
                             self::$config['sys']['timezone']
@@ -109,23 +109,23 @@ abstract class Runner extends Base
             // {{{ calling Command or Controller class
 
             if (PHP_SAPI === 'cli') {
-                $command = self::$e['sys']['command'] = (new \App\Router())->getCommand();
+                $command = (new Router\Command())->get();
 
                 if ($command !== false) {
                     set_time_limit(0);
 
-                    $class = "App\\Command\\$command";
+                    self::$e['sys']['command'] = substr($command, 12);
 
-                    new $class();
+                    new $command();
                 }
             } else {
-                $controller = self::$e['sys']['controller'] = (new \App\Router())->getController();
+                $controller = (new Router\Controller())->get();
 
                 if ($controller !== false) {
-                    $class = "App\\Controller\\$controller";
+                    if (class_exists($controller)) {
+                        self::$e['sys']['controller'] = substr($controller, 15);
 
-                    if (class_exists($class)) {
-                        new $class();
+                        new $controller();
                     } else {
                         $this->sys('Response')->errorPage(404);
                     }
@@ -197,7 +197,7 @@ abstract class Runner extends Base
     /**
      * Initializing default environment.
      *
-     * @throws BadConfigurationException
+     * @throws LogicException
      */
     private function defaultEnvironment(): void
     {
@@ -207,7 +207,7 @@ abstract class Runner extends Base
             $parsed = parse_url(self::$config['sys']['url']);
 
             if (!isset($parsed['host'])) {
-                throw new BadConfigurationException('Incorrect url in system config');
+                throw new LogicException('Incorrect url in system config');
             }
 
             self::$e['sys']['url_scheme'] = $parsed['scheme'] ?? 'http';

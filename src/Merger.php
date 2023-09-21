@@ -22,45 +22,43 @@ class Merger extends Base
      * @throws LogicException
      * @throws RuntimeException
      */
-    public function get(array $options = []): array
+    public function get(): array
     {
-        $version = @include self::$config['sys']['merger']['version'];
+        $cache = @include self::$config['sys']['merger']['cache'];
 
-        if ($version !== false
-            && !($options['recheck'] ?? true)
-                && ($options['minify'] ?? true) === $version['minify']
+        if ($cache !== false
+            && self::$config['sys']['env'] === 'prod'
+            && self::$config['sys']['debug'] === $cache['debug']
         ) {
-            return $this->getPaths($version['time']);
+            return $this->getPaths($cache);
         }
 
         if ($this->sys('Locker')->lock('merger') === false) {
-            return $this->getPaths(
-                $version !== false
-                    ? $version['time']
-                    : 0
-            );
+            return $this->getPaths($cache);
         }
 
-        $version = @include self::$config['sys']['merger']['version'];
+        $cache = @include self::$config['sys']['merger']['cache'];
 
         $sources = $this->getSources();
 
-        $version = $this->checkVersion($version, $sources, $options['minify'] ?? true);
+        $cache = $this->checkVersion($cache, $sources);
 
-        if ($version === false) {
-            $version = $this->recombine($sources, $options['minify'] ?? true);
+        if ($cache === false) {
+            $cache = $this->recombine($sources);
         }
 
         $this->sys('Locker')->unlock('merger');
 
-        return $this->getPaths($version['time']);
+        return $this->getPaths($cache);
     }
 
     /**
      * Getting merged paths.
      */
-    protected function getPaths(int $time): array
+    protected function getPaths(array|false $cache): array
     {
+        $time = $cache ? $cache['time'] : 0;
+
         $paths = [];
 
         foreach ($this->sources as $targets) {
@@ -99,13 +97,13 @@ class Merger extends Base
     /**
      * Recheck of the needs for recombination.
      */
-    protected function checkVersion(array|false $version, array $sources, bool $minify): array|false
+    protected function checkVersion(array|false $cache, array $sources): array|false
     {
-        if ($version === false) {
+        if ($cache === false) {
             return false;
         }
 
-        if ($minify !== $version['minify']) {
+        if (self::$config['sys']['debug'] !== $cache['debug']) {
             return false;
         }
 
@@ -114,7 +112,7 @@ class Merger extends Base
         foreach (@$this->sys('Dir')->scan(self::$config['sys']['merger']['dir']) as $item) {
             if (is_file(self::$config['sys']['merger']['dir'] . "/$item")
                 && preg_match('/^(\d+)\.(.+)$/', $item, $M)
-                    && (int) $M[1] === $version['time']
+                    && (int) $M[1] === $cache['time']
             ) {
                 $targets[] = $M[2];
             } else {
@@ -136,14 +134,14 @@ class Merger extends Base
         foreach (array_keys($sources) as $type) {
             foreach ($sources[$type] as $files) {
                 foreach ($files as $file) {
-                    if ((int) filemtime($file) > $version['time']) {
+                    if ((int) filemtime($file) > $cache['time']) {
                         return false;
                     }
                 }
             }
         }
 
-        return $version;
+        return $cache;
     }
 
     /**
@@ -152,23 +150,23 @@ class Merger extends Base
      * @throws LogicException
      * @throws RuntimeException
      */
-    protected function recombine(array $sources, bool $minify): array
+    protected function recombine(array $sources): array
     {
         $this->sys('Dir')->clear(self::$config['sys']['merger']['dir']);
 
-        $version = [
+        $cache = [
             'time' => time(),
-            'minify' => $minify,
+            'debug' => self::$config['sys']['debug'],
         ];
 
         foreach (array_keys($sources) as $type) {
             foreach ($sources[$type] as $target => $files) {
-                $file = self::$config['sys']['merger']['dir'] . "/{$version['time']}.$target";
+                $file = self::$config['sys']['merger']['dir'] . "/{$cache['time']}.$target";
 
                 if ($type === 'js') {
-                    $contents = $this->mergeJs($files, $minify);
+                    $contents = $this->mergeJs($files);
                 } else {
-                    $contents = $this->mergeCss($files, $minify);
+                    $contents = $this->mergeCss($files);
                 }
 
                 if ($this->sys('File')->put($file, $contents) === false) {
@@ -182,16 +180,16 @@ class Merger extends Base
             }
         }
 
-        if ($this->sys('File')->putVar(self::$config['sys']['merger']['version'], $version) === false) {
+        if ($this->sys('File')->putVar(self::$config['sys']['merger']['cache'], $cache) === false) {
             throw new RuntimeException(
                 sprintf(
                     'Unable to write file %s',
-                        self::$config['sys']['merger']['version']
+                        self::$config['sys']['merger']['cache']
                 )
             );
         }
 
-        return $version;
+        return $cache;
     }
 
     /**
@@ -200,11 +198,11 @@ class Merger extends Base
      * @throws LogicException
      * @throws RuntimeException
      */
-    public function mergeJs(array $files, bool $minify): string
+    public function mergeJs(array $files): string
     {
         $merged = $this->mergeFiles($files);
 
-        if ($minify) {
+        if (!self::$config['sys']['debug']) {
             try {
                 $merged = (new JSMin($merged))->min();
             } catch (\Exception $error) {
@@ -222,14 +220,14 @@ class Merger extends Base
      *
      * @throws RuntimeException
      */
-    public function mergeCss(array $files, bool $minify): string
+    public function mergeCss(array $files): string
     {
         $merged = $this->mergeFiles($files);
 
-        if ($minify) {
-            $merged = $this->sys('Text')->fTrim(
-                preg_replace('~/\*(.*?)\*/~us', '', $merged)
-            );
+        if (!self::$config['sys']['debug']) {
+            $merged = preg_replace('~/\*(.*?)\*/~us', '', $merged);
+
+            $merged = $this->sys('Text')->fTrim($merged);
         }
 
         return preg_replace_callback('/url\(\s*(.+?)\s*\)/u',

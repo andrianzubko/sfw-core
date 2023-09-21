@@ -192,7 +192,7 @@ class Sys extends \SFW\Config
         // }}}
         // {{{ locker
 
-        /* Lock files.
+        /* Lock files pattern.
          *
          * string
          */
@@ -210,7 +210,7 @@ class Sys extends \SFW\Config
         // }}}
         // {{{ response
 
-        /* Optional error documents.
+        /* Optional error documents pattern.
          *
          * ?string
          */
@@ -243,11 +243,11 @@ class Sys extends \SFW\Config
         // }}}
         // {{{ merger
 
-        /* File with version of merged JS and CSS files.
+        /* Cache file with merger internal data.
          *
          * string
          */
-        $sys['merger']['version'] = APP_DIR . '/var/cache/merged.version.php';
+        $sys['merger']['cache'] = APP_DIR . '/var/cache/merger.php';
 
         /* Directory for merged JS and CSS files.
          *
@@ -260,6 +260,15 @@ class Sys extends \SFW\Config
          * string
          */
         $sys['merger']['location'] = '/.merged';
+
+        // }}}
+        // {{{ router
+
+        /* Cache file with router internal data.
+         *
+         * string
+         */
+        $sys['router']['cache'] = APP_DIR . '/var/cache/router.php';
 
         // }}}
         // {{{ paginator

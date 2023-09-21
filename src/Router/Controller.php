@@ -12,7 +12,7 @@ class Controller extends \SFW\Router
      *
      * @throws \SFW\RuntimeException
      */
-    public function get(): string|false
+    public function get(): array
     {
         $cache = @include self::$config['sys']['router']['cache'];
 
@@ -36,25 +36,25 @@ class Controller extends \SFW\Router
     /**
      * Finds target Controller class.
      */
-    protected function findClass(array $cache): string|false
+    protected function findClass(array $cache): array
     {
         if (preg_match($cache['regex'], $_SERVER['REQUEST_URL'], $M)) {
-            $route = $cache['routes'][$M['MARK']];
+            $found = $cache['in'][$M['MARK']];
 
-            if (empty($route['methods'])
-                || in_array($_SERVER['REQUEST_METHOD'], $route['methods'], true)
+            if (empty($found['method'])
+                || in_array($_SERVER['REQUEST_METHOD'], $found['method'], true)
             ) {
-                if (isset($route['keys'])) {
-                    foreach ($route['keys'] as $i => $key) {
+                if (isset($found['keys'])) {
+                    foreach ($found['keys'] as $i => $key) {
                         $_GET[$key] = $_REQUEST[$key] = $M[$i + 1];
                     }
                 }
 
-                return $route['class'];
+                return $found['target'];
             }
         }
 
-        return false;
+        return [false, false, false];
     }
 
     /**
@@ -108,56 +108,75 @@ class Controller extends \SFW\Router
 
         $cache = [
             'time' => time(),
-            'routes' => [],
-            'paths' => [],
+            'in' => [],
+            'out' => [],
         ];
 
         foreach (get_declared_classes() as $class) {
             if (str_starts_with($class, 'App\\Controller\\')) {
-                $attributes = (new \ReflectionClass($class))->getAttributes();
+                $rClass = new \ReflectionClass($class);
 
-                foreach ($attributes as $attribute) {
-                    if ($attribute->getName() === 'SFW\\Route') {
-                        $instance = $attribute->newInstance();
+                foreach ($rClass->getAttributes('SFW\\Route') as $attribute) {
+                    $route = $attribute->newInstance();
 
-                        $route = [
-                            'class' => $class,
-                            'path' => $instance->path,
-                        ];
+                    $cache['in'][$route->path] = array_filter([
+                        'target' => [
+                            $class, '__construct'
+                        ],
+                        'method' => $route->method,
+                    ]);
+                }
 
-                        if ($instance->methods) {
-                            $route['methods'] = $instance->methods;
+                foreach ($rClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $rMethod) {
+                    if ($rMethod->class === $class) {
+                        foreach ($rMethod->getAttributes('SFW\\Route') as $attribute) {
+                            $route = $attribute->newInstance();
+
+                            $cache['in'][$route->path] = array_filter([
+                                'target' => [
+                                    $class, $rMethod->name
+                                ],
+                                'method' => $route->method,
+                            ]);
                         }
-
-                        $cache['routes'][] = $route;
                     }
                 }
             }
         }
 
+        foreach ($cache['in'] as $path => $item) {
+            if ($item['target'][1] === '__construct') {
+                $item['target'][] = substr($item['target'][0], 15);
+            } else {
+                $item['target'][] = implode('::', [
+                    substr($item['target'][0], 15), $item['target'][1],
+                ]);
+            }
+
+            if (preg_match_all('/{([^}]+)}/', $path, $M)) {
+                $item['keys'] = $M[1];
+            }
+
+            $cache['in'][$path] = $item;
+
+            $cache['out'][$item['target'][2]] = $path;
+        }
+
         $cache['regex'] = sprintf('{^(?|%s)$}',
             implode('|',
                 array_map(
-                    fn($i, $route) => sprintf("%s(*:$i)",
-                        preg_replace('/\\\\{[^}]+}/', '([^/]+)',
-                            preg_quote($route['path'])
-                        )
-                    ), array_keys($cache['routes']), $cache['routes']
+                    fn($i, $path) => sprintf("%s(*:$i)",
+                        preg_replace('/\\\\{[^}]+}/', '([^/]+)', preg_quote($path))
+                    ),
+                    array_keys(
+                        array_keys($cache['in'])
+                    ),
+                    array_keys($cache['in'])
                 )
             )
         );
 
-        foreach ($cache['routes'] as $i => $route) {
-            if (preg_match_all('/{([^}]+)}/', $route['path'], $M)) {
-                $route['keys'] = $M[1];
-            }
-
-            $cache['paths'][$route['class']] = $route['path'];
-
-            unset($route['path']);
-
-            $cache['routes'][$i] = $route;
-        }
+        $cache['in'] = array_values($cache['in']);
 
         if ($this->sys('File')->putVar(self::$config['sys']['router']['cache'], $cache) === false) {
             throw new \SFW\RuntimeException(

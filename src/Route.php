@@ -13,8 +13,8 @@ class Route
      */
     public function __construct(
         public string $path,
-        public string|array $methods = []
+        public string|array $method = []
     ) {
-        $this->methods = array_map(strtoupper(...), (array) $this->methods);
+        $this->method = array_map(strtoupper(...), (array) $this->method);
     }
 }

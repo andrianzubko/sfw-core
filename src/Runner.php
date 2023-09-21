@@ -79,21 +79,7 @@ abstract class Runner extends Base
             // }}}
             // {{{ server parameters correcting
 
-            $_SERVER['HTTP_HOST'] ??= 'localhost';
-
-            $_SERVER['HTTP_SCHEME'] = empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off'
-                ? 'http' : 'https';
-
-            $_SERVER['REMOTE_ADDR'] ??= '0.0.0.0';
-
-            $_SERVER['REQUEST_METHOD'] ??= 'GET';
-
-            $_SERVER['REQUEST_URI'] = $_SERVER['REDIRECT_REQUEST_URI'] ?? $_SERVER['REQUEST_URI'] ?? '/';
-
-            [
-                $_SERVER['REQUEST_URL'],
-                $_SERVER['REQUEST_QUERY']
-            ] = array_pad(explode('?', $_SERVER['REQUEST_URI'], 2), 2, '');
+            $this->correctServerParams();
 
             // }}}
             // {{{ initializing default environment
@@ -106,32 +92,24 @@ abstract class Runner extends Base
             $this->additionalEnvironment();
 
             // }}}
-            // {{{ calling Command or Controller class
+            // {{{ calling Command or Controller request handler
 
-            if (PHP_SAPI === 'cli') {
-                $command = (new Router\Command())->get();
+            [$class, $method, self::$e['sys']['action']] = (new Router())->get();
 
-                if ($command !== false) {
-                    set_time_limit(0);
-
-                    self::$e['sys']['command'] = substr($command, 12);
-
-                    new $command();
-                }
-            } else {
-                $controller = (new Router\Controller())->get();
-
-                if ($controller !== false) {
-                    if (class_exists($controller)) {
-                        self::$e['sys']['controller'] = substr($controller, 15);
-
-                        new $controller();
-                    } else {
-                        $this->sys('Response')->errorPage(404);
-                    }
+            if ($class === false
+                || !method_exists($class, $method)
+            ) {
+                if (PHP_SAPI === 'cli') {
+                    $this->exit();
                 } else {
                     $this->sys('Response')->errorPage(404);
                 }
+            }
+
+            $handler = new $class();
+
+            if ($method !== '__construct') {
+                $handler->$method();
             }
 
             // }}}
@@ -192,6 +170,28 @@ abstract class Runner extends Base
         }
 
         return true;
+    }
+
+    /**
+     * Corrects server parameters.
+     */
+    private function correctServerParams(): void
+    {
+        $_SERVER['HTTP_HOST'] ??= 'localhost';
+
+        $_SERVER['HTTP_SCHEME'] = empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off'
+            ? 'http' : 'https';
+
+        $_SERVER['REMOTE_ADDR'] ??= '0.0.0.0';
+
+        $_SERVER['REQUEST_METHOD'] ??= 'GET';
+
+        $_SERVER['REQUEST_URI'] = $_SERVER['REDIRECT_REQUEST_URI'] ?? $_SERVER['REQUEST_URI'] ?? '/';
+
+        [
+            $_SERVER['REQUEST_URL'],
+            $_SERVER['REQUEST_QUERY']
+        ] = array_pad(explode('?', $_SERVER['REQUEST_URI'], 2), 2, '');
     }
 
     /**

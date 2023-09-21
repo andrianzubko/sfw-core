@@ -41,7 +41,7 @@ class Controller extends \SFW\Router
         if (preg_match($cache['regex'], $_SERVER['REQUEST_URL'], $M)) {
             $route = $cache['routes'][$M['MARK']];
 
-            if (!$route['methods']
+            if (empty($route['methods'])
                 || in_array($_SERVER['REQUEST_METHOD'], $route['methods'], true)
             ) {
                 if (isset($route['keys'])) {
@@ -117,10 +117,20 @@ class Controller extends \SFW\Router
                 $attributes = (new \ReflectionClass($class))->getAttributes();
 
                 foreach ($attributes as $attribute) {
-                    $cache['routes'][] = [
-                        'class' => $class,
-                        ...(array) $attribute->newInstance()
-                    ];
+                    if ($attribute->getName() === 'SFW\\Route') {
+                        $instance = $attribute->newInstance();
+
+                        $route = [
+                            'class' => $class,
+                            'path' => $instance->path,
+                        ];
+
+                        if ($instance->methods) {
+                            $path['methods'] = $instance->methods;
+                        }
+
+                        $cache['routes'][] = $route;
+                    }
                 }
             }
         }

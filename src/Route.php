@@ -8,6 +8,9 @@ namespace SFW;
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
 class Route
 {
+    /**
+     * Registers route.
+     */
     public function __construct(
         public string $path,
         public string|array $methods = []

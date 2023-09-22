@@ -16,8 +16,8 @@ class Mysql extends \SFW\Lazy\Sys
      */
     public function getInstance(): \SFW\Databaser\Driver
     {
-        return (new \SFW\Databaser\Mysql(self::$config['sys']['db']['mysql']))
-            ->setProfiler(
+        return
+            (new \SFW\Databaser\Mysql(self::$config['sys']['db']['mysql']))->setProfiler(
                 $this->sys('Logger')->logDbSlowQuery(...)
             );
     }

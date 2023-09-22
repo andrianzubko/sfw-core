@@ -28,34 +28,32 @@ class Native extends \SFW\Lazy\Sys
                     ]
                 )
             )
-            ->addProperties(
-                [
-                    'lc' => $this->sys('Text')->lc(...),
+            ->addProperties([
+                'lc' => $this->sys('Text')->lc(...),
 
-                    'lcFirst' => $this->sys('Text')->lcFirst(...),
+                'lcFirst' => $this->sys('Text')->lcFirst(...),
 
-                    'uc' => $this->sys('Text')->uc(...),
+                'uc' => $this->sys('Text')->uc(...),
 
-                    'ucFirst' => $this->sys('Text')->ucFirst(...),
+                'ucFirst' => $this->sys('Text')->ucFirst(...),
 
-                    'trim' => $this->sys('Text')->trim(...),
+                'trim' => $this->sys('Text')->trim(...),
 
-                    'rTrim' => $this->sys('Text')->rTrim(...),
+                'rTrim' => $this->sys('Text')->rTrim(...),
 
-                    'lTrim' => $this->sys('Text')->lTrim(...),
+                'lTrim' => $this->sys('Text')->lTrim(...),
 
-                    'fTrim' => $this->sys('Text')->fTrim(...),
+                'fTrim' => $this->sys('Text')->fTrim(...),
 
-                    'mTrim' => $this->sys('Text')->mTrim(...),
+                'mTrim' => $this->sys('Text')->mTrim(...),
 
-                    'cut' => $this->sys('Text')->cut(...),
+                'cut' => $this->sys('Text')->cut(...),
 
-                    'random' => $this->sys('Text')->random(...),
+                'random' => $this->sys('Text')->random(...),
 
-                    'makeUrl' => \SFW\Router::makeUrl(...),
+                'makeUrl' => \SFW\Router::makeUrl(...),
 
-                    ...$this->properties,
-                ]
-            );
+                ...$this->properties,
+            ]);
     }
 }

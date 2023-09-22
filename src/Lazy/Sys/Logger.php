@@ -189,13 +189,11 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
             )
         );
 
-        $this->info($message,
-            [
-                'destination' => self::$config['sys']['db']['slow_queries_log'],
+        $this->info($message, [
+            'destination' => self::$config['sys']['db']['slow_queries_log'],
 
-                'append_file_and_line' => false,
-            ]
-        );
+            'append_file_and_line' => false,
+        ]);
     }
 
     /**
@@ -214,12 +212,10 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
             idn_to_utf8($_SERVER['HTTP_HOST']) . $_SERVER['REQUEST_URI']
         );
 
-        $this->log($level, $message,
-            [
-                'destination' => self::$config['sys']['transaction']['fails_log'],
+        $this->log($level, $message, [
+            'destination' => self::$config['sys']['transaction']['fails_log'],
 
-                'append_file_and_line' => false,
-            ]
-        );
+            'append_file_and_line' => false,
+        ]);
     }
 }

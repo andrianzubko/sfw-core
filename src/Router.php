@@ -5,7 +5,7 @@ namespace SFW;
 /**
  * Router.
  */
-class Router extends Base
+abstract class Router extends Base
 {
     /**
      * Internal cache.
@@ -17,13 +17,11 @@ class Router extends Base
      *
      * @throws RuntimeException
      */
-    public function get(): array
+    public static function get(): array
     {
-        if (PHP_SAPI === 'cli') {
-            return (new \SFW\Router\Command())->get();
-        }
-
-        return (new \SFW\Router\Controller())->get();
+        return PHP_SAPI === 'cli'
+            ? (new \SFW\Router\Command())->getRoute()
+            : (new \SFW\Router\Controller())->getRoute();
     }
 
     /**
@@ -31,10 +29,10 @@ class Router extends Base
      *
      * @throws RuntimeException
      */
-    public static function makeUrl(string $action, string ...$params): string
+    public static function makeUrl(string $action, string|int|float ...$params): string
     {
         if (self::$cache === false) {
-            (new \SFW\Router\Controller())->recheck();
+            (new \SFW\Router\Controller())->recheckCache();
         }
 
         $url = self::$cache['out'][$action]
@@ -46,5 +44,17 @@ class Router extends Base
         }
 
         return $url;
+    }
+
+    /**
+     * Gets full class name, method and action.
+     */
+    abstract protected function getRoute(): array;
+
+    /**
+     * Just check and rebuild cache if outdated.
+     */
+    protected function recheckCache(): void
+    {
     }
 }

@@ -94,7 +94,7 @@ abstract class Runner extends Base
             // }}}
             // {{{ calling Command or Controller action
 
-            [$class, $method, self::$e['sys']['action']] = (new Router())->get();
+            [$class, $method, self::$e['sys']['action']] = Router::get();
 
             if ($class !== false
                 && (method_exists($class, $method)

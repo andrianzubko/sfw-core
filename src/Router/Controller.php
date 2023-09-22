@@ -8,7 +8,7 @@ namespace SFW\Router;
 class Controller extends \SFW\Router
 {
     /**
-     * Controllers files.
+     * Controller files.
      */
     protected array $cFiles;
 
@@ -17,7 +17,7 @@ class Controller extends \SFW\Router
      *
      * @throws \SFW\RuntimeException
      */
-    public function get(): array
+    protected function getRoute(): array
     {
         if (self::$cache === false) {
             self::$cache = @include self::$config['sys']['router']['cache'];
@@ -41,7 +41,7 @@ class Controller extends \SFW\Router
      *
      * @throws \SFW\RuntimeException
      */
-    public function recheck(): void
+    protected function recheckCache(): void
     {
         if (self::$cache === false) {
             self::$cache = @include self::$config['sys']['router']['cache'];
@@ -90,17 +90,21 @@ class Controller extends \SFW\Router
      */
     protected function getControllerFiles(): array
     {
-        $cFiles = [];
+        if (!isset($this->cFiles)) {
+            $this->cFiles = [];
 
-        foreach ($this->sys('Dir')->scan(APP_DIR . '/src/Controller', true, true) as $item) {
-            if (is_file($item)
-                && str_ends_with($item, '.php')
+            foreach (
+                $this->sys('Dir')->scan(APP_DIR . '/src/Controller', true, true) as $item
             ) {
-                $cFiles[] = $item;
+                if (str_ends_with($item, '.php')
+                    && is_file($item)
+                ) {
+                    $this->cFiles[] = $item;
+                }
             }
         }
 
-        return $cFiles;
+        return $this->cFiles;
     }
 
     /**
@@ -112,11 +116,7 @@ class Controller extends \SFW\Router
             return true;
         }
 
-        if (!isset($this->cFiles)) {
-            $this->cFiles = $this->getControllerFiles();
-        }
-
-        foreach ($this->cFiles as $file) {
+        foreach ($this->getControllerFiles() as $file) {
             if ((int) filemtime($file) > self::$cache['time']) {
                 return true;
             }
@@ -132,11 +132,7 @@ class Controller extends \SFW\Router
      */
     protected function rebuild(): void
     {
-        if (!isset($this->cFiles)) {
-            $this->cFiles = $this->getControllerFiles();
-        }
-
-        foreach ($this->cFiles as $file) {
+        foreach ($this->getControllerFiles() as $file) {
             require_once $file;
         }
 

@@ -92,7 +92,7 @@ abstract class Runner extends Base
             $this->additionalEnvironment();
 
             // }}}
-            // {{{ calling Command or Controller request handler
+            // {{{ calling Command or Controller action
 
             [$class, $method, self::$e['sys']['action']] = (new Router())->get();
 
@@ -106,10 +106,10 @@ abstract class Runner extends Base
                 }
             }
 
-            $handler = new $class();
+            $instance = new $class();
 
             if ($method !== '__construct') {
-                $handler->$method();
+                $instance->$method();
             }
 
             // }}}

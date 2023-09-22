@@ -169,7 +169,7 @@ class Merger extends Base
                     $contents = $this->mergeCss($files);
                 }
 
-                if ($this->sys('File')->put($file, $contents) === false) {
+                if (!$this->sys('File')->put($file, $contents)) {
                     throw new RuntimeException(
                         sprintf(
                             'Unable to write file %s',
@@ -180,7 +180,9 @@ class Merger extends Base
             }
         }
 
-        if ($this->sys('File')->putVar(self::$config['sys']['merger']['cache'], $cache) === false) {
+        if (!$this->sys('File')->putVar(
+                self::$config['sys']['merger']['cache'], $cache)
+        ) {
             throw new RuntimeException(
                 sprintf(
                     'Unable to write file %s',

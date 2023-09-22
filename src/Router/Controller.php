@@ -8,40 +8,40 @@ namespace SFW\Router;
 class Controller extends \SFW\Router
 {
     /**
-     * Gets target class name.
+     * Gets full class name, method and action (short form of class + method).
      *
      * @throws \SFW\RuntimeException
      */
     public function get(): array
     {
-        $cache = @include self::$config['sys']['router']['cache'];
+        if (self::$cache === false) {
+            self::$cache = @include self::$config['sys']['router']['cache'];
+        }
 
-        if ($cache !== false
+        if (self::$cache !== false
             && self::$config['sys']['env'] === 'prod'
         ) {
-            return $this->findClass($cache);
+            return $this->findInCache();
         }
 
         $cFiles = $this->getControllerFiles();
 
-        $cache = $this->checkVersion($cache, $cFiles);
-
-        if ($cache === false) {
-            $cache = $this->rebuild($cFiles);
+        if ($this->isOutdated($cFiles)) {
+            $this->rebuild($cFiles);
         }
 
-        return $this->findClass($cache);
+        return $this->findInCache();
     }
 
     /**
-     * Finds target Controller class.
+     * Finds action in cache and transform to usable variant.
      */
-    protected function findClass(array $cache): array
+    protected function findInCache(): array
     {
-        if (preg_match($cache['regex'], $_SERVER['REQUEST_URL'], $M)) {
-            $found = $cache['in'][$M['MARK']];
+        if (preg_match(self::$cache['regex'], $_SERVER['REQUEST_URL'], $M)) {
+            $found = self::$cache['in'][$M['MARK']];
 
-            if (empty($found['method'])
+            if (!isset($found['method'])
                 || in_array($_SERVER['REQUEST_METHOD'], $found['method'], true)
             ) {
                 if (isset($found['keys'])) {
@@ -50,7 +50,14 @@ class Controller extends \SFW\Router
                     }
                 }
 
-                return $found['target'];
+                return
+                    array_pad(
+                        explode(
+                            '::', 'App\\Controller\\' . $found['action'], 2
+                        ), 2, '__construct'
+                    ) + [
+                        2 => $found['action']
+                    ];
             }
         }
 
@@ -80,19 +87,19 @@ class Controller extends \SFW\Router
     /**
      * Recheck of the needs for rescanning.
      */
-    protected function checkVersion(array|false $cache, array $cFiles): array|false
+    protected function isOutdated(array $cFiles): bool
     {
-        if ($cache === false) {
-            return false;
+        if (self::$cache === false) {
+            return true;
         }
 
         foreach ($cFiles as $cFile) {
-            if ((int) filemtime($cFile) > $cache['time']) {
-                return false;
+            if ((int) filemtime($cFile) > self::$cache['time']) {
+                return true;
             }
         }
 
-        return $cache;
+        return false;
     }
 
     /**
@@ -100,16 +107,17 @@ class Controller extends \SFW\Router
      *
      * @throws \SFW\RuntimeException
      */
-    protected function rebuild(array $cFiles): array
+    protected function rebuild(array $cFiles): void
     {
         foreach ($cFiles as $cFile) {
             require_once $cFile;
         }
 
-        $cache = [
+        self::$cache = [
             'time' => time(),
             'in' => [],
             'out' => [],
+            'regex' => [],
         ];
 
         foreach (get_declared_classes() as $class) {
@@ -119,10 +127,8 @@ class Controller extends \SFW\Router
                 foreach ($rClass->getAttributes('SFW\\Route') as $attribute) {
                     $route = $attribute->newInstance();
 
-                    $cache['in'][$route->path] = array_filter([
-                        'target' => [
-                            $class, '__construct'
-                        ],
+                    self::$cache['in'][$route->url] = array_filter([
+                        'action' => substr($class, 15),
                         'method' => $route->method,
                     ]);
                 }
@@ -132,10 +138,11 @@ class Controller extends \SFW\Router
                         foreach ($rMethod->getAttributes('SFW\\Route') as $attribute) {
                             $route = $attribute->newInstance();
 
-                            $cache['in'][$route->path] = array_filter([
-                                'target' => [
-                                    $class, $rMethod->name
-                                ],
+                            self::$cache['in'][$route->url] = array_filter([
+                                'action' => substr($class, 15) . (
+                                    $rMethod->isConstructor()
+                                        ? '' : '::' . $rMethod->name
+                                ),
                                 'method' => $route->method,
                             ]);
                         }
@@ -144,41 +151,28 @@ class Controller extends \SFW\Router
             }
         }
 
-        foreach ($cache['in'] as $path => $item) {
-            if ($item['target'][1] === '__construct') {
-                $item['target'][] = substr($item['target'][0], 15);
-            } else {
-                $item['target'][] = implode('::', [
-                    substr($item['target'][0], 15), $item['target'][1],
-                ]);
+        foreach (self::$cache['in'] as $url => $item) {
+            if (preg_match_all('/{([^}]+)}/', $url, $M)) {
+                self::$cache['in'][$url]['keys'] = $M[1];
             }
 
-            if (preg_match_all('/{([^}]+)}/', $path, $M)) {
-                $item['keys'] = $M[1];
-            }
+            self::$cache['out'][$item['action']] = $url;
 
-            $cache['in'][$path] = $item;
-
-            $cache['out'][$item['target'][2]] = $path;
+            self::$cache['regex'][] = sprintf('%s(*:%s)',
+                preg_replace('/\\\\{[^}]+}/', '([^/]+)', preg_quote($url)),
+                    count(self::$cache['regex'])
+            );
         }
 
-        $cache['regex'] = sprintf('{^(?|%s)$}',
-            implode('|',
-                array_map(
-                    fn($i, $path) => sprintf("%s(*:$i)",
-                        preg_replace('/\\\\{[^}]+}/', '([^/]+)', preg_quote($path))
-                    ),
-                    array_keys(
-                        array_keys($cache['in'])
-                    ),
-                    array_keys($cache['in'])
-                )
-            )
+        self::$cache['regex'] = sprintf('{^(?|%s)$}',
+            implode('|', self::$cache['regex'])
         );
 
-        $cache['in'] = array_values($cache['in']);
+        self::$cache['in'] = array_values(self::$cache['in']);
 
-        if ($this->sys('File')->putVar(self::$config['sys']['router']['cache'], $cache) === false) {
+        if (!$this->sys('File')->putVar(
+                self::$config['sys']['router']['cache'], self::$cache, LOCK_EX)
+        ) {
             throw new \SFW\RuntimeException(
                 sprintf(
                     'Unable to write file %s',
@@ -186,7 +180,5 @@ class Controller extends \SFW\Router
                 )
             );
         }
-
-        return $cache;
     }
 }

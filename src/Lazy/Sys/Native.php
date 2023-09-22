@@ -23,10 +23,8 @@ class Native extends \SFW\Lazy\Sys
     {
         return
             (new \SFW\Templater\Native(
-                    [
-                        ...self::$config['sys']['templater']['native'],
-
-                        'debug' => self::$config['sys']['debug'],
+                    self::$config['sys']['templater']['native'] + [
+                        'debug' => self::$config['sys']['debug']
                     ]
                 )
             )
@@ -53,6 +51,8 @@ class Native extends \SFW\Lazy\Sys
                     'cut' => $this->sys('Text')->cut(...),
 
                     'random' => $this->sys('Text')->random(...),
+
+                    'makeUrl' => \SFW\Router::makeUrl(...),
 
                     ...$this->properties,
                 ]

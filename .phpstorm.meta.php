@@ -21,6 +21,7 @@ namespace PHPSTORM_META {
         'Pgsql',
         'Redis',
         'Response',
+        'Router',
         'Shutdown',
         'Templater',
         'Text',

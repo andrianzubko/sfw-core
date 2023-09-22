@@ -12,7 +12,7 @@ class Route
      * Registers route.
      */
     public function __construct(
-        public string $path,
+        public string $url,
         public string|array $method = []
     ) {
         $this->method = array_map(strtoupper(...), (array) $this->method);

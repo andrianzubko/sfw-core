@@ -34,11 +34,14 @@ class File extends \SFW\Lazy\Sys
     /**
      * Putting variable to some PHP file.
      */
-    public function putVar(string $file, mixed $var): bool
+    public function putVar(string $file, mixed $variable, int $flags = 0, bool $createDir = true): bool
     {
-        $var = var_export($var, true);
-
-        $success = $this->put($file, "<?php\n\nreturn $var;\n");
+        $success = $this->put($file,
+            sprintf(
+                "<?php\n\nreturn %s;\n",
+                    var_export($variable, true)
+            ), $flags, $createDir
+        );
 
         if ($success
             && extension_loaded('zend-opcache')

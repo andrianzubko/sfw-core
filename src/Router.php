@@ -19,9 +19,11 @@ abstract class Router extends Base
      */
     public static function get(): array
     {
-        return PHP_SAPI === 'cli'
-            ? (new \SFW\Router\Command())->getRoute()
-            : (new \SFW\Router\Controller())->getRoute();
+        return (
+            PHP_SAPI === 'cli'
+                ? new \SFW\Router\Command()
+                : new \SFW\Router\Controller()
+        )->getRoute();
     }
 
     /**
@@ -35,8 +37,8 @@ abstract class Router extends Base
             (new \SFW\Router\Controller())->recheckCache();
         }
 
-        $url = self::$cache['out'][$action]
-            ?? self::$cache['out'][str_replace(['App\\Controller\\', '::__construct'], '', $action)]
+        $url = self::$cache['urls'][$action]
+            ?? self::$cache['urls'][str_replace(['App\\Controller\\', '::__construct'], '', $action)]
             ?? '/';
 
         foreach ($params as $param) {

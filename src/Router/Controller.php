@@ -60,13 +60,15 @@ class Controller extends \SFW\Router
         if (self::$cache !== false
             && preg_match(self::$cache['regex'], $_SERVER['REQUEST_URL'], $M)
         ) {
-            $found = self::$cache['in'][$M['MARK']];
+            $actions = self::$cache['actions'][$M['MARK']];
 
-            if (!isset($found['method'])
-                || in_array($_SERVER['REQUEST_METHOD'], $found['method'], true)
-            ) {
-                if (isset($found['keys'])) {
-                    foreach ($found['keys'] as $i => $key) {
+            $action = $actions[$_SERVER['REQUEST_METHOD']] ?? $actions[''] ?? null;
+
+            if (isset($action)) {
+                $keys = self::$cache['keys'][$M['MARK']] ?? null;
+
+                if (isset($keys)) {
+                    foreach ($keys as $i => $key) {
                         $_GET[$key] = $_REQUEST[$key] = $M[$i + 1];
                     }
                 }
@@ -74,10 +76,10 @@ class Controller extends \SFW\Router
                 return
                     array_pad(
                         explode(
-                            '::', 'App\\Controller\\' . $found['action'], 2
+                            '::', "App\\Controller\\$action", 2
                         ), 2, '__construct'
                     ) + [
-                        2 => $found['action']
+                        2 => $action
                     ];
             }
         }
@@ -138,8 +140,9 @@ class Controller extends \SFW\Router
 
         self::$cache = [
             'time' => time(),
-            'in' => [],
-            'out' => [],
+            'actions' => [],
+            'keys' => [],
+            'urls' => [],
             'regex' => [],
         ];
 
@@ -147,51 +150,42 @@ class Controller extends \SFW\Router
             if (str_starts_with($class, 'App\\Controller\\')) {
                 $rClass = new \ReflectionClass($class);
 
-                foreach ($rClass->getAttributes('SFW\\Route') as $attribute) {
-                    $route = $attribute->newInstance();
-
-                    self::$cache['in'][$route->url] = array_filter([
-                        'action' => substr($class, 15),
-                        'method' => $route->method,
-                    ]);
-                }
+                $this->saveRouteToCache($rClass, substr($class, 15));
 
                 foreach ($rClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $rMethod) {
                     if ($rMethod->class === $class) {
-                        foreach ($rMethod->getAttributes('SFW\\Route') as $attribute) {
-                            $route = $attribute->newInstance();
-
-                            self::$cache['in'][$route->url] = array_filter([
-                                'action' => substr($class, 15) . (
-                                    $rMethod->isConstructor()
-                                        ? '' : '::' . $rMethod->name
-                                ),
-                                'method' => $route->method,
-                            ]);
-                        }
+                        $this->saveRouteToCache(
+                            $rMethod,
+                            $rMethod->isConstructor()
+                                ? substr($class, 15)
+                                : substr($class, 15) . '::' . $rMethod->name
+                        );
                     }
                 }
             }
         }
 
-        foreach (self::$cache['in'] as $url => $item) {
+        $i = 0;
+
+        foreach (self::$cache['actions'] as $url => $actions) {
             if (preg_match_all('/{([^}]+)}/', $url, $M)) {
-                self::$cache['in'][$url]['keys'] = $M[1];
+                self::$cache['keys'][$i] = $M[1];
             }
 
-            self::$cache['out'][$item['action']] = $url;
+            foreach ($actions as $action) {
+                self::$cache['urls'][$action] = $url;
+            }
 
-            self::$cache['regex'][] = sprintf('%s(*:%s)',
+            self::$cache['regex'][] = sprintf("%s(*:$i)",
                 preg_replace('/\\\\{[^}]+}/', '([^/]+)', preg_quote($url)),
-                    count(self::$cache['regex'])
             );
+
+            $i++;
         }
 
-        self::$cache['regex'] = sprintf('{^(?|%s)$}',
-            implode('|', self::$cache['regex'])
-        );
+        self::$cache['regex'] = sprintf('{^(?|%s)$}', implode('|', self::$cache['regex']));
 
-        self::$cache['in'] = array_values(self::$cache['in']);
+        self::$cache['actions'] = array_values(self::$cache['actions']);
 
         if (!$this->sys('File')->putVar(
                 self::$config['sys']['router']['cache'], self::$cache, LOCK_EX)
@@ -202,6 +196,20 @@ class Controller extends \SFW\Router
                         self::$config['sys']['router']['cache']
                 )
             );
+        }
+    }
+
+    /**
+     * Reflection item to cache structure.
+     */
+    private function saveRouteToCache(\ReflectionClass | \ReflectionMethod $item, string $action): void
+    {
+        foreach ($item->getAttributes('SFW\\Route') as $attribute) {
+            $route = $attribute->newInstance();
+
+            foreach ($route->methods as $method) {
+                self::$cache['actions'][$route->url][$method] = $action;
+            }
         }
     }
 }

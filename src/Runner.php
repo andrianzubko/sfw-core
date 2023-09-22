@@ -96,20 +96,17 @@ abstract class Runner extends Base
 
             [$class, $method, self::$e['sys']['action']] = (new Router())->get();
 
-            if ($class === false
-                || !method_exists($class, $method)
+            if ($class !== false
+                && (method_exists($class, $method)
+                    || PHP_SAPI === 'cli')
             ) {
-                if (PHP_SAPI === 'cli') {
-                    $this->exit();
-                } else {
-                    $this->sys('Response')->errorPage(404);
+                $instance = new $class();
+
+                if ($method !== '__construct') {
+                    $instance->$method();
                 }
-            }
-
-            $instance = new $class();
-
-            if ($method !== '__construct') {
-                $instance->$method();
+            } elseif (PHP_SAPI !== 'cli') {
+                $this->sys('Response')->errorPage(404);
             }
 
             // }}}

@@ -8,7 +8,7 @@ namespace SFW\Router;
 class Command extends \SFW\Router
 {
     /**
-     * Gets target class name.
+     * Gets full class name, method and action.
      *
      * Very poor implementation. Will be better soon.
      */

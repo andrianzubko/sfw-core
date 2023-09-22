@@ -15,8 +15,12 @@ class Dir extends \SFW\Lazy\Sys
     /**
      * Directory scanning.
      */
-    public function scan(string $dir, bool $recursive = false, int $order = SCANDIR_SORT_ASCENDING): array
-    {
+    public function scan(
+        string $dir,
+        bool $recursive = false,
+        bool $withDir = false,
+        int $order = SCANDIR_SORT_ASCENDING
+    ): array {
         $scanned = [];
 
         if (is_dir($dir)
@@ -30,10 +34,14 @@ class Dir extends \SFW\Lazy\Sys
                 if (!$recursive
                     || is_file("$dir/$item")
                 ) {
-                    $scanned[] = $item;
+                    $scanned[] = $withDir
+                        ? "$dir/$item"
+                        : "$item";
                 } else {
-                    foreach ($this->scan("$dir/$item", true, $order) as $subItem) {
-                        $scanned[] = "$item/$subItem";
+                    foreach ($this->scan("$dir/$item", true, false, $order) as $subItem) {
+                        $scanned[] = $withDir
+                            ? "$dir/$item/$subItem"
+                            : "$item/$subItem";
                     }
                 }
             }

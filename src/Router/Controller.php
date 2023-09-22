@@ -8,7 +8,12 @@ namespace SFW\Router;
 class Controller extends \SFW\Router
 {
     /**
-     * Gets full class name, method and action (short form of class + method).
+     * Controllers files.
+     */
+    protected array $cFiles;
+
+    /**
+     * Gets full class name, method and action.
      *
      * @throws \SFW\RuntimeException
      */
@@ -24,13 +29,27 @@ class Controller extends \SFW\Router
             return $this->findInCache();
         }
 
-        $cFiles = $this->getControllerFiles();
-
-        if ($this->isOutdated($cFiles)) {
-            $this->rebuild($cFiles);
+        if ($this->isOutdated()) {
+            $this->rebuild();
         }
 
         return $this->findInCache();
+    }
+
+    /**
+     * Just check and rebuild cache if outdated.
+     *
+     * @throws \SFW\RuntimeException
+     */
+    public function recheck(): void
+    {
+        if (self::$cache === false) {
+            self::$cache = @include self::$config['sys']['router']['cache'];
+        }
+
+        if ($this->isOutdated()) {
+            $this->rebuild();
+        }
     }
 
     /**
@@ -38,7 +57,9 @@ class Controller extends \SFW\Router
      */
     protected function findInCache(): array
     {
-        if (preg_match(self::$cache['regex'], $_SERVER['REQUEST_URL'], $M)) {
+        if (self::$cache !== false
+            && preg_match(self::$cache['regex'], $_SERVER['REQUEST_URL'], $M)
+        ) {
             $found = self::$cache['in'][$M['MARK']];
 
             if (!isset($found['method'])
@@ -69,15 +90,13 @@ class Controller extends \SFW\Router
      */
     protected function getControllerFiles(): array
     {
-        $cDir = APP_DIR . '/src/Controller';
-
         $cFiles = [];
 
-        foreach ($this->sys('Dir')->scan($cDir, true) as $item) {
-            if (is_file("$cDir/$item")
+        foreach ($this->sys('Dir')->scan(APP_DIR . '/src/Controller', true, true) as $item) {
+            if (is_file($item)
                 && str_ends_with($item, '.php')
             ) {
-                $cFiles[] = "$cDir/$item";
+                $cFiles[] = $item;
             }
         }
 
@@ -87,14 +106,18 @@ class Controller extends \SFW\Router
     /**
      * Recheck of the needs for rescanning.
      */
-    protected function isOutdated(array $cFiles): bool
+    protected function isOutdated(): bool
     {
         if (self::$cache === false) {
             return true;
         }
 
-        foreach ($cFiles as $cFile) {
-            if ((int) filemtime($cFile) > self::$cache['time']) {
+        if (!isset($this->cFiles)) {
+            $this->cFiles = $this->getControllerFiles();
+        }
+
+        foreach ($this->cFiles as $file) {
+            if ((int) filemtime($file) > self::$cache['time']) {
                 return true;
             }
         }
@@ -107,10 +130,14 @@ class Controller extends \SFW\Router
      *
      * @throws \SFW\RuntimeException
      */
-    protected function rebuild(array $cFiles): void
+    protected function rebuild(): void
     {
-        foreach ($cFiles as $cFile) {
-            require_once $cFile;
+        if (!isset($this->cFiles)) {
+            $this->cFiles = $this->getControllerFiles();
+        }
+
+        foreach ($this->cFiles as $file) {
+            require_once $file;
         }
 
         self::$cache = [

@@ -13,7 +13,7 @@ class Router extends Base
     protected static array|false $cache = false;
 
     /**
-     * Gets target class name.
+     * Gets full class name, method and action.
      *
      * @throws RuntimeException
      */
@@ -34,11 +34,7 @@ class Router extends Base
     public static function makeUrl(string $action, string ...$params): string
     {
         if (self::$cache === false) {
-            self::$cache = @include self::$config['sys']['router']['cache'];
-
-            if (self::$cache === false) {
-                (new \SFW\Router\Controller())->get();
-            }
+            (new \SFW\Router\Controller())->recheck();
         }
 
         $url = self::$cache['out'][$action]

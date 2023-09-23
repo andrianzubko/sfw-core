@@ -7,4 +7,10 @@ namespace SFW\Lazy;
  */
 abstract class Sys extends \SFW\Lazy
 {
+    /**
+     * Just placeholder.
+     */
+    public function __construct()
+    {
+    }
 }

@@ -194,7 +194,7 @@ abstract class Runner extends Base
     /**
      * Initializing default environment.
      *
-     * @throws BadConfigurationException
+     * @throws Exception
      */
     private function defaultEnvironment(): void
     {
@@ -219,6 +219,12 @@ abstract class Runner extends Base
         self::$e['sys']['url'] = sprintf('%s://%s',
             self::$e['sys']['url_scheme'], self::$e['sys']['url_host']
         );
+
+        if (PHP_SAPI !== 'cli'
+            && isset(self::$config['sys']['merger']['sources'])
+        ) {
+            self::$e['sys']['merged'] = (new Merger())->process();
+        }
     }
 
     /**

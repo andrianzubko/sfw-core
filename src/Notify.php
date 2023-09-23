@@ -12,7 +12,7 @@ abstract class Notify extends Base
      *
      * This method called after browser disconnect.
      */
-    public function build(NotifyStruct $defaultStruct): array
+    public function build(NotifyStruct $defaultStruct): iterable
     {
         return [];
     }

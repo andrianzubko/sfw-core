@@ -183,11 +183,23 @@ class Sys extends \SFW\Config
          */
         $sys['notifier']['enabled'] = true;
 
+        /* Default sender.
+         *
+         * 'EMAIL' or array('EMAIL'[, 'NAME'])
+         */
+        $sys['notifier']['sender'] = 'mailer@domain.com';
+
         /* Instead of disabling, you can override recipients by your email.
          *
          * ?array('EMAIL' or array('EMAIL'[, 'NAME']), ...)
          */
         $sys['notifier']['recipients'] = null;
+
+        /* Default replies.
+         *
+         * array('EMAIL' or array('EMAIL'[, 'NAME']), ...)
+         */
+        $sys['notifier']['replies'] = [];
 
         // }}}
         // {{{ locker
@@ -243,11 +255,19 @@ class Sys extends \SFW\Config
         // }}}
         // {{{ merger
 
-        /* Cache file with merger internal data.
+        /* Sources to merge (sources are absolute, targets are just filenames).
+         *
+         * Null value disables merger.
+         *
+         * ?array
+         */
+        $sys['merger']['sources'] = null;
+
+        /* URL location with merged JS and CSS files.
          *
          * string
          */
-        $sys['merger']['cache'] = APP_DIR . '/var/cache/merger.php';
+        $sys['merger']['location'] = '/.merged';
 
         /* Directory for merged JS and CSS files.
          *
@@ -255,11 +275,11 @@ class Sys extends \SFW\Config
          */
         $sys['merger']['dir'] = APP_DIR . '/var/cache/merged';
 
-        /* URL location with merged JS and CSS files.
+        /* Cache file with merger internal data.
          *
          * string
          */
-        $sys['merger']['location'] = '/.merged';
+        $sys['merger']['cache'] = APP_DIR . '/var/cache/merger.php';
 
         // }}}
         // {{{ router

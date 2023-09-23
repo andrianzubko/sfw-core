@@ -53,7 +53,7 @@ class Controller extends \SFW\Router
     }
 
     /**
-     * Finds action in cache and transform to usable variant.
+     * Finds action in cache and transforms to usable variant.
      */
     protected function findInCache(): array
     {
@@ -177,7 +177,7 @@ class Controller extends \SFW\Router
             }
 
             self::$cache['regex'][] = sprintf("%s(*:$i)",
-                preg_replace('/\\\\{[^}]+}/', '([^/]+)', preg_quote($url)),
+                preg_replace('/\\\\{[^}]+}/', '([^/]+)', preg_quote($url))
             );
 
             $i++;
@@ -207,7 +207,7 @@ class Controller extends \SFW\Router
         foreach ($item->getAttributes('SFW\\Route') as $attribute) {
             $route = $attribute->newInstance();
 
-            foreach ($route->methods as $method) {
+            foreach ($route->method as $method) {
                 self::$cache['actions'][$route->url][$method] = $action;
             }
         }

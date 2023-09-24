@@ -23,6 +23,6 @@ class Router extends \SFW\Lazy\Sys
      */
     public function makeUrl(string $action, string ...$params): string
     {
-        return \SFW\Router::makeUrl($action, ...$params);
+        return \SFW\Router\Controller::makeUrl($action, ...$params);
     }
 }

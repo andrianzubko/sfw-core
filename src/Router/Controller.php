@@ -8,16 +8,57 @@ namespace SFW\Router;
 class Controller extends \SFW\Router
 {
     /**
+     * Internal cache.
+     */
+    protected static array|false $cache = false;
+
+    /**
      * Controller files.
      */
     protected array $cFiles;
+
+    /**
+     * Makes URL by action (or full namespace) and optional parameters.
+     *
+     * @throws \SFW\RuntimeException
+     */
+    public static function makeUrl(string $action, string|int|float ...$params): string
+    {
+        if (self::$cache === false) {
+            self::$cache = @include self::$config['sys']['router']['cache'];
+
+            if (self::$cache === false
+                || self::$config['sys']['env'] !== 'prod'
+            ) {
+                $controller = new self();
+
+                if ($controller->isOutdated()) {
+                    $controller->rebuild();
+                }
+            }
+        }
+
+        $url = self::$cache['urls'][$action][count($params)] ?? null;
+
+        if (!isset($url)) {
+            $action = str_replace(['App\\Controller\\', '::__construct'], '', $action);
+
+            $url = self::$cache['urls'][$action][count($params)] ?? '/';
+        }
+
+        foreach ($params as $param) {
+            $url = preg_replace('/{[^}]+}/', $param, $url, 1);
+        }
+
+        return $url;
+    }
 
     /**
      * Gets full class name, method and action.
      *
      * @throws \SFW\RuntimeException
      */
-    protected function getRoute(): array
+    protected function getAction(): array
     {
         if (self::$cache === false) {
             self::$cache = @include self::$config['sys']['router']['cache'];
@@ -34,22 +75,6 @@ class Controller extends \SFW\Router
         }
 
         return $this->findInCache();
-    }
-
-    /**
-     * Just checks and rebuilds cache if outdated.
-     *
-     * @throws \SFW\RuntimeException
-     */
-    protected function recheckCache(): void
-    {
-        if (self::$cache === false) {
-            self::$cache = @include self::$config['sys']['router']['cache'];
-        }
-
-        if ($this->isOutdated()) {
-            $this->rebuild();
-        }
     }
 
     /**
@@ -173,7 +198,7 @@ class Controller extends \SFW\Router
             }
 
             foreach ($actions as $action) {
-                self::$cache['urls'][$action] = $url;
+                self::$cache['urls'][$action][count(self::$cache['keys'][$i] ?? [])] ??= $url;
             }
 
             self::$cache['regex'][] = sprintf("%s(*:$i)",

@@ -43,7 +43,7 @@ class Native extends \SFW\Lazy\Sys
 
         $this->properties['random'] = $this->sys('Text')->random(...);
 
-        $this->properties['makeUrl'] = \SFW\Router::makeUrl(...);
+        $this->properties['makeUrl'] = \SFW\Router\Controller::makeUrl(...);
     }
 
     /**

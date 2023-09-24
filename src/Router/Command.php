@@ -12,7 +12,7 @@ class Command extends \SFW\Router
      *
      * Very poor implementation. Will be better soon.
      */
-    protected function getRoute(): array
+    protected function getAction(): array
     {
         if (isset($_SERVER['argv'][1])) {
             $class = preg_replace_callback(
@@ -23,12 +23,5 @@ class Command extends \SFW\Router
         }
 
         return [false, false, false];
-    }
-
-    /**
-     * Just checks and rebuilds cache if outdated.
-     */
-    protected function recheckCache(): void
-    {
     }
 }

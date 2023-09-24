@@ -20,7 +20,7 @@ class Merger extends Base
     protected array $sources;
 
     /**
-     * Recombining if needed and returning merged paths.
+     * Recombines if needed and returns merged paths.
      *
      * @throws LogicException
      * @throws RuntimeException
@@ -50,7 +50,7 @@ class Merger extends Base
     }
 
     /**
-     * Getting merged paths.
+     * Gets merged paths.
      */
     protected function getPaths(): array
     {
@@ -73,7 +73,7 @@ class Merger extends Base
     }
 
     /**
-     * Getting sources files.
+     * Gets sources files.
      */
     protected function getSources(): array
     {
@@ -99,7 +99,7 @@ class Merger extends Base
     }
 
     /**
-     * Recheck of the needs for recombination.
+     * Rechecks of the needs for recombination.
      */
     protected function isOutdated(): bool
     {
@@ -149,7 +149,7 @@ class Merger extends Base
     }
 
     /**
-     * Recombining.
+     * Recombines all.
      *
      * @throws LogicException
      * @throws RuntimeException
@@ -204,7 +204,7 @@ class Merger extends Base
     }
 
     /**
-     * Merging JS.
+     * Merges JS.
      *
      * @throws LogicException
      * @throws RuntimeException
@@ -227,7 +227,7 @@ class Merger extends Base
     }
 
     /**
-     * Merging CSS.
+     * Merges CSS.
      *
      * @throws RuntimeException
      */
@@ -279,7 +279,7 @@ class Merger extends Base
     }
 
     /**
-     * Merging files.
+     * Merges files.
      *
      * @throws RuntimeException
      */

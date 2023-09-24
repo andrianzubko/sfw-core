@@ -18,7 +18,7 @@ abstract class Config
     abstract public static function get(): array;
 
     /**
-     * Getting parameter from server environment or env file.
+     * Gets parameter from server environment or env file.
      */
     protected static function env(string $key, mixed $default = null): mixed
     {

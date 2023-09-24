@@ -54,9 +54,7 @@ abstract class Router extends Base
     abstract protected function getRoute(): array;
 
     /**
-     * Just check and rebuild cache if outdated.
+     * Just checks and rebuilds cache if outdated.
      */
-    protected function recheckCache(): void
-    {
-    }
+    abstract protected function recheckCache(): void;
 }

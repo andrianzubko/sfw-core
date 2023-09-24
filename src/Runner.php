@@ -8,7 +8,7 @@ namespace SFW;
 abstract class Runner extends Base
 {
     /**
-     * Initializing environment and calling Controller class.
+     * Initializes environment and calls Controller or Command class.
      */
     final public function __construct()
     {
@@ -192,7 +192,7 @@ abstract class Runner extends Base
     }
 
     /**
-     * Initializing default environment.
+     * Initializes default environment.
      *
      * @throws Exception
      */
@@ -228,7 +228,7 @@ abstract class Runner extends Base
     }
 
     /**
-     * Initializing additional environment.
+     * Initializes additional environment.
      */
     abstract protected function additionalEnvironment(): void;
 }

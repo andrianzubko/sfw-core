@@ -3,7 +3,7 @@
 namespace SFW\Router;
 
 /**
- * Route from command line arguments to Command class.
+ * Routes from command line arguments to Command class.
  */
 class Command extends \SFW\Router
 {
@@ -23,5 +23,12 @@ class Command extends \SFW\Router
         }
 
         return [false, false, false];
+    }
+
+    /**
+     * Just checks and rebuilds cache if outdated.
+     */
+    protected function recheckCache(): void
+    {
     }
 }

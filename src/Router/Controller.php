@@ -3,7 +3,7 @@
 namespace SFW\Router;
 
 /**
- * Route from request url to Controller class.
+ * Routes from request url to Controller class.
  */
 class Controller extends \SFW\Router
 {
@@ -37,7 +37,7 @@ class Controller extends \SFW\Router
     }
 
     /**
-     * Just check and rebuild cache if outdated.
+     * Just checks and rebuilds cache if outdated.
      *
      * @throws \SFW\RuntimeException
      */
@@ -110,7 +110,7 @@ class Controller extends \SFW\Router
     }
 
     /**
-     * Recheck of the needs for rescanning.
+     * Rechecks of the needs for rescanning.
      */
     protected function isOutdated(): bool
     {
@@ -128,7 +128,7 @@ class Controller extends \SFW\Router
     }
 
     /**
-     * Rescan controllers and rebuild cache.
+     * Rescans controllers and rebuilds cache.
      *
      * @throws \SFW\RuntimeException
      */

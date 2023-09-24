@@ -10,57 +10,57 @@ class NotifyStruct
     /**
      * Subject.
      */
-    public string $subject;
+    public string $subject = '';
 
     /**
      * HTML body.
      */
-    public string $body;
+    public string $body = '';
 
     /**
      * Sender address.
      *
-     * 'EMAIL' or array('EMAIL'[, 'NAME'])
+     * 'EMAIL' or array('EMAIL'[, 'NAME']) or null
      */
-    public array|string $sender;
+    public array|string|null $sender = null;
 
     /**
      * Recipient addresses.
      *
      * array('EMAIL' or array('EMAIL'[, 'NAME']), ...)
      */
-    public array $recipients;
+    public array $recipients = [];
 
     /**
      * Reply To addresses.
      *
      * array('EMAIL' or array('EMAIL'[, 'NAME']), ...)
      */
-    public array $replies;
+    public array $replies = [];
 
     /**
      * Custom headers.
      *
      * array('NAME: VALUE' or array('NAME', 'VALUE'), ...)
      */
-    public array $customHeaders;
+    public array $customHeaders = [];
 
     /**
      * Attachments as files.
      *
      * array('PATH' or array('PATH'[, 'FILENAME']), ...)
      */
-    public array $attachmentsFiles;
+    public array $attachmentFiles = [];
 
     /**
      * Attachments as strings.
      *
      * array(array('BINARY', 'FILENAME'), ...)
      */
-    public array $attachmentsStrings;
+    public array $attachmentStrings = [];
 
     /**
      * Environment for template.
      */
-    public array $e;
+    public array $e = [];
 }

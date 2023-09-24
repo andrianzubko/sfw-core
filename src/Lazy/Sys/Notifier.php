@@ -20,13 +20,17 @@ class Notifier extends \SFW\Lazy\Sys
     protected array $notifies = [];
 
     /**
-     * Initializing default struct and registering shutdown function.
+     * Initializes default structure and registers shutdown process.
      */
     public function __construct()
     {
         parent::__construct();
 
         $this->defaultStruct = new \SFW\NotifyStruct();
+
+        $this->defaultStruct->sender = self::$config['sys']['notifier']['sender'];
+
+        $this->defaultStruct->replies = self::$config['sys']['notifier']['replies'];
 
         $this->defaultStruct->e['config'] = self::$e['config'];
 
@@ -62,21 +66,21 @@ class Notifier extends \SFW\Lazy\Sys
     {
         while ($notify = array_shift($this->notifies)) {
             try {
-                $structs = $notify->build(clone $this->defaultStruct);
+                foreach ($notify->build(clone $this->defaultStruct) as $struct) {
+                    if (self::$config['sys']['notifier']['enabled']) {
+                        if (isset(self::$config['sys']['notifier']['recipients'])) {
+                            $struct->recipients = self::$config['sys']['notifier']['recipients'];
+                        }
+
+                        try {
+                            $this->send($struct);
+                        } catch (\Throwable $error) {
+                            $this->sys('Logger')->error($error);
+                        }
+                    }
+                }
             } catch (\Throwable $error) {
                 $this->sys('Logger')->error($error);
-
-                continue;
-            }
-
-            if (self::$config['sys']['notifier']['enabled']) {
-                foreach ($structs as $struct) {
-                    if (isset(self::$config['sys']['notifier']['recipients'])) {
-                        $struct->recipients = self::$config['sys']['notifier']['recipients'];
-                    }
-
-                    $this->send($struct);
-                }
             }
         }
     }
@@ -93,46 +97,55 @@ class Notifier extends \SFW\Lazy\Sys
 
     /**
      * Sending single message.
+     *
+     * @throws \SFW\LogicException
+     * @throws PHPMailerException
      */
     protected function send(\SFW\NotifyStruct $struct): void
     {
+        $mailer = new PHPMailer(true);
+
+        $mailer->CharSet = 'utf-8';
+
+        $mailer->Subject = $struct->subject;
+
+        $mailer->msgHTML($struct->body);
+
+        if (empty($struct->sender)) {
+            throw new \SFW\LogicException('No sender in notify');
+        }
+
+        $mailer->setFrom(...(array) $struct->sender);
+
+        if (empty($struct->recipients)) {
+            throw new \SFW\LogicException('No recipients in notify');
+        }
+
+        foreach ($struct->recipients as $item) {
+            try {
+                $mailer->addAddress(...(array) $item);
+            } catch (PHPMailerException) {}
+        }
+
+        foreach ($struct->replies as $item) {
+            try {
+                $mailer->addReplyTo(...(array) $item);
+            } catch (PHPMailerException) {}
+        }
+
+        foreach ($struct->customHeaders as $item) {
+            $mailer->addCustomHeader(...(array) $item);
+        }
+
+        foreach ($struct->attachmentFiles as $item) {
+            $mailer->addAttachment(...(array) $item);
+        }
+
+        foreach ($struct->attachmentStrings as $item) {
+            $mailer->addStringAttachment(...$item);
+        }
+
         try {
-            $mailer = new PHPMailer(true);
-
-            $mailer->CharSet = 'utf-8';
-
-            $mailer->Subject = $struct->subject ?? '';
-
-            $mailer->msgHTML($struct->body ?? '');
-
-            $mailer->setFrom(...(array) (
-                $struct->sender ?? self::$config['sys']['notifier']['sender']
-            ));
-
-            foreach ($struct->recipients ?? [] as $recipient) {
-                try {
-                    $mailer->addAddress(...(array) $recipient);
-                } catch (PHPMailerException) {}
-            }
-
-            foreach ($struct->replies ?? self::$config['sys']['notifier']['replies'] as $reply) {
-                try {
-                    $mailer->addReplyTo(...(array) $reply);
-                } catch (PHPMailerException) {}
-            }
-
-            foreach ($struct->customHeaders ?? [] as $header) {
-                $mailer->addCustomHeader(...(array) $header);
-            }
-
-            foreach ($struct->attachmentsFiles ?? [] as $attachment) {
-                $mailer->addAttachment(...(array) $attachment);
-            }
-
-            foreach ($struct->attachmentsStrings ?? [] as $attachment) {
-                $mailer->addStringAttachment(...$attachment);
-            }
-
             $mailer->send();
         } catch (PHPMailerException) {}
     }

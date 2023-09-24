@@ -28,7 +28,7 @@ class Sys extends \SFW\Config
          */
         $sys['debug'] = false;
 
-        /* Basic url (autodetect if not set).
+        /* Basic url (autodetect if null).
          *
          * ?string
          */
@@ -183,17 +183,17 @@ class Sys extends \SFW\Config
          */
         $sys['notifier']['enabled'] = true;
 
-        /* Default sender.
-         *
-         * 'EMAIL' or array('EMAIL'[, 'NAME'])
-         */
-        $sys['notifier']['sender'] = 'mailer@domain.com';
-
         /* Instead of disabling, you can override recipients by your email.
          *
          * ?array('EMAIL' or array('EMAIL'[, 'NAME']), ...)
          */
         $sys['notifier']['recipients'] = null;
+
+        /* Default sender.
+         *
+         * 'EMAIL' or array('EMAIL'[, 'NAME']) or null
+         */
+        $sys['notifier']['sender'] = null;
 
         /* Default replies.
          *

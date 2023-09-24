@@ -38,7 +38,7 @@ class Sys extends \SFW\Config
          *
          * string
          */
-        $sys['timezone'] = 'Europe/Moscow';
+        $sys['timezone'] = 'UTC';
 
         // }}}
         // {{{ databaser
@@ -297,7 +297,7 @@ class Sys extends \SFW\Config
          *
          * string
          */
-        $sys['paginator']['param'] = 'i';
+        $sys['paginator']['param'] = 'page';
 
         // }}}
 

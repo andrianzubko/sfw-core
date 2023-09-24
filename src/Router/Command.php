@@ -12,7 +12,7 @@ class Command extends \SFW\Router
      *
      * Very poor implementation. Will be better soon.
      */
-    protected function getAction(): array
+    protected function get(): array
     {
         if (isset($_SERVER['argv'][1])) {
             $class = preg_replace_callback(

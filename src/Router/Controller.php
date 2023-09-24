@@ -58,7 +58,7 @@ class Controller extends \SFW\Router
      *
      * @throws \SFW\RuntimeException
      */
-    protected function getAction(): array
+    protected function get(): array
     {
         if (self::$cache === false) {
             self::$cache = @include self::$config['sys']['router']['cache'];

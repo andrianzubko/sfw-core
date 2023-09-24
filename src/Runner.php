@@ -94,7 +94,13 @@ abstract class Runner extends Base
             // }}}
             // {{{ calling Command or Controller action
 
-            [$class, $method, self::$e['sys']['action']] = Router::get();
+            if (PHP_SAPI === 'cli') {
+                $router = new \SFW\Router\Command();
+            } else {
+                $router = new \SFW\Router\Controller();
+            }
+
+            [$class, $method, self::$e['sys']['action']] = $router->get();
 
             if ($class !== false
                 && (method_exists($class, $method)
@@ -220,8 +226,8 @@ abstract class Runner extends Base
             self::$e['sys']['url_scheme'], self::$e['sys']['url_host']
         );
 
-        if (PHP_SAPI !== 'cli'
-            && isset(self::$config['sys']['merger']['sources'])
+        if (isset(self::$config['sys']['merger']['sources'])
+            && PHP_SAPI !== 'cli'
         ) {
             self::$e['sys']['merged'] = (new Merger())->process();
         }

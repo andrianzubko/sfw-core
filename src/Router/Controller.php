@@ -3,7 +3,7 @@
 namespace SFW\Router;
 
 /**
- * Routes from request url to Controller class.
+ * Routes from request url to Controller action.
  */
 class Controller extends \SFW\Router
 {
@@ -15,14 +15,14 @@ class Controller extends \SFW\Router
     /**
      * Controller files.
      */
-    protected array $cFiles;
+    protected static array $cFiles;
 
     /**
-     * Makes URL by action (or full namespace) and optional parameters.
+     * Makes URL by action (or FQCN) and optional parameters.
      *
      * @throws \SFW\RuntimeException
      */
-    public static function makeUrl(string $action, string|int|float ...$params): string
+    public function makeUrl(string $action, string|int|float|null ...$params): string
     {
         if (self::$cache === false) {
             self::$cache = @include self::$config['sys']['router']['cache'];
@@ -30,27 +30,42 @@ class Controller extends \SFW\Router
             if (self::$cache === false
                 || self::$config['sys']['env'] !== 'prod'
             ) {
-                $controller = new self();
-
-                if ($controller->isOutdated()) {
-                    $controller->rebuild();
+                if ($this->isOutdated()) {
+                    $this->rebuild();
                 }
             }
         }
 
-        $url = self::$cache['urls'][$action][count($params)] ?? null;
+        $url = self::$cache['urls'][$action][count($params)]
+            ?? self::$cache['urls'][$this->FQCNToAction($action)][count($params)]
+            ?? null;
 
-        if (!isset($url)) {
-            $action = str_replace(['App\\Controller\\', '::__construct'], '', $action);
+        if (isset($url)) {
+            if (count($params)) {
+                $url = preg_split('/({[^}]+})/', $url, flags: PREG_SPLIT_DELIM_CAPTURE);
 
-            $url = self::$cache['urls'][$action][count($params)] ?? '/';
+                foreach ($params as $i => $value) {
+                    if (isset($value)) {
+                        $url[$i * 2 + 1] = $value;
+                    }
+                }
+
+                return implode($url);
+            }
+
+            return $url;
         }
 
-        foreach ($params as $param) {
-            $url = preg_replace('/{[^}]+}/', $param, $url, 1);
-        }
+        $this->sys('Logger')->warning(
+            sprintf(
+                'Unable to make URL by action %s and %d %s',
+                    $action,
+                    count($params),
+                    count($params) === 1 ? 'parameter' : 'parameters'
+            ), debug_backtrace(2)[1]
+        );
 
-        return $url;
+        return '/';
     }
 
     /**
@@ -58,7 +73,7 @@ class Controller extends \SFW\Router
      *
      * @throws \SFW\RuntimeException
      */
-    public function get(): array
+    public function getAction(): array
     {
         if (self::$cache === false) {
             self::$cache = @include self::$config['sys']['router']['cache'];
@@ -117,21 +132,19 @@ class Controller extends \SFW\Router
      */
     protected function getControllerFiles(): array
     {
-        if (!isset($this->cFiles)) {
-            $this->cFiles = [];
+        if (!isset(self::$cFiles)) {
+            self::$cFiles = [];
 
-            foreach (
-                $this->sys('Dir')->scan(APP_DIR . '/src/Controller', true, true) as $item
-            ) {
-                if (str_ends_with($item, '.php')
-                    && is_file($item)
+            foreach ($this->sys('Dir')->scan(APP_DIR . '/src/Controller', true, true) as $item) {
+                if (is_file($item)
+                    && str_ends_with($item, '.php')
                 ) {
-                    $this->cFiles[] = $item;
+                    self::$cFiles[] = $item;
                 }
             }
         }
 
-        return $this->cFiles;
+        return self::$cFiles;
     }
 
     /**
@@ -175,16 +188,11 @@ class Controller extends \SFW\Router
             if (str_starts_with($class, 'App\\Controller\\')) {
                 $rClass = new \ReflectionClass($class);
 
-                $this->saveRouteToCache($rClass, substr($class, 15));
+                $this->saveRouteToCache($rClass, $class);
 
                 foreach ($rClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $rMethod) {
                     if ($rMethod->class === $class) {
-                        $this->saveRouteToCache(
-                            $rMethod,
-                            $rMethod->isConstructor()
-                                ? substr($class, 15)
-                                : substr($class, 15) . '::' . $rMethod->name
-                        );
+                        $this->saveRouteToCache($rMethod, "$class::$rMethod->name");
                     }
                 }
             }
@@ -198,7 +206,7 @@ class Controller extends \SFW\Router
             }
 
             foreach ($actions as $action) {
-                self::$cache['urls'][$action][count(self::$cache['keys'][$i] ?? [])] ??= $url;
+                self::$cache['urls'][$action][count(self::$cache['keys'][$i] ?? [])] = $url;
             }
 
             self::$cache['regex'][] = sprintf("%s(*:$i)",
@@ -229,6 +237,8 @@ class Controller extends \SFW\Router
      */
     private function saveRouteToCache(\ReflectionClass | \ReflectionMethod $item, string $action): void
     {
+        $action = $this->FQCNToAction($action);
+
         foreach ($item->getAttributes('SFW\\Route') as $attribute) {
             $route = $attribute->newInstance();
 
@@ -238,5 +248,13 @@ class Controller extends \SFW\Router
                 }
             }
         }
+    }
+
+    /**
+     * Makes action from fully qualified class name.
+     */
+    private function FQCNToAction(string $action): string
+    {
+        return preg_replace('/(?:^App\\\\Controller\\\\|::__construct$)/', '', $action);
     }
 }

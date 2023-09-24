@@ -100,7 +100,7 @@ abstract class Runner extends Base
                 $router = new \SFW\Router\Controller();
             }
 
-            [$class, $method, self::$e['sys']['action']] = $router->get();
+            [$class, $method, self::$e['sys']['action']] = $router->getAction();
 
             if ($class !== false
                 && (method_exists($class, $method)

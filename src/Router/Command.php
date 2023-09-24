@@ -3,7 +3,7 @@
 namespace SFW\Router;
 
 /**
- * Routes from command line arguments to Command class.
+ * Routes from command line arguments to Command action.
  */
 class Command extends \SFW\Router
 {
@@ -12,7 +12,7 @@ class Command extends \SFW\Router
      *
      * Very poor implementation. Will be better soon.
      */
-    public function get(): array
+    public function getAction(): array
     {
         if (isset($_SERVER['argv'][1])) {
             $class = preg_replace_callback(

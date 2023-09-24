@@ -3,12 +3,12 @@
 namespace SFW;
 
 /**
- * Router.
+ * Abstraction for routers.
  */
 abstract class Router extends Base
 {
     /**
      * Gets full class name, method and action.
      */
-    abstract public function get(): array;
+    abstract public function getAction(): array;
 }

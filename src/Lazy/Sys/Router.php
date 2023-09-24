@@ -8,12 +8,18 @@ namespace SFW\Lazy\Sys;
 class Router extends \SFW\Lazy\Sys
 {
     /**
-     * Just a placeholder.
+     * Controllers router instance.
+     */
+    protected \SFW\Router\Controller $router;
+
+    /**
+     * Instantiates controllers router.
      *
-     * If your overrides constructor, don't forget call parent at first line! Even if it's empty!
+     * If your overrides constructor, don't forget call parent at first line!
      */
     public function __construct()
     {
+        $this->router = new \SFW\Router\Controller();
     }
 
     /**
@@ -21,8 +27,8 @@ class Router extends \SFW\Lazy\Sys
      *
      * @throws \SFW\RuntimeException
      */
-    public function makeUrl(string $action, string ...$params): string
+    public function makeUrl(string $action, string|int|float|null ...$params): string
     {
-        return \SFW\Router\Controller::makeUrl($action, ...$params);
+        return $this->router->makeUrl($action, ...$params);
     }
 }

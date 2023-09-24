@@ -67,16 +67,10 @@ class Notifier extends \SFW\Lazy\Sys
         while ($notify = array_shift($this->notifies)) {
             try {
                 foreach ($notify->build(clone $this->defaultStruct) as $struct) {
-                    if (self::$config['sys']['notifier']['enabled']) {
-                        if (isset(self::$config['sys']['notifier']['recipients'])) {
-                            $struct->recipients = self::$config['sys']['notifier']['recipients'];
-                        }
-
-                        try {
-                            $this->send($struct);
-                        } catch (\Throwable $error) {
-                            $this->sys('Logger')->error($error);
-                        }
+                    try {
+                        $this->send($struct);
+                    } catch (\Throwable $error) {
+                        $this->sys('Logger')->error($error);
                     }
                 }
             } catch (\Throwable $error) {
@@ -117,6 +111,10 @@ class Notifier extends \SFW\Lazy\Sys
 
         $mailer->setFrom(...(array) $struct->sender);
 
+        if (isset(self::$config['sys']['notifier']['recipients'])) {
+            $struct->recipients = self::$config['sys']['notifier']['recipients'];
+        }
+
         if (empty($struct->recipients)) {
             throw new \SFW\LogicException('No recipients in notify');
         }
@@ -124,13 +122,15 @@ class Notifier extends \SFW\Lazy\Sys
         foreach ($struct->recipients as $item) {
             try {
                 $mailer->addAddress(...(array) $item);
-            } catch (PHPMailerException) {}
+            } catch (PHPMailerException) {
+            }
         }
 
         foreach ($struct->replies as $item) {
             try {
                 $mailer->addReplyTo(...(array) $item);
-            } catch (PHPMailerException) {}
+            } catch (PHPMailerException) {
+            }
         }
 
         foreach ($struct->customHeaders as $item) {
@@ -145,8 +145,11 @@ class Notifier extends \SFW\Lazy\Sys
             $mailer->addStringAttachment(...$item);
         }
 
-        try {
-            $mailer->send();
-        } catch (PHPMailerException) {}
+        if (self::$config['sys']['notifier']['enabled']) {
+            try {
+                $mailer->send();
+            } catch (PHPMailerException) {
+            }
+        }
     }
 }

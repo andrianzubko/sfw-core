@@ -207,8 +207,10 @@ class Controller extends \SFW\Router
         foreach ($item->getAttributes('SFW\\Route') as $attribute) {
             $route = $attribute->newInstance();
 
-            foreach ($route->method as $method) {
-                self::$cache['actions'][$route->url][$method] = $action;
+            foreach ($route->url as $url) {
+                foreach ($route->method as $method) {
+                    self::$cache['actions'][$url][$method] = $action;
+                }
             }
         }
     }

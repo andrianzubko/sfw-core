@@ -13,6 +13,15 @@ class Dir extends \SFW\Lazy\Sys
     protected ?string $temporary;
 
     /**
+     * Just a placeholder.
+     *
+     * If your overrides constructor, don't forget call parent at first line! Even if it's empty!
+     */
+    public function __construct()
+    {
+    }
+
+    /**
      * Directory scanning.
      */
     public function scan(

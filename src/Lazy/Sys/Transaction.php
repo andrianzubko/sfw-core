@@ -15,6 +15,15 @@ class Transaction extends \SFW\Lazy\Sys
     protected array $callbacks = [];
 
     /**
+     * Just a placeholder.
+     *
+     * If your overrides constructor, don't forget call parent at first line! Even if it's empty!
+     */
+    public function __construct()
+    {
+    }
+
+    /**
      * Processing pgsql transaction with retries on expected errors.
      *
      * @throws \SFW\Databaser\Exception

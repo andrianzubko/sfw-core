@@ -10,6 +10,15 @@ namespace SFW\Lazy\Sys;
 class Db extends \SFW\Lazy\Sys
 {
     /**
+     * Just a placeholder.
+     *
+     * If your overrides constructor, don't forget call parent at first line! Even if it's empty!
+     */
+    public function __construct()
+    {
+    }
+
+    /**
      * Databaser module instance.
      *
      * @internal

@@ -8,6 +8,15 @@ namespace SFW\Lazy\Sys;
 class File extends \SFW\Lazy\Sys
 {
     /**
+     * Just a placeholder.
+     *
+     * If your overrides constructor, don't forget call parent at first line! Even if it's empty!
+     */
+    public function __construct()
+    {
+    }
+
+    /**
      * Getting file contents into string.
      */
     public function get(string $file): string|false {

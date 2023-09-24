@@ -21,11 +21,11 @@ class Notifier extends \SFW\Lazy\Sys
 
     /**
      * Initializes default structure and registers shutdown process.
+     *
+     * If your overrides constructor, don't forget call parent at first line!
      */
     public function __construct()
     {
-        parent::__construct();
-
         $this->defaultStruct = new \SFW\NotifyStruct();
 
         $this->defaultStruct->sender = self::$config['sys']['notifier']['sender'];

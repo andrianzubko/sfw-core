@@ -8,6 +8,15 @@ namespace SFW\Lazy\Sys;
 class Curl extends \SFW\Lazy\Sys
 {
     /**
+     * Just a placeholder.
+     *
+     * If your overrides constructor, don't forget call parent at first line! Even if it's empty!
+     */
+    public function __construct()
+    {
+    }
+
+    /**
      * Do CURL request with encoding detection.
      */
     public function request(array $options, ?array &$headers = null): string|false

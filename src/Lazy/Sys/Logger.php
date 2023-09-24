@@ -10,6 +10,15 @@ use Psr\Log\{LoggerInterface, LogLevel};
 class Logger extends \SFW\Lazy\Sys implements LoggerInterface
 {
     /**
+     * Just a placeholder.
+     *
+     * If your overrides constructor, don't forget call parent at first line! Even if it's empty!
+     */
+    public function __construct()
+    {
+    }
+
+    /**
      * System is unusable.
      */
     public function emergency(string|\Stringable $message, array $context = []): void

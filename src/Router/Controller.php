@@ -37,7 +37,7 @@ class Controller extends \SFW\Router
         }
 
         $url = self::$cache['urls'][$action][count($params)]
-            ?? self::$cache['urls'][$this->FQCNToAction($action)][count($params)]
+            ?? self::$cache['urls'][$this->FQMNToAction($action)][count($params)]
             ?? null;
 
         if (isset($url)) {
@@ -113,14 +113,13 @@ class Controller extends \SFW\Router
                     }
                 }
 
-                return
-                    array_pad(
+                return [
+                    $action, ...array_pad(
                         explode(
                             '::', "App\\Controller\\$action", 2
                         ), 2, '__construct'
-                    ) + [
-                        2 => $action
-                    ];
+                    ),
+                ];
             }
         }
 
@@ -237,7 +236,7 @@ class Controller extends \SFW\Router
      */
     private function saveRouteToCache(\ReflectionClass | \ReflectionMethod $item, string $action): void
     {
-        $action = $this->FQCNToAction($action);
+        $action = $this->FQMNToAction($action);
 
         foreach ($item->getAttributes('SFW\\Route') as $attribute) {
             $route = $attribute->newInstance();
@@ -251,9 +250,9 @@ class Controller extends \SFW\Router
     }
 
     /**
-     * Makes action from fully qualified class name.
+     * Makes action from fully qualified method name.
      */
-    private function FQCNToAction(string $action): string
+    private function FQMNToAction(string $action): string
     {
         return preg_replace('/(?:^App\\\\Controller\\\\|::__construct$)/', '', $action);
     }

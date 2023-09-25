@@ -100,9 +100,9 @@ abstract class Runner extends Base
                 $router = new \SFW\Router\Controller();
             }
 
-            [$class, $method, self::$e['sys']['action']] = $router->getAction();
+            [self::$e['sys']['action'], $class, $method] = $router->getAction();
 
-            if ($class !== false
+            if (self::$e['sys']['action'] !== false
                 && (method_exists($class, $method)
                     || PHP_SAPI === 'cli')
             ) {

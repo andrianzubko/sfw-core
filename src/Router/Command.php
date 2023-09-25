@@ -15,11 +15,11 @@ class Command extends \SFW\Router
     public function getAction(): array
     {
         if (isset($_SERVER['argv'][1])) {
-            $class = preg_replace_callback(
+            $action = preg_replace_callback(
                 '/(?:^|:)(.)/', fn($M) => strtoupper($M[1]), $_SERVER['argv'][1]
             );
 
-            return ["App\\Command\\$class", '__construct', $class];
+            return [$action, "App\\Command\\$action", '__construct'];
         }
 
         return [false, false, false];

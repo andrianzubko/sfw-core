@@ -32,16 +32,23 @@ class Response extends \SFW\Lazy\Sys
     }
 
     /**
-     * Output some as inline json.
+     * Output some as inline pretty print json.
      */
     public function json(
         mixed $contents,
         string $mime = 'text/plain',
-        int $expire = 0,
         ?string $filename = null,
-        int $code = 200
+        int $expire = 0,
+        int $code = 200,
+        bool $pretty = false
     ): self {
-        return $this->inline(json_encode($contents), $mime, $expire, $filename, $code);
+        return $this->inline(
+            json_encode($contents,
+                $pretty
+                    ? JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT
+                    : JSON_UNESCAPED_UNICODE
+            ), $mime, $filename, $expire, $code
+        );
     }
 
     /**
@@ -50,11 +57,11 @@ class Response extends \SFW\Lazy\Sys
     public function inline(
         string $contents,
         string $mime = 'text/plain',
-        int $expire = 0,
         ?string $filename = null,
+        int $expire = 0,
         int $code = 200
     ): self {
-        return $this->output(__FUNCTION__, $contents, $mime, $expire, $filename, $code);
+        return $this->output(__FUNCTION__, $contents, $mime, $filename, $expire, $code);
     }
 
     /**
@@ -63,11 +70,11 @@ class Response extends \SFW\Lazy\Sys
     public function attachment(
         string $contents,
         string $mime = 'text/plain',
-        int $expire = 0,
         ?string $filename = null,
+        int $expire = 0,
         int $code = 200
     ): self {
-        return $this->output(__FUNCTION__, $contents, $mime, $expire, $filename, $code);
+        return $this->output(__FUNCTION__, $contents, $mime, $filename, $expire, $code);
     }
 
     /**
@@ -77,8 +84,8 @@ class Response extends \SFW\Lazy\Sys
         string $disposition,
         string $contents,
         string $mime,
-        int $expire,
         ?string $filename,
+        int $expire,
         int $code
     ): self {
         ini_set('zlib.output_compression', false);

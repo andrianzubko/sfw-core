@@ -12,8 +12,8 @@ abstract class Lazy extends Base
      *
      * @internal
      */
-    public function getInstance(): object
+    public static function getInstance(): object
     {
-        return $this;
+        return new static();
     }
 }

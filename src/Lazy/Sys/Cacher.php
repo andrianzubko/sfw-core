@@ -23,8 +23,8 @@ class Cacher extends \SFW\Lazy\Sys
      *
      * @internal
      */
-    public function getInstance(): \SFW\Cacher\Driver
+    public static function getInstance(): \SFW\Cacher\Driver
     {
-        return $this->sys(self::$config['sys']['cacher']['default']);
+        return (new static())->sys(self::$config['sys']['cacher']['default']);
     }
 }

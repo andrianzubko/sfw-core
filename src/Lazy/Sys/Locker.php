@@ -32,7 +32,7 @@ class Locker extends \SFW\Lazy\Sys
         if (isset($this->locks[$key])) {
             throw new \SFW\LogicException(
                 sprintf(
-                    'Lock with key %s is already in use',
+                    'Lock with key "%s" is already in use',
                         $key
                 )
             );
@@ -82,7 +82,7 @@ class Locker extends \SFW\Lazy\Sys
         if (!isset($this->locks[$key])) {
             throw new \SFW\LogicException(
                 sprintf(
-                    'Lock with key %s is not exists',
+                    'Lock with key "%s" is not exists',
                         $key
                 )
             );

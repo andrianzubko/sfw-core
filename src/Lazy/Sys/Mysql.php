@@ -23,11 +23,12 @@ class Mysql extends \SFW\Lazy\Sys
      *
      * @internal
      */
-    public function getInstance(): \SFW\Databaser\Driver
+    public static function getInstance(): \SFW\Databaser\Driver
     {
         return
-            (new \SFW\Databaser\Mysql(self::$config['sys']['db']['mysql']))->setProfiler(
-                $this->sys('Logger')->logDbSlowQuery(...)
-            );
+            (new \SFW\Databaser\Mysql(self::$config['sys']['db']['mysql']))
+                ->setProfiler(
+                    (new static())->sys('Logger')->logDbSlowQuery(...)
+                );
     }
 }

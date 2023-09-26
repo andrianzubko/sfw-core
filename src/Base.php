@@ -40,17 +40,10 @@ abstract class Base
      */
     public function sys(string $name): object
     {
-        if (!isset(self::$sysLazies[$name])) {
-            $class = "App\\Lazy\\Sys\\$name";
-
-            if (!class_exists($class)) {
-                $class = "SFW\\Lazy\\Sys\\$name";
-            }
-
-            self::$sysLazies[$name] = (new $class())->getInstance();
-        }
-
-        return self::$sysLazies[$name];
+        return self::$sysLazies[$name] ??=
+            class_exists("App\\Lazy\\Sys\\$name")
+                ? "App\\Lazy\\Sys\\$name::getInstance"()
+                : "SFW\\Lazy\\Sys\\$name::getInstance"();
     }
 
     /**
@@ -60,13 +53,7 @@ abstract class Base
      */
     public function my(string $name): object
     {
-        if (!isset(self::$myLazies[$name])) {
-            $class = "App\\Lazy\\My\\$name";
-
-            self::$myLazies[$name] = (new $class())->getInstance();
-        }
-
-        return self::$myLazies[$name];
+        return self::$myLazies[$name] ??= "App\\Lazy\\My\\$name::getInstance"();
     }
 
     /**

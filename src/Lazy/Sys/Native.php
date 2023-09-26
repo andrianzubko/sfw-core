@@ -51,13 +51,16 @@ class Native extends \SFW\Lazy\Sys
      *
      * @internal
      */
-    public function getInstance(): \SFW\Templater\Processor
+    public static function getInstance(): \SFW\Templater\Processor
     {
-        return (new \SFW\Templater\Native(
+        return
+            (new \SFW\Templater\Native(
                     self::$config['sys']['templater']['native'] + [
                         'debug' => self::$config['sys']['debug']
                     ]
                 )
-            )->addProperties($this->properties);
+            )->addProperties(
+                (new static())->properties
+            );
     }
 }

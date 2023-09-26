@@ -23,8 +23,8 @@ class Db extends \SFW\Lazy\Sys
      *
      * @internal
      */
-    public function getInstance(): \SFW\Databaser\Driver
+    public static function getInstance(): \SFW\Databaser\Driver
     {
-        return $this->sys(self::$config['sys']['db']['default']);
+        return (new static())->sys(self::$config['sys']['db']['default']);
     }
 }

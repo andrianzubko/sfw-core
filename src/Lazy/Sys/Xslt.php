@@ -28,11 +28,12 @@ class Xslt extends \SFW\Lazy\Sys
      *
      * @internal
      */
-    public function getInstance(): \SFW\Templater\Processor
+    public static function getInstance(): \SFW\Templater\Processor
     {
-        return (new \SFW\Templater\Xslt(self::$config['sys']['templater']['xslt']))
-            ->addProperties(
-                $this->properties
-            );
+        return
+            (new \SFW\Templater\Xslt(self::$config['sys']['templater']['xslt']))
+                ->addProperties(
+                    (new static())->properties
+                );
     }
 }

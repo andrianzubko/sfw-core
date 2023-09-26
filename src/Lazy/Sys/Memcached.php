@@ -23,7 +23,7 @@ class Memcached extends \SFW\Lazy\Sys
      *
      * @internal
      */
-    public function getInstance(): \SFW\Cacher\Driver
+    public static function getInstance(): \SFW\Cacher\Driver
     {
         return new \SFW\Cacher\Memcached(self::$config['sys']['cacher']['memcached']);
     }

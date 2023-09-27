@@ -87,7 +87,8 @@ class Transaction extends \SFW\Lazy\Sys
             ) {
                 try {
                     $this->sys('Db')->rollback();
-                } catch (\SFW\Databaser\Exception) {}
+                } catch (\SFW\Databaser\Exception) {
+                }
 
                 if (isset($onAbort)) {
                     $onAbort($error->getSqlState());

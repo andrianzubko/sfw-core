@@ -22,7 +22,6 @@ class Redis extends \SFW\Lazy\Sys
      * Redis module instance.
      *
      * @throws \SFW\Cacher\Exception
-     *
      * @internal
      */
     public static function getInstance(): \SFW\Cacher\Driver

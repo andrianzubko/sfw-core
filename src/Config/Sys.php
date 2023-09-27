@@ -295,7 +295,7 @@ class Sys extends \SFW\Config
 
         /* Name of page parameter in url for paginator.
          *
-         * string
+         * ?string
          */
         $sys['paginator']['param'] = 'page';
 

@@ -73,7 +73,8 @@ class Curl extends \SFW\Lazy\Sys
             ) {
                 try {
                     return @mb_convert_encoding($response, 'utf-8', $M[1]);
-                } catch (\ValueError) {}
+                } catch (\ValueError) {
+                }
             }
         }
 

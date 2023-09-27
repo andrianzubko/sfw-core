@@ -27,7 +27,9 @@ abstract class Runner extends Base
             // }}}
             // {{{ application dir
 
-            define('APP_DIR', dirname(__DIR__, 4));
+            define('APP_DIR',
+                dirname((new \ReflectionClass(static::class))->getFileName(), 2)
+            );
 
             // }}}
             // {{{ important PHP params.

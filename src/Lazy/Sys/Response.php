@@ -156,7 +156,7 @@ class Response extends \SFW\Lazy\Sys
      * @throws \SFW\Templater\Exception
      */
     public function native(
-        array|object $context,
+        array|object|null $context,
         string $template,
         int $code = 200
     ): self {
@@ -169,7 +169,7 @@ class Response extends \SFW\Lazy\Sys
      * @throws \SFW\Templater\Exception
      */
     public function xslt(
-        array|object $context,
+        array|object|null $context,
         string $template,
         int $code = 200
     ): self {
@@ -182,7 +182,7 @@ class Response extends \SFW\Lazy\Sys
      * @throws \SFW\Templater\Exception
      */
     public function template(
-        array|object $context,
+        array|object|null $context,
         string $template,
         int $code = 200,
         string $processor = 'Templater'

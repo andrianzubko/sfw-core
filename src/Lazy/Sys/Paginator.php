@@ -39,12 +39,8 @@ class Paginator extends \SFW\Lazy\Sys
     /**
      * Calculates page-by-page navigation.
      */
-    public function calc(
-        int $totalEntries,
-        int $entriesPerPage,
-        int $pagesPerSet,
-        int $currentPage
-    ): array {
+    public function calc(int $totalEntries, int $entriesPerPage, int $pagesPerSet, int $currentPage): array
+    {
         $pagination = (new \SFW\Paginator(...func_get_args()))->toArray();
 
         if (isset($this->url)) {

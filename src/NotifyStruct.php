@@ -60,7 +60,7 @@ class NotifyStruct
     public array $attachmentStrings = [];
 
     /**
-     * Environment for template.
+     * Context for template.
      */
-    public array $e = [];
+    public array $context = [];
 }

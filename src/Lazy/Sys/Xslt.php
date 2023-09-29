@@ -10,17 +10,20 @@ namespace SFW\Lazy\Sys;
 class Xslt extends \SFW\Lazy\Sys
 {
     /**
-     * Properties for templates.
+     * Options for templates.
      */
-    protected array $properties = [];
+    protected array $options;
 
     /**
-     * Initializes properties for templates.
+     * Initializes options for templates.
      *
-     * If your overrides constructor, don't forget call parent at first line! Even if it's empty!
+     * If your overrides constructor, don't forget call parent at first line!
      */
-    public function __construct()
+    protected function __construct()
     {
+        $this->options = self::$config['sys']['templater']['xslt'];
+
+        $this->options['properties'] = [];
     }
 
     /**
@@ -30,10 +33,6 @@ class Xslt extends \SFW\Lazy\Sys
      */
     public static function getInstance(): \SFW\Templater\Processor
     {
-        return
-            (new \SFW\Templater\Xslt(self::$config['sys']['templater']['xslt']))
-                ->addProperties(
-                    (new static())->properties
-                );
+        return new \SFW\Templater\Xslt((new static())->options);
     }
 }

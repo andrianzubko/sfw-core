@@ -32,8 +32,8 @@ class Shutdown extends \SFW\Lazy\Sys
                     foreach ($this->callbacks as $callback) {
                         try {
                             $callback();
-                        } catch (\Throwable $error) {
-                            $this->sys('Logger')->error($error);
+                        } catch (\Throwable $e) {
+                            $this->sys('Logger')->error($e);
                         }
                     }
                 }

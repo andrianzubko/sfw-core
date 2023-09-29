@@ -10,40 +10,50 @@ namespace SFW\Lazy\Sys;
 class Native extends \SFW\Lazy\Sys
 {
     /**
-     * Properties for templates.
+     * Options for templates.
      */
-    protected array $properties = [];
+    protected array $options;
 
     /**
-     * Initializes properties for templates.
+     * Initializes options for templates.
      *
      * If your overrides constructor, don't forget call parent at first line!
      */
-    public function __construct()
+    protected function __construct()
     {
-        $this->properties['lc'] = $this->sys('Text')->lc(...);
+        $this->options = self::$config['sys']['templater']['native'];
 
-        $this->properties['lcFirst'] = $this->sys('Text')->lcFirst(...);
+        $this->options['debug'] = self::$config['sys']['debug'];
 
-        $this->properties['uc'] = $this->sys('Text')->uc(...);
+        $this->options['properties'] = [
+            'config' => self::$config['shared'],
 
-        $this->properties['ucFirst'] = $this->sys('Text')->ucFirst(...);
+            'sys' => self::$sys,
 
-        $this->properties['trim'] = $this->sys('Text')->trim(...);
+            'lc' => $this->sys('Text')->lc(...),
 
-        $this->properties['rTrim'] = $this->sys('Text')->rTrim(...);
+            'lcFirst' => $this->sys('Text')->lcFirst(...),
 
-        $this->properties['lTrim'] = $this->sys('Text')->lTrim(...);
+            'uc' => $this->sys('Text')->uc(...),
 
-        $this->properties['fTrim'] = $this->sys('Text')->fTrim(...);
+            'ucFirst' => $this->sys('Text')->ucFirst(...),
 
-        $this->properties['mTrim'] = $this->sys('Text')->mTrim(...);
+            'trim' => $this->sys('Text')->trim(...),
 
-        $this->properties['cut'] = $this->sys('Text')->cut(...);
+            'rTrim' => $this->sys('Text')->rTrim(...),
 
-        $this->properties['random'] = $this->sys('Text')->random(...);
+            'lTrim' => $this->sys('Text')->lTrim(...),
 
-        $this->properties['makeUrl'] = $this->sys('Router')->makeUrl(...);
+            'fTrim' => $this->sys('Text')->fTrim(...),
+
+            'mTrim' => $this->sys('Text')->mTrim(...),
+
+            'cut' => $this->sys('Text')->cut(...),
+
+            'random' => $this->sys('Text')->random(...),
+
+            'makeUrl' => $this->sys('Router')->makeUrl(...),
+        ];
     }
 
     /**
@@ -53,14 +63,6 @@ class Native extends \SFW\Lazy\Sys
      */
     public static function getInstance(): \SFW\Templater\Processor
     {
-        return
-            (new \SFW\Templater\Native(
-                    self::$config['sys']['templater']['native'] + [
-                        'debug' => self::$config['sys']['debug']
-                    ]
-                )
-            )->addProperties(
-                (new static())->properties
-            );
+        return new \SFW\Templater\Native((new static())->options);
     }
 }

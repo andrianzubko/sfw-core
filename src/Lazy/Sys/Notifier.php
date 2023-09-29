@@ -32,10 +32,6 @@ class Notifier extends \SFW\Lazy\Sys
 
         $this->defaultStruct->replies = self::$config['sys']['notifier']['replies'];
 
-        $this->defaultStruct->e['config'] = self::$e['config'];
-
-        $this->defaultStruct->e['sys'] = self::$e['sys'];
-
         register_shutdown_function(
             function () {
                 register_shutdown_function(
@@ -69,12 +65,12 @@ class Notifier extends \SFW\Lazy\Sys
                 foreach ($notify->build(clone $this->defaultStruct) as $struct) {
                     try {
                         $this->send($struct);
-                    } catch (\Throwable $error) {
-                        $this->sys('Logger')->error($error);
+                    } catch (\Throwable $e) {
+                        $this->sys('Logger')->error($e);
                     }
                 }
-            } catch (\Throwable $error) {
-                $this->sys('Logger')->error($error);
+            } catch (\Throwable $e) {
+                $this->sys('Logger')->error($e);
             }
         }
     }

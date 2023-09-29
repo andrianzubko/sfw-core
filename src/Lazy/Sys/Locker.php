@@ -22,7 +22,7 @@ class Locker extends \SFW\Lazy\Sys
     }
 
     /**
-     * Lock.
+     * Locks file by key and returns true or returns false if file already in use.
      *
      * @throws \SFW\LogicException
      * @throws \SFW\RuntimeException
@@ -30,23 +30,16 @@ class Locker extends \SFW\Lazy\Sys
     public function lock(string $key): bool
     {
         if (isset($this->locks[$key])) {
-            throw new \SFW\LogicException(
-                sprintf(
-                    'Lock with key "%s" is already in use',
-                        $key
-                )
-            );
+            throw new \SFW\LogicException("Lock with key '$key' is already in use");
         }
 
         $file = str_replace('{KEY}', $key, self::$config['sys']['locker']['file']);
 
-        $dir = dirname($file);
-
-        if ($this->sys('Dir')->create($dir) === false) {
+        if ($this->sys('Dir')->create(dirname($file)) === false) {
             throw new \SFW\RuntimeException(
                 sprintf(
                     'Unable to create directory %s',
-                        $dir
+                        dirname($file)
                 )
             );
         }
@@ -72,7 +65,7 @@ class Locker extends \SFW\Lazy\Sys
     }
 
     /**
-     * Unlock.
+     * Unlocks file by key.
      *
      * @throws \SFW\LogicException
      * @throws \SFW\RuntimeException
@@ -80,12 +73,7 @@ class Locker extends \SFW\Lazy\Sys
     public function unlock(string $key): void
     {
         if (!isset($this->locks[$key])) {
-            throw new \SFW\LogicException(
-                sprintf(
-                    'Lock with key "%s" is not exists',
-                        $key
-                )
-            );
+            throw new \SFW\LogicException("Lock with key '$key' is not exists");
         }
 
         if (fclose($this->locks[$key]) === false) {

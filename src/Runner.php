@@ -32,7 +32,7 @@ abstract class Runner extends Base
             );
 
             // }}}
-            // {{{ important PHP params.
+            // {{{ important PHP parameters.
 
             ini_set('display_errors', PHP_SAPI === 'cli');
 
@@ -48,8 +48,6 @@ abstract class Runner extends Base
             self::$config['my'] = \App\Config\My::get();
 
             self::$config['shared'] = \App\Config\Shared::get();
-
-            self::$e['config'] = &self::$config['shared'];
 
             // }}}
             // {{{ default locale
@@ -102,9 +100,9 @@ abstract class Runner extends Base
                 $router = new \SFW\Router\Controller();
             }
 
-            [self::$e['sys']['action'], $class, $method] = $router->getAction();
+            [self::$sys['action'], $class, $method] = $router->getAction();
 
-            if (self::$e['sys']['action'] !== false
+            if (self::$sys['action'] !== false
                 && (method_exists($class, $method)
                     || PHP_SAPI === 'cli')
             ) {
@@ -118,14 +116,14 @@ abstract class Runner extends Base
             }
 
             // }}}
-        } catch (\Throwable $error) {
+        } catch (\Throwable $e) {
             // {{{ something wrong
 
             $this->sys('Notifier')->removeAll();
 
             $this->sys('Shutdown')->unregisterAll();
 
-            $this->sys('Logger')->error($error);
+            $this->sys('Logger')->error($e);
 
             $this->sys('Logger')->emergency('Application terminated!', [
                 'append_file_and_line' => false
@@ -206,7 +204,7 @@ abstract class Runner extends Base
      */
     private function defaultEnvironment(): void
     {
-        self::$e['sys']['timestamp'] = (int) self::$startedTime;
+        self::$sys['timestamp'] = (int) self::$startedTime;
 
         if (isset(self::$config['sys']['url'])) {
             $parsed = parse_url(self::$config['sys']['url']);
@@ -215,23 +213,21 @@ abstract class Runner extends Base
                 throw new BadConfigurationException('Incorrect url in system config');
             }
 
-            self::$e['sys']['url_scheme'] = $parsed['scheme'] ?? 'http';
+            self::$sys['url_scheme'] = $parsed['scheme'] ?? 'http';
 
-            self::$e['sys']['url_host'] = $parsed['host'];
+            self::$sys['url_host'] = $parsed['host'];
         } else {
-            self::$e['sys']['url_scheme'] = $_SERVER['HTTP_SCHEME'];
+            self::$sys['url_scheme'] = $_SERVER['HTTP_SCHEME'];
 
-            self::$e['sys']['url_host'] = $_SERVER['HTTP_HOST'];
+            self::$sys['url_host'] = $_SERVER['HTTP_HOST'];
         }
 
-        self::$e['sys']['url'] = sprintf('%s://%s',
-            self::$e['sys']['url_scheme'], self::$e['sys']['url_host']
-        );
+        self::$sys['url'] = sprintf('%s://%s', self::$sys['url_scheme'], self::$sys['url_host']);
 
         if (isset(self::$config['sys']['merger']['sources'])
             && PHP_SAPI !== 'cli'
         ) {
-            self::$e['sys']['merged'] = (new Merger())->process();
+            self::$sys['merged'] = (new Merger())->process();
         }
     }
 

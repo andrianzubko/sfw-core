@@ -19,9 +19,9 @@ abstract class Base
     public static array $config = [];
 
     /**
-     * Shared config, default and your environment (should be passed to templates).
+     * System parameters.
      */
-    public static array $e = [];
+    public static array $sys = [];
 
     /**
      * Instances of system Lazy classes.
@@ -40,10 +40,11 @@ abstract class Base
      */
     public function sys(string $name): object
     {
-        return self::$sysLazies[$name] ??=
-            class_exists("App\\Lazy\\Sys\\$name")
-                ? "App\\Lazy\\Sys\\$name::getInstance"()
-                : "SFW\\Lazy\\Sys\\$name::getInstance"();
+        if (class_exists("App\\Lazy\\Sys\\$name")) {
+            return self::$sysLazies[$name] ??= "App\\Lazy\\Sys\\$name::getInstance"();
+        }
+
+        return self::$sysLazies[$name] ??= "SFW\\Lazy\\Sys\\$name::getInstance"();
     }
 
     /**

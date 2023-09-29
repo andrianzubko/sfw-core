@@ -94,7 +94,7 @@ class Response extends \SFW\Lazy\Sys
 
         header(
             sprintf('Last-Modified: %s',
-                gmdate('D, d M Y H:i:s \G\M\T', self::$e['sys']['timestamp'])
+                gmdate('D, d M Y H:i:s \G\M\T', self::$sys['timestamp'])
             )
         );
 
@@ -125,9 +125,7 @@ class Response extends \SFW\Lazy\Sys
                         $filename
                 )
             );
-        } elseif (
-            $disposition === 'attachment'
-        ) {
+        } elseif ($disposition === 'attachment') {
             header('Content-Disposition: attachment');
         }
 
@@ -157,9 +155,12 @@ class Response extends \SFW\Lazy\Sys
      *
      * @throws \SFW\Templater\Exception
      */
-    public function native(array $e, string $template, int $code = 200): self
-    {
-        return $this->template($e, $template, $code, 'Native');
+    public function native(
+        array|object $context,
+        string $template,
+        int $code = 200
+    ): self {
+        return $this->template($context, $template, $code, 'Native');
     }
 
     /**
@@ -167,9 +168,12 @@ class Response extends \SFW\Lazy\Sys
      *
      * @throws \SFW\Templater\Exception
      */
-    public function xslt(array $e, string $template, int $code = 200): self
-    {
-        return $this->template($e, $template, $code, 'Xslt');
+    public function xslt(
+        array|object $context,
+        string $template,
+        int $code = 200
+    ): self {
+        return $this->template($context, $template, $code, 'Xslt');
     }
 
     /**
@@ -177,9 +181,13 @@ class Response extends \SFW\Lazy\Sys
      *
      * @throws \SFW\Templater\Exception
      */
-    public function template(array $e, string $template, int $code = 200, string $processor = 'Templater'): self
-    {
-        $contents = $this->sys($processor)->transform($e, $template);
+    public function template(
+        array|object $context,
+        string $template,
+        int $code = 200,
+        string $processor = 'Templater'
+    ): self {
+        $contents = $this->sys($processor)->transform($context, $template);
 
         if (isset(self::$config['sys']['response']['stats'])) {
             $timer = gettimeofday(true) - self::$startedTime;
@@ -246,12 +254,12 @@ class Response extends \SFW\Lazy\Sys
     public function redirect(string $url, $exit = true): self
     {
         if ($url === '') {
-            $url = self::$e['sys']['url'] . '/';
+            $url = self::$sys['url'] . '/';
         } elseif (
                 str_starts_with($url, '/')
             && !str_starts_with($url, '//')
         ) {
-            $url = self::$e['sys']['url'] . $url;
+            $url = self::$sys['url'] . $url;
         }
 
         http_response_code(302);

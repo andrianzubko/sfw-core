@@ -216,10 +216,10 @@ class Merger extends Base
         if (!self::$config['sys']['debug']) {
             try {
                 $merged = (new JSMin($merged))->min();
-            } catch (\Exception $error) {
-                throw (new LogicException($error->getMessage()))
-                    ->setFile($error->getFile())
-                    ->setLine($error->getLine());
+            } catch (\Exception $e) {
+                throw (new LogicException($e->getMessage()))
+                    ->setFile($e->getFile())
+                    ->setLine($e->getLine());
             }
         }
 

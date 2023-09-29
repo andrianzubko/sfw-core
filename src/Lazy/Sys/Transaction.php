@@ -82,24 +82,22 @@ class Transaction extends \SFW\Lazy\Sys
                 }
 
                 break;
-            } catch (
-                \SFW\Databaser\Exception $error
-            ) {
+            } catch (\SFW\Databaser\Exception $e) {
                 try {
                     $this->sys('Db')->rollback();
                 } catch (\SFW\Databaser\Exception) {
                 }
 
                 if (isset($onAbort)) {
-                    $onAbort($error->getSqlState());
+                    $onAbort($e->getSqlState());
                 }
 
-                if (in_array($error->getSqlState(), $expected ?? [], true)
+                if (in_array($e->getSqlState(), $expected ?? [], true)
                     && $retry < self::$config['sys']['transaction']['retries']
                 ) {
                     $this->sys('Logger')->logTransactionFail(
                         LogLevel::INFO,
-                        $error->getSqlState(),
+                        $e->getSqlState(),
                         $retry
                     );
 
@@ -108,13 +106,13 @@ class Transaction extends \SFW\Lazy\Sys
 
                 $this->sys('Logger')->logTransactionFail(
                     LogLevel::ERROR,
-                    $error->getSqlState(),
+                    $e->getSqlState(),
                     $retry
                 );
 
                 self::$sysLazies['Db'] = $this->sys(self::$config['sys']['db']['default']);
 
-                throw $error;
+                throw $e;
             }
         }
 

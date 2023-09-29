@@ -23,17 +23,11 @@ abstract class Config
     protected static function env(string $key, mixed $default = null): mixed
     {
         if (!isset(self::$env)) {
-            $env = false;
-
             if (isset($_SERVER['APP_ENV'])) {
-                $env = @include APP_DIR . sprintf('/.env.%s.php', $_SERVER['APP_ENV']);
+                self::$env = require APP_DIR . sprintf('/.env.%s.php', $_SERVER['APP_ENV']);
+            } else {
+                self::$env = require APP_DIR . '/.env.php';
             }
-
-            if ($env === false) {
-                $env = @include APP_DIR . '/.env.php';
-            }
-
-            self::$env = is_array($env) ? $env : [];
         }
 
         return $_SERVER[$key] ?? self::$env[$key] ?? $default;

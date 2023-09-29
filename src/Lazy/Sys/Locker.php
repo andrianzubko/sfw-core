@@ -35,7 +35,7 @@ class Locker extends \SFW\Lazy\Sys
 
         $file = str_replace('{KEY}', $key, self::$config['sys']['locker']['file']);
 
-        if ($this->sys('Dir')->create(dirname($file)) === false) {
+        if (!$this->sys('Dir')->create(dirname($file))) {
             throw new \SFW\RuntimeException(
                 sprintf(
                     'Unable to create directory %s',
@@ -47,15 +47,10 @@ class Locker extends \SFW\Lazy\Sys
         $handle = fopen($file, 'cb+');
 
         if ($handle === false) {
-            throw new \SFW\RuntimeException(
-                sprintf(
-                    'Unable to open file %s',
-                        $file
-                )
-            );
+            throw new \SFW\RuntimeException("Unable to open file $file");
         }
 
-        if (flock($handle, LOCK_EX | LOCK_NB) === false) {
+        if (!flock($handle, LOCK_EX | LOCK_NB)) {
             return false;
         }
 
@@ -76,7 +71,7 @@ class Locker extends \SFW\Lazy\Sys
             throw new \SFW\LogicException("Lock with key '$key' is not exists");
         }
 
-        if (fclose($this->locks[$key]) === false) {
+        if (!fclose($this->locks[$key])) {
             throw new \SFW\RuntimeException(
                 sprintf(
                     'Unable to close file %s',

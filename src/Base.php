@@ -6,7 +6,7 @@ namespace SFW;
  * Abstraction with basic environment.
  */
 #[\AllowDynamicProperties]
-abstract class Base
+abstract class Base extends \stdClass
 {
     /**
      * Started time.

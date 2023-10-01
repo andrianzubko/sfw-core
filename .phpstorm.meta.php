@@ -26,6 +26,7 @@ namespace PHPSTORM_META {
         'Templater',
         'Text',
         'Transaction',
+        'Twig',
         'Xslt',
     );
 

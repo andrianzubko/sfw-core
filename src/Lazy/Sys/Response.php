@@ -156,11 +156,24 @@ class Response extends \SFW\Lazy\Sys
      * @throws \SFW\Templater\Exception
      */
     public function native(
-        array|object|null $context,
         string $template,
+        array|object|null $context = null,
         int $code = 200
     ): self {
-        return $this->template($context, $template, $code, 'Native');
+        return $this->template($template, $context, $code, 'Native');
+    }
+
+    /**
+     * Process and output twig template.
+     *
+     * @throws \SFW\Templater\Exception
+     */
+    public function twig(
+        string $template,
+        array|object|null $context = null,
+        int $code = 200
+    ): self {
+        return $this->template($template, $context, $code, 'Twig');
     }
 
     /**
@@ -169,11 +182,11 @@ class Response extends \SFW\Lazy\Sys
      * @throws \SFW\Templater\Exception
      */
     public function xslt(
-        array|object|null $context,
         string $template,
+        array|object|null $context = null,
         int $code = 200
     ): self {
-        return $this->template($context, $template, $code, 'Xslt');
+        return $this->template($template, $context, $code, 'Xslt');
     }
 
     /**
@@ -182,12 +195,12 @@ class Response extends \SFW\Lazy\Sys
      * @throws \SFW\Templater\Exception
      */
     public function template(
-        array|object|null $context,
         string $template,
+        array|object|null $context = null,
         int $code = 200,
         string $processor = 'Templater'
     ): self {
-        $contents = $this->sys($processor)->transform($context, $template);
+        $contents = $this->sys($processor)->transform($template, $context);
 
         if (isset(self::$config['sys']['response']['stats'])) {
             $timer = gettimeofday(true) - self::$startedTime;

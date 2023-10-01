@@ -23,7 +23,11 @@ class Xslt extends \SFW\Lazy\Sys
     {
         $this->options = self::$config['sys']['templater']['xslt'];
 
-        $this->options['properties'] = [];
+        $this->options['globals'] = [
+            'config' => self::$config['shared'],
+
+            'sys' => self::$sys,
+        ];
     }
 
     /**

@@ -154,7 +154,7 @@ class Sys extends \SFW\Config
 
         /* Default templater.
          *
-         * string 'Native' or 'Xslt'
+         * string 'Native', 'Twig' or 'Xslt'
          */
         $sys['templater']['default'] = 'Native';
 
@@ -163,6 +163,16 @@ class Sys extends \SFW\Config
         $sys['templater']['native']['dir'] = APP_DIR . '/templates';
 
         $sys['templater']['native']['minify'] = true;
+
+        /* Twig
+         */
+        $sys['templater']['twig']['dir'] = APP_DIR . '/templates';
+
+        $sys['templater']['twig']['cache'] = APP_DIR . '/var/cache/twig';
+
+        $sys['templater']['twig']['strict'] = true;
+
+        $sys['templater']['twig']['autoescape'] = 'html';
 
         /* Xslt
          */

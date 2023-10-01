@@ -181,12 +181,7 @@ class Merger extends Base
                 }
 
                 if (!$this->sys('File')->put($file, $contents)) {
-                    throw new RuntimeException(
-                        sprintf(
-                            'Unable to write file %s',
-                                $file
-                        )
-                    );
+                    throw new RuntimeException("Unable to write file $file");
                 }
             }
         }
@@ -236,9 +231,9 @@ class Merger extends Base
         $merged = $this->mergeFiles($files);
 
         if (!self::$config['sys']['debug']) {
-            $merged = preg_replace('~/\*(.*?)\*/~us', '', $merged);
-
-            $merged = $this->sys('Text')->fTrim($merged);
+            $merged = $this->sys('Text')->fTrim(
+                preg_replace('~/\*(.*?)\*/~us', '', $merged)
+            );
         }
 
         return preg_replace_callback('/url\(\s*(.+?)\s*\)/u',
@@ -268,9 +263,7 @@ class Merger extends Base
                 }
 
                 if ($data !== false) {
-                    return sprintf('url(data:image/%s;base64,%s)',
-                        $type, base64_encode($data)
-                    );
+                    return sprintf('url(data:image/%s;base64,%s)', $type, base64_encode($data));
                 } else {
                     return sprintf('url(%s)', $M[1]);
                 }
@@ -291,12 +284,7 @@ class Merger extends Base
             $contents = $this->sys('File')->get($file);
 
             if ($contents === false) {
-                throw new RuntimeException(
-                    sprintf(
-                        'Unable to read file %s',
-                            $file
-                    )
-                );
+                throw new RuntimeException("Unable to read file $file");
             }
 
             $merged[] = $contents;

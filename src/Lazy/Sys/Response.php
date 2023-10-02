@@ -220,18 +220,18 @@ class Response extends \SFW\Lazy\Sys
                     '{TPL_T}',
                     '{ALL_T}',
                 ], [
-                    sprintf('%.2f',
+                    sprintf('%.3f',
                         $timer - $this->sys('Db')->getTimer() - $this->sys('Templater')->getTimer()
                     ),
                     $this->sys('Db')->getCounter(),
-                    sprintf('%.2f',
+                    sprintf('%.3f',
                         $this->sys('Db')->getTimer()
                     ),
                     $this->sys('Templater')->getCounter(),
-                    sprintf('%.2f',
+                    sprintf('%.3f',
                         $this->sys('Templater')->getTimer()
                     ),
-                    sprintf('%.2f',
+                    sprintf('%.3f',
                         $timer
                     ),
                 ], self::$config['sys']['response']['stats']

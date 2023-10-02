@@ -162,7 +162,7 @@ class Sys extends \SFW\Config
          */
         $sys['templater']['native']['dir'] = APP_DIR . '/templates';
 
-        $sys['templater']['native']['minify'] = true;
+        $sys['templater']['native']['minify'] = false;
 
         /* Twig
          */
@@ -170,7 +170,7 @@ class Sys extends \SFW\Config
 
         $sys['templater']['twig']['cache'] = APP_DIR . '/var/cache/twig';
 
-        $sys['templater']['twig']['minify'] = true;
+        $sys['templater']['twig']['minify'] = false;
 
         $sys['templater']['twig']['strict'] = true;
 

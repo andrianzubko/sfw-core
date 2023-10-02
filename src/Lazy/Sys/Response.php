@@ -203,6 +203,12 @@ class Response extends \SFW\Lazy\Sys
         $contents = $this->sys($processor)->transform($template, $context);
 
         if (isset(self::$config['sys']['response']['stats'])) {
+            if ($contents !== ''
+                && !str_ends_with($contents, "\n")
+            ) {
+                $contents .= "\n";
+            }
+
             $timer = gettimeofday(true) - self::$startedTime;
 
             $contents .= str_replace(

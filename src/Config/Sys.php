@@ -170,9 +170,9 @@ class Sys extends \SFW\Config
 
         $sys['templater']['twig']['cache'] = APP_DIR . '/var/cache/twig';
 
-        $sys['templater']['twig']['strict'] = true;
+        $sys['templater']['twig']['minify'] = true;
 
-        $sys['templater']['twig']['autoescape'] = 'html';
+        $sys['templater']['twig']['strict'] = true;
 
         /* Xslt
          */

@@ -31,7 +31,7 @@ class Merger extends Base
 
         if ($this->cache !== false
             && self::$config['sys']['env'] === 'prod'
-                && self::$config['sys']['debug'] === $this->cache['debug']
+            && self::$config['sys']['debug'] === $this->cache['debug']
         ) {
             return $this->getPaths();
         }
@@ -58,15 +58,13 @@ class Merger extends Base
 
         $time = $this->cache ? $this->cache['time'] : 0;
 
-        foreach (self::$config['sys']['merger']['sources'] as $targets) {
-            foreach ((array) $targets as $target) {
-                $paths[$target] = sprintf(
-                    '%s/%s.%s',
-                        self::$config['sys']['merger']['location'],
-                        $time,
-                        $target
-                );
-            }
+        foreach (self::$config['sys']['merger']['sources'] as $target => $sources) {
+            $paths[$target] = sprintf(
+                '%s/%s.%s',
+                    self::$config['sys']['merger']['location'],
+                    $time,
+                    $target
+            );
         }
 
         return $paths;
@@ -80,14 +78,14 @@ class Merger extends Base
         if (!isset($this->sources)) {
             $this->sources = [];
 
-            foreach (self::$config['sys']['merger']['sources'] as $source => $targets) {
-                if (preg_match('/\.(css|js)$/', $source, $M)) {
-                    foreach ((array) $targets as $target) {
+            foreach (self::$config['sys']['merger']['sources'] as $target => $sources) {
+                foreach ((array) $sources as $source) {
+                    if (preg_match('/\.(css|js)$/', $source, $M)) {
                         $this->sources[$M[1]][$target] ??= [];
 
-                        foreach (glob($source) as $item) {
-                            if (is_file($item)) {
-                                $this->sources[$M[1]][$target][] = $item;
+                        foreach (glob($source) as $file) {
+                            if (is_file($file)) {
+                                $this->sources[$M[1]][$target][] = $file;
                             }
                         }
                     }

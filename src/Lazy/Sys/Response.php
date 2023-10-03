@@ -156,11 +156,12 @@ class Response extends \SFW\Lazy\Sys
      * @throws \SFW\Templater\Exception
      */
     public function native(
-        string $template,
+        string $filename,
         array|object|null $context = null,
+        ?string $mime = null,
         int $code = 200
     ): self {
-        return $this->template($template, $context, $code, 'Native');
+        return $this->template($filename, $context, $code, 'Native');
     }
 
     /**
@@ -169,11 +170,12 @@ class Response extends \SFW\Lazy\Sys
      * @throws \SFW\Templater\Exception
      */
     public function twig(
-        string $template,
+        string $filename,
         array|object|null $context = null,
+        ?string $mime = null,
         int $code = 200
     ): self {
-        return $this->template($template, $context, $code, 'Twig');
+        return $this->template($filename, $context, $code, 'Twig');
     }
 
     /**
@@ -182,11 +184,12 @@ class Response extends \SFW\Lazy\Sys
      * @throws \SFW\Templater\Exception
      */
     public function xslt(
-        string $template,
+        string $filename,
         array|object|null $context = null,
+        ?string $mime = null,
         int $code = 200
     ): self {
-        return $this->template($template, $context, $code, 'Xslt');
+        return $this->template($filename, $context, $code, 'Xslt');
     }
 
     /**
@@ -195,14 +198,21 @@ class Response extends \SFW\Lazy\Sys
      * @throws \SFW\Templater\Exception
      */
     public function template(
-        string $template,
+        string $filename,
         array|object|null $context = null,
+        ?string $mime = null,
         int $code = 200,
         string $processor = 'Templater'
     ): self {
-        $contents = $this->sys($processor)->transform($template, $context);
+        $contents = $this->sys($processor)->transform($filename, $context);
 
-        if (isset(self::$config['sys']['response']['stats'])) {
+        if (!isset($mime)) {
+            $mime = $this->sys($processor)->getLastMime();
+        }
+
+        if (isset(self::$config['sys']['response']['stats'])
+            && $mime === 'text/html'
+        ) {
             if ($contents !== ''
                 && !str_ends_with($contents, "\n")
             ) {
@@ -238,7 +248,7 @@ class Response extends \SFW\Lazy\Sys
             );
         }
 
-        return $this->inline($contents, 'text/html', code: $code);
+        return $this->inline($contents, $mime, code: $code);
     }
 
     /**

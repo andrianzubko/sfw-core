@@ -29,12 +29,11 @@ class Transaction extends \SFW\Lazy\Sys
      * @throws \SFW\Databaser\Exception
      */
     public function pgsql(
-        ?string $isolation,
-        ?array $expected,
         callable $body,
-        ?callable $onerror = null
+        ?string $isolation = null,
+        ?array $retryOn = null
     ): self {
-        return $this->run($isolation, $expected, $body, $onerror, 'Pgsql');
+        return $this->run($body, $isolation, $retryOn, 'Pgsql');
     }
 
     /**
@@ -43,12 +42,11 @@ class Transaction extends \SFW\Lazy\Sys
      * @throws \SFW\Databaser\Exception
      */
     public function mysql(
-        ?string $isolation,
-        ?array $expected,
         callable $body,
-        ?callable $onerror = null
+        ?string $isolation = null,
+        ?array $retryOn = null
     ): self {
-        return $this->run($isolation, $expected, $body, $onerror, 'Mysql');
+        return $this->run($body, $isolation, $retryOn, 'Mysql');
     }
 
     /**
@@ -57,25 +55,26 @@ class Transaction extends \SFW\Lazy\Sys
      * @throws \SFW\Databaser\Exception
      */
     public function run(
-        ?string $isolation,
-        ?array $expected,
         callable $body,
-        ?callable $onAbort = null,
+        ?string $isolation = null,
+        ?array $retryOn = null,
         string $driver = 'Db'
     ): self {
         self::$sysLazies['Db'] = $this->sys($driver);
 
         for ($retry = 1; $retry <= self::$config['sys']['transaction']['retries']; $retry++) {
             try {
-                $this->callbacks['success'] = [];
+                $this->callbacks = [];
 
                 $this->sys('Db')->begin($isolation);
 
                 if ($body()) {
                     $this->sys('Db')->commit();
 
-                    foreach ($this->callbacks['success'] as $callback) {
-                        $callback();
+                    if (isset($this->callbacks['success'])) {
+                        foreach ($this->callbacks['success'] as $callback) {
+                            $callback();
+                        }
                     }
                 } else {
                     $this->sys('Db')->rollback();
@@ -88,11 +87,7 @@ class Transaction extends \SFW\Lazy\Sys
                 } catch (\SFW\Databaser\Exception) {
                 }
 
-                if (isset($onAbort)) {
-                    $onAbort($e->getSqlState());
-                }
-
-                if (in_array($e->getSqlState(), $expected ?? [], true)
+                if (in_array($e->getSqlState(), $retryOn ?? [], true)
                     && $retry < self::$config['sys']['transaction']['retries']
                 ) {
                     $this->sys('Logger')->logTransactionFail(
@@ -122,9 +117,9 @@ class Transaction extends \SFW\Lazy\Sys
     }
 
     /**
-     * Do some action on successful commit.
+     * Do some action on successful commit of current transaction.
      *
-     * If there is no active transaction, then callback will be called immediately.
+     * If you call this method outside of transaction, then callback will be called immediately.
      */
     public function onSuccess(callable $callback): self
     {

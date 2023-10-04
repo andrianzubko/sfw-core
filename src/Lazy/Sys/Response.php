@@ -157,7 +157,7 @@ class Response extends \SFW\Lazy\Sys
      */
     public function native(
         string $filename,
-        array|object|null $context = null,
+        array|null $context = null,
         ?string $mime = null,
         int $code = 200
     ): self {
@@ -171,7 +171,7 @@ class Response extends \SFW\Lazy\Sys
      */
     public function twig(
         string $filename,
-        array|object|null $context = null,
+        array|null $context = null,
         ?string $mime = null,
         int $code = 200
     ): self {
@@ -185,7 +185,7 @@ class Response extends \SFW\Lazy\Sys
      */
     public function xslt(
         string $filename,
-        array|object|null $context = null,
+        array|null $context = null,
         ?string $mime = null,
         int $code = 200
     ): self {
@@ -199,7 +199,7 @@ class Response extends \SFW\Lazy\Sys
      */
     public function template(
         string $filename,
-        array|object|null $context = null,
+        array|null $context = null,
         ?string $mime = null,
         int $code = 200,
         string $processor = 'Templater'

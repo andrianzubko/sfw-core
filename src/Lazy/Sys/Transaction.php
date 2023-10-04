@@ -2,8 +2,6 @@
 
 namespace SFW\Lazy\Sys;
 
-use Psr\Log\LogLevel;
-
 /**
  * Transaction.
  */
@@ -24,41 +22,54 @@ class Transaction extends \SFW\Lazy\Sys
     }
 
     /**
-     * Processing pgsql transaction with retries on expected errors.
+     * Processes pgsql transaction with retries at expected errors.
      *
      * @throws \SFW\Databaser\Exception
      */
     public function pgsql(
         callable $body,
         ?string $isolation = null,
-        ?array $retryOn = null
+        ?array $retryAt = null
     ): self {
-        return $this->run($body, $isolation, $retryOn, 'Pgsql');
+        return $this->process('Pgsql', $body, $isolation, $retryAt);
     }
 
     /**
-     * Processing mysql transaction with retries on expected errors.
+     * Processes mysql transaction with retries at expected errors.
      *
      * @throws \SFW\Databaser\Exception
      */
     public function mysql(
         callable $body,
         ?string $isolation = null,
-        ?array $retryOn = null
+        ?array $retryAt = null
     ): self {
-        return $this->run($body, $isolation, $retryOn, 'Mysql');
+        return $this->process('Mysql', $body, $isolation, $retryAt);
     }
 
     /**
-     * Processing transaction with retries on expected errors.
+     * Processes transaction with retries at expected errors.
      *
      * @throws \SFW\Databaser\Exception
      */
     public function run(
         callable $body,
         ?string $isolation = null,
-        ?array $retryOn = null,
-        string $driver = 'Db'
+        ?array $retryAt = null
+    ): self {
+        return $this->process('Db', $body, $isolation, $retryAt);
+    }
+
+    /**
+     * Base method for processing transaction.
+     *
+     * @throws \SFW\Databaser\Exception
+     */
+    protected function process(
+        string $driver,
+        callable $body,
+        ?string $isolation,
+        ?array $retryAt
     ): self {
         self::$sysLazies['Db'] = $this->sys($driver);
 
@@ -85,22 +96,18 @@ class Transaction extends \SFW\Lazy\Sys
                 } catch (\SFW\Databaser\Exception) {
                 }
 
-                if (in_array($e->getSqlState(), $retryOn ?? [], true)
+                if (in_array($e->getSqlState(), $retryAt ?? [], true)
                     && $retry < self::$config['sys']['transaction']['retries']
                 ) {
                     $this->sys('Logger')->logTransactionFail(
-                        LogLevel::INFO,
-                        $e->getSqlState(),
-                        $retry
+                        \Psr\Log\LogLevel::INFO, $e->getSqlState(), $retry
                     );
 
                     continue;
                 }
 
                 $this->sys('Logger')->logTransactionFail(
-                    LogLevel::ERROR,
-                    $e->getSqlState(),
-                    $retry
+                    \Psr\Log\LogLevel::ERROR, $e->getSqlState(), $retry
                 );
 
                 self::$sysLazies['Db'] = $this->sys(self::$config['sys']['db']['default']);

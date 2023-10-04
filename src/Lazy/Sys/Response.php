@@ -61,7 +61,7 @@ class Response extends \SFW\Lazy\Sys
         int $expire = 0,
         int $code = 200
     ): self {
-        return $this->output(__FUNCTION__, $contents, $mime, $filename, $expire, $code);
+        return $this->output('inline', $contents, $mime, $filename, $expire, $code);
     }
 
     /**
@@ -74,11 +74,11 @@ class Response extends \SFW\Lazy\Sys
         int $expire = 0,
         int $code = 200
     ): self {
-        return $this->output(__FUNCTION__, $contents, $mime, $filename, $expire, $code);
+        return $this->output('attachment', $contents, $mime, $filename, $expire, $code);
     }
 
     /**
-     * Output base.
+     * Base method for outputs.
      */
     protected function output(
         string $disposition,
@@ -153,56 +153,78 @@ class Response extends \SFW\Lazy\Sys
     /**
      * Process and output native template.
      *
+     * If context is an object, then only public non-static properties will be taken.
+     *
      * @throws \SFW\Templater\Exception
      */
     public function native(
         string $filename,
-        array|null $context = null,
+        array|object|null $context = null,
         ?string $mime = null,
         int $code = 200
     ): self {
-        return $this->template($filename, $context, $code, 'Native');
+        return $this->transform('Native', $filename, $context, $mime, $code);
     }
 
     /**
      * Process and output twig template.
      *
+     * If context is an object, then only public non-static properties will be taken.
+     *
      * @throws \SFW\Templater\Exception
      */
     public function twig(
         string $filename,
-        array|null $context = null,
+        array|object|null $context = null,
         ?string $mime = null,
         int $code = 200
     ): self {
-        return $this->template($filename, $context, $code, 'Twig');
+        return $this->transform('Twig', $filename, $context, $mime, $code);
     }
 
     /**
      * Process and output xslt template.
      *
+     * If context is an object, then only public non-static properties will be taken.
+     *
      * @throws \SFW\Templater\Exception
      */
     public function xslt(
         string $filename,
-        array|null $context = null,
+        array|object|null $context = null,
         ?string $mime = null,
         int $code = 200
     ): self {
-        return $this->template($filename, $context, $code, 'Xslt');
+        return $this->transform('Xslt', $filename, $context, $mime, $code);
     }
 
     /**
      * Process and output template.
      *
+     * If context is an object, then only public non-static properties will be taken.
+     *
      * @throws \SFW\Templater\Exception
      */
     public function template(
         string $filename,
-        array|null $context = null,
+        array|object|null $context = null,
         ?string $mime = null,
-        int $code = 200,
-        string $processor = 'Templater'
+        int $code = 200
+    ): self {
+        return $this->transform('Templater', $filename, $context, $mime, $code);
+    }
+
+    /**
+     * Base method for template transformation.
+     *
+     * @throws \SFW\Templater\Exception
+     */
+    protected function transform(
+        string $processor,
+        string $filename,
+        array|object|null $context,
+        ?string $mime,
+        int $code
     ): self {
         $contents = $this->sys($processor)->transform($filename, $context);
 

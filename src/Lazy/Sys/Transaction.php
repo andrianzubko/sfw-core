@@ -64,17 +64,15 @@ class Transaction extends \SFW\Lazy\Sys
 
         for ($retry = 1; $retry <= self::$config['sys']['transaction']['retries']; $retry++) {
             try {
-                $this->callbacks = [];
+                $this->callbacks['success'] = [];
 
                 $this->sys('Db')->begin($isolation);
 
                 if ($body()) {
                     $this->sys('Db')->commit();
 
-                    if (isset($this->callbacks['success'])) {
-                        foreach ($this->callbacks['success'] as $callback) {
-                            $callback();
-                        }
+                    foreach ($this->callbacks['success'] as $callback) {
+                        $callback();
                     }
                 } else {
                     $this->sys('Db')->rollback();

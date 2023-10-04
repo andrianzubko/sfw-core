@@ -108,7 +108,7 @@ class Response extends \SFW\Lazy\Sys
         ) {
             header('Content-Encoding: gzip');
 
-            $contents = gzencode($contents, 5);
+            $contents = gzencode($contents, 1);
         } else {
             header('Content-Encoding: none');
         }

@@ -79,7 +79,7 @@ class Transaction extends \SFW\Lazy\Sys
 
                 $this->sys('Db')->begin($isolation);
 
-                if ($body()) {
+                if ($body() !== false) {
                     $this->sys('Db')->commit();
 
                     foreach ($this->callbacks['success'] as $callback) {

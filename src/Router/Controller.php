@@ -18,6 +18,27 @@ class Controller extends \SFW\Router
     protected static array $cFiles;
 
     /**
+     * Gets action, full class and method name.
+     *
+     * @throws \SFW\RuntimeException
+     */
+    public function getTarget(): array
+    {
+        if (self::$cache === false) {
+            self::$cache = @include self::$config['sys']['router']['cache'];
+
+            if (self::$cache === false
+                || self::$config['sys']['env'] !== 'prod'
+                && $this->isOutdated()
+            ) {
+                $this->rebuild();
+            }
+        }
+
+        return $this->findInCache();
+    }
+
+    /**
      * Makes URL by action (or FQMN) and optional parameters.
      *
      * @throws \SFW\RuntimeException
@@ -71,27 +92,6 @@ class Controller extends \SFW\Router
         }
 
         return $url;
-    }
-
-    /**
-     * Gets action, full class and method name.
-     *
-     * @throws \SFW\RuntimeException
-     */
-    public function getTarget(): array
-    {
-        if (self::$cache === false) {
-            self::$cache = @include self::$config['sys']['router']['cache'];
-
-            if (self::$cache === false
-                || self::$config['sys']['env'] !== 'prod'
-                    && $this->isOutdated()
-            ) {
-                $this->rebuild();
-            }
-        }
-
-        return $this->findInCache();
     }
 
     /**

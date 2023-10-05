@@ -23,12 +23,12 @@ class Router extends \SFW\Lazy\Sys
     }
 
     /**
-     * Makes URL by action (or full namespace) and optional parameters.
+     * Generates URL by action (or full namespace) and optional parameters.
      *
      * @throws \SFW\RuntimeException
      */
-    public function makeUrl(string $action, string|int|float|null ...$params): string
+    public function genUrl(string $action, string|int|float|null ...$params): string
     {
-        return $this->router->makeUrl($action, ...$params);
+        return $this->router->genUrl($action, ...$params);
     }
 }

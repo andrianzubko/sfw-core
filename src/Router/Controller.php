@@ -39,11 +39,11 @@ class Controller extends \SFW\Router
     }
 
     /**
-     * Makes URL by action (or FQMN) and optional parameters.
+     * Generates URL by action (or FQMN) and optional parameters.
      *
      * @throws \SFW\RuntimeException
      */
-    public function makeUrl(string $action, string|int|float|null ...$params): string
+    public function genUrl(string $action, string|int|float|null ...$params): string
     {
         if (self::$cache === false) {
             self::$cache = @include self::$config['sys']['router']['cache'];

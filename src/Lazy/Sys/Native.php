@@ -52,7 +52,7 @@ class Native extends \SFW\Lazy\Sys
 
             'random' => $this->sys('Text')->random(...),
 
-            'makeUrl' => $this->sys('Router')->makeUrl(...),
+            'genUrl' => $this->sys('Router')->genUrl(...),
         ];
     }
 

@@ -57,6 +57,8 @@ class Twig extends \SFW\Lazy\Sys
             'random' => $this->sys('Text')->random(...),
 
             'genUrl' => $this->sys('Router')->genUrl(...),
+
+            'genAbsoluteUrl' => $this->sys('Router')->genAbsoluteUrl(...),
         ];
     }
 

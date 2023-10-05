@@ -31,4 +31,14 @@ class Router extends \SFW\Lazy\Sys
     {
         return $this->router->genUrl($action, ...$params);
     }
+
+    /**
+     * Generates absolute URL by action (or full namespace) and optional parameters.
+     *
+     * @throws \SFW\RuntimeException
+     */
+    public function genAbsoluteUrl(string $action, string|int|float|null ...$params): string
+    {
+        return self::$sys['url'] . $this->router->genUrl($action, ...$params);
+    }
 }

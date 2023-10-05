@@ -8,11 +8,11 @@ namespace SFW\Router;
 class Command extends \SFW\Router
 {
     /**
-     * Gets full class name, method and action.
+     * Gets action, full class and method name.
      *
      * Very poor implementation. Will be better soon.
      */
-    public function getAction(): array
+    public function getTarget(): array
     {
         if (isset($_SERVER['argv'][1])) {
             $action = preg_replace_callback(

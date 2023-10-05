@@ -18,7 +18,7 @@ class Controller extends \SFW\Router
     protected static array $cFiles;
 
     /**
-     * Makes URL by action (or FQCN) and optional parameters.
+     * Makes URL by action (or FQMN) and optional parameters.
      *
      * @throws \SFW\RuntimeException
      */
@@ -74,11 +74,11 @@ class Controller extends \SFW\Router
     }
 
     /**
-     * Gets full class name, method and action.
+     * Gets action, full class and method name.
      *
      * @throws \SFW\RuntimeException
      */
-    public function getAction(): array
+    public function getTarget(): array
     {
         if (self::$cache === false) {
             self::$cache = @include self::$config['sys']['router']['cache'];
@@ -97,7 +97,7 @@ class Controller extends \SFW\Router
     /**
      * Finds action in cache and transforms to usable variant.
      *
-     * Note: no cache check!
+     * Note: no checks for cache existence!
      */
     protected function findInCache(): array
     {
@@ -153,7 +153,7 @@ class Controller extends \SFW\Router
     /**
      * Rechecks of the needs for rescanning.
      *
-     * Note: no cache check!
+     * Note: no checks for cache existence!
      */
     protected function isOutdated(): bool
     {

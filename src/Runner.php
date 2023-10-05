@@ -87,17 +87,6 @@ abstract class Runner extends Base
             $this->defaultEnvironment();
 
             // }}}
-            // {{{ cleanup after dirty exit from transaction
-
-            register_shutdown_function(
-                function () {
-                    if (isset(self::$sysLazies['Db'])) {
-                        self::$sysLazies['Db'] = $this->sys(self::$config['sys']['db']['default']);
-                    }
-                }
-            );
-
-            // }}}
             // {{{ initializing additional environment
 
             $this->additionalEnvironment();
@@ -111,7 +100,7 @@ abstract class Runner extends Base
                 $router = new \SFW\Router\Controller();
             }
 
-            [self::$sys['action'], $class, $method] = $router->getAction();
+            [self::$sys['action'], $class, $method] = $router->getTarget();
 
             if (self::$sys['action'] !== false
                 && (method_exists($class, $method)

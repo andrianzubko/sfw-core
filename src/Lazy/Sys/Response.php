@@ -92,11 +92,7 @@ class Response extends \SFW\Lazy\Sys
 
         http_response_code($code);
 
-        header(
-            sprintf('Last-Modified: %s',
-                gmdate('D, d M Y H:i:s \G\M\T', self::$sys['timestamp'])
-            )
-        );
+        header('Last-Modified: ' . gmdate('D, d M Y H:i:s \G\M\T', self::$sys['timestamp']));
 
         header("Cache-Control: private, max-age=$expire");
 
@@ -113,19 +109,13 @@ class Response extends \SFW\Lazy\Sys
             header('Content-Encoding: none');
         }
 
-        header(
-            sprintf('Content-Length: %s', strlen($contents))
-        );
+        header('Content-Length: ' . strlen($contents));
 
         if (isset($filename)) {
-            header(
-                sprintf(
-                    'Content-Disposition: %s; filename="%s"',
-                        $disposition,
-                        $filename
-                )
-            );
-        } elseif ($disposition === 'attachment') {
+            header("Content-Disposition: $disposition; filename=\"$filename\"");
+        } elseif (
+            $disposition === 'attachment'
+        ) {
             header('Content-Disposition: attachment');
         }
 
@@ -235,42 +225,46 @@ class Response extends \SFW\Lazy\Sys
         if (isset(self::$config['sys']['response']['stats'])
             && $mime === 'text/html'
         ) {
-            if ($contents !== ''
-                && !str_ends_with($contents, "\n")
-            ) {
-                $contents .= "\n";
-            }
-
-            $timer = gettimeofday(true) - self::$startedTime;
-
-            $contents .= str_replace(
-                [
-                    '{SCR_T}',
-                    '{SQL_C}',
-                    '{SQL_T}',
-                    '{TPL_C}',
-                    '{TPL_T}',
-                    '{ALL_T}',
-                ], [
-                    sprintf('%.3f',
-                        $timer - $this->sys('Db')->getTimer() - $this->sys('Templater')->getTimer()
-                    ),
-                    $this->sys('Db')->getCounter(),
-                    sprintf('%.3f',
-                        $this->sys('Db')->getTimer()
-                    ),
-                    $this->sys('Templater')->getCounter(),
-                    sprintf('%.3f',
-                        $this->sys('Templater')->getTimer()
-                    ),
-                    sprintf('%.3f',
-                        $timer
-                    ),
-                ], self::$config['sys']['response']['stats']
-            );
+            $contents .= $this->makeStats();
         }
 
         return $this->inline($contents, $mime, code: $code);
+    }
+
+    /**
+     * Makes statistics line.
+     *
+     * Note: no checks for statistics pattern existence!
+     */
+    protected function makeStats(): string
+    {
+        $timer = gettimeofday(true) - self::$startedTime;
+
+        return str_replace(
+            [
+                '{SCR_T}',
+                '{SQL_C}',
+                '{SQL_T}',
+                '{TPL_C}',
+                '{TPL_T}',
+                '{ALL_T}',
+            ], [
+                sprintf('%.3f',
+                    $timer - $this->sys('Db')->getTimer() - $this->sys('Templater')->getTimer()
+                ),
+                $this->sys('Db')->getCounter(),
+                sprintf('%.3f',
+                    $this->sys('Db')->getTimer()
+                ),
+                $this->sys('Templater')->getCounter(),
+                sprintf('%.3f',
+                    $this->sys('Templater')->getTimer()
+                ),
+                sprintf('%.3f',
+                    $timer
+                ),
+            ], self::$config['sys']['response']['stats']
+        );
     }
 
     /**

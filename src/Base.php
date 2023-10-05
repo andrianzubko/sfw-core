@@ -58,10 +58,25 @@ abstract class Base extends \stdClass
     }
 
     /**
-     * Useful for fluent syntax exit.
+     * Makes some important cleanups and exit.
      */
     public function exit(string|int $status = 0): void
     {
+        foreach (['Pgsql','Mysql'] as $driver) {
+            if (isset(self::$sysLazies[$driver])
+                && self::$sysLazies[$driver]->isInTrans()
+            ) {
+                try {
+                    self::$sysLazies[$driver]->rollback();
+                } catch (\SFW\Databaser\Exception) {
+                }
+            }
+        }
+
+        if (isset(self::$sysLazies['Db'])) {
+            self::$sysLazies['Db'] = $this->sys(self::$config['sys']['db']['default']);
+        }
+
         exit($status);
     }
 }

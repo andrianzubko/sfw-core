@@ -87,6 +87,17 @@ abstract class Runner extends Base
             $this->defaultEnvironment();
 
             // }}}
+            // {{{ cleanup after dirty exit from transaction
+
+            register_shutdown_function(
+                function () {
+                    if (isset(self::$sysLazies['Db'])) {
+                        self::$sysLazies['Db'] = $this->sys(self::$config['sys']['db']['default']);
+                    }
+                }
+            );
+
+            // }}}
             // {{{ initializing additional environment
 
             $this->additionalEnvironment();
@@ -191,38 +202,45 @@ abstract class Runner extends Base
 
         $_SERVER['REQUEST_URI'] = $_SERVER['REDIRECT_REQUEST_URI'] ?? $_SERVER['REQUEST_URI'] ?? '/';
 
-        [
-            $_SERVER['REQUEST_URL'],
-            $_SERVER['REQUEST_QUERY']
-        ] = array_pad(explode('?', $_SERVER['REQUEST_URI'], 2), 2, '');
+        $chunks = explode('?', $_SERVER['REQUEST_URI'], 2);
+
+        $_SERVER['REQUEST_URL'] = $chunks[0];
+
+        $_SERVER['REQUEST_QUERY'] = $chunks[1] ?? '';
     }
 
     /**
      * Initializes default environment.
      *
-     * @throws Exception
+     * @throws BadConfigurationException
      */
     private function defaultEnvironment(): void
     {
         self::$sys['timestamp'] = (int) self::$startedTime;
 
         if (isset(self::$config['sys']['url'])) {
-            $parsed = parse_url(self::$config['sys']['url']);
+            $url = parse_url(self::$config['sys']['url']);
 
-            if (!isset($parsed['host'])) {
+            if (empty($url)
+                || !isset($url['host'])
+            ) {
                 throw new BadConfigurationException('Incorrect url in system config');
             }
 
-            self::$sys['url_scheme'] = $parsed['scheme'] ?? 'http';
+            self::$sys['url_scheme'] = $url['scheme'] ?? 'http';
 
-            self::$sys['url_host'] = $parsed['host'];
+            if (isset($url['port'])) {
+                self::$sys['url_host'] = $url['host'] . ':' . $url['port'];
+            } else {
+                self::$sys['url_host'] = $url['host'];
+            }
         } else {
             self::$sys['url_scheme'] = $_SERVER['HTTP_SCHEME'];
 
             self::$sys['url_host'] = $_SERVER['HTTP_HOST'];
         }
 
-        self::$sys['url'] = sprintf('%s://%s', self::$sys['url_scheme'], self::$sys['url_host']);
+        self::$sys['url'] = self::$sys['url_scheme'] . '://' . self::$sys['url_host'];
 
         if (isset(self::$config['sys']['merger']['sources'])
             && PHP_SAPI !== 'cli'

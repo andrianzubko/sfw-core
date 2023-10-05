@@ -22,28 +22,22 @@ class Transaction extends \SFW\Lazy\Sys
     }
 
     /**
-     * Processes pgsql transaction with retries at expected errors.
+     * Processes Pgsql transaction with retries at expected errors.
      *
      * @throws \SFW\Databaser\Exception
      */
-    public function pgsql(
-        callable $body,
-        ?string $isolation = null,
-        ?array $retryAt = null
-    ): self {
+    public function pgsql(callable $body, ?string $isolation = null, array $retryAt = []): self
+    {
         return $this->process('Pgsql', $body, $isolation, $retryAt);
     }
 
     /**
-     * Processes mysql transaction with retries at expected errors.
+     * Processes Mysql transaction with retries at expected errors.
      *
      * @throws \SFW\Databaser\Exception
      */
-    public function mysql(
-        callable $body,
-        ?string $isolation = null,
-        ?array $retryAt = null
-    ): self {
+    public function mysql(callable $body, ?string $isolation = null, array $retryAt = []): self
+    {
         return $this->process('Mysql', $body, $isolation, $retryAt);
     }
 
@@ -52,11 +46,8 @@ class Transaction extends \SFW\Lazy\Sys
      *
      * @throws \SFW\Databaser\Exception
      */
-    public function run(
-        callable $body,
-        ?string $isolation = null,
-        ?array $retryAt = null
-    ): self {
+    public function run(callable $body, ?string $isolation = null, array $retryAt = []): self
+    {
         return $this->process('Db', $body, $isolation, $retryAt);
     }
 
@@ -65,13 +56,9 @@ class Transaction extends \SFW\Lazy\Sys
      *
      * @throws \SFW\Databaser\Exception
      */
-    protected function process(
-        string $driver,
-        callable $body,
-        ?string $isolation,
-        ?array $retryAt
-    ): self {
-        self::$sysLazies['Db'] = $this->sys($driver);
+    protected function process(string $driver, callable $body, ?string $isolation, array $retryAt): self
+    {
+        $this->setDriver($driver);
 
         for ($retry = 1; $retry <= self::$config['sys']['transaction']['retries']; $retry++) {
             try {
@@ -89,33 +76,47 @@ class Transaction extends \SFW\Lazy\Sys
                     $this->sys('Db')->rollback();
                 }
 
-                break;
+                return $this->resetDriver();
             } catch (\SFW\Databaser\Exception $e) {
                 try {
                     $this->sys('Db')->rollback();
                 } catch (\SFW\Databaser\Exception) {
                 }
 
-                if (in_array($e->getSqlState(), $retryAt ?? [], true)
+                if (in_array($e->getSqlState(), $retryAt, true)
                     && $retry < self::$config['sys']['transaction']['retries']
                 ) {
                     $this->sys('Logger')->logTransactionFail(
                         \Psr\Log\LogLevel::INFO, $e->getSqlState(), $retry
                     );
+                } else {
+                    $this->sys('Logger')->logTransactionFail(
+                        \Psr\Log\LogLevel::ERROR, $e->getSqlState(), $retry
+                    );
 
-                    continue;
+                    $this->resetDriver();
+
+                    throw $e;
                 }
-
-                $this->sys('Logger')->logTransactionFail(
-                    \Psr\Log\LogLevel::ERROR, $e->getSqlState(), $retry
-                );
-
-                self::$sysLazies['Db'] = $this->sys(self::$config['sys']['db']['default']);
-
-                throw $e;
             }
         }
 
+        return $this->resetDriver();
+    }
+
+    /**
+     * Sets driver.
+     */
+    private function setDriver(string $driver): void
+    {
+        self::$sysLazies['Db'] = $this->sys($driver);
+    }
+
+    /**
+     * Resets driver to default.
+     */
+    private function resetDriver(): self
+    {
         self::$sysLazies['Db'] = $this->sys(self::$config['sys']['db']['default']);
 
         return $this;

@@ -101,10 +101,10 @@ class Controller extends \SFW\Router
      */
     protected function findInCache(): array
     {
-        $actions = self::$cache['static'][$_SERVER['REQUEST_URL']] ?? null;
+        $actions = self::$cache['static'][$_SERVER['REQUEST_PATH']] ?? null;
 
         if (!isset($actions)
-            && preg_match(self::$cache['regex'], $_SERVER['REQUEST_URL'], $M)
+            && preg_match(self::$cache['regex'], $_SERVER['REQUEST_PATH'], $M)
         ) {
             [$actions, $keys] = self::$cache['dynamic'][$M['MARK']];
 

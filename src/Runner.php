@@ -25,11 +25,6 @@ abstract class Runner extends Base
             self::$startedTime = gettimeofday(true);
 
             // }}}
-            // {{{ application dir
-
-            define('APP_DIR', dirname((new \ReflectionClass(static::class))->getFileName(), 2));
-
-            // }}}
             // {{{ important PHP parameters.
 
             ini_set('display_errors', PHP_SAPI === 'cli');
@@ -39,6 +34,23 @@ abstract class Runner extends Base
             ini_set('ignore_user_abort', true);
 
             // }}}
+            // {{{ default locale and encoding
+
+            setlocale(LC_ALL, 'C');
+
+            mb_internal_encoding('UTF-8');
+
+            // }}}
+            // {{{ server parameters correcting
+
+            $this->correctServerParams();
+
+            // }}}
+            // {{{ application dir
+
+            define('APP_DIR', dirname((new \ReflectionClass(static::class))->getFileName(), 2));
+
+            // }}}
             // {{{ configs
 
             self::$config['sys'] = \App\Config\Sys::get();
@@ -46,16 +58,6 @@ abstract class Runner extends Base
             self::$config['my'] = \App\Config\My::get();
 
             self::$config['shared'] = \App\Config\Shared::get();
-
-            // }}}
-            // {{{ default locale
-
-            setlocale(LC_ALL, 'C');
-
-            // }}}
-            // {{{ default encoding
-
-            mb_internal_encoding('UTF-8');
 
             // }}}
             // {{{ custom error handler
@@ -75,17 +77,24 @@ abstract class Runner extends Base
             }
 
             // }}}
-            // {{{ server parameters correcting
+            // {{{ routing
 
-            $this->correctServerParams();
+            [self::$sys['action'], $class, $method] = (
+                PHP_SAPI === 'cli'
+                    ? new \SFW\Router\Command()
+                    : new \SFW\Router\Controller()
+            )->getTarget();
+
+            if (self::$sys['action'] === false
+                && PHP_SAPI !== 'cli'
+            ) {
+                $this->sys('Response')->errorPage(404);
+            }
 
             // }}}
-            // {{{ initializing default environment
+            // {{{ initializing environments
 
             $this->defaultEnvironment();
-
-            // }}}
-            // {{{ initializing additional environment
 
             $this->additionalEnvironment();
 
@@ -93,23 +102,16 @@ abstract class Runner extends Base
             // {{{ calling Command or Controller action
 
             if (PHP_SAPI === 'cli') {
-                $router = new \SFW\Router\Command();
-            } else {
-                $router = new \SFW\Router\Controller();
-            }
-
-            [self::$sys['action'], $class, $method] = $router->getTarget();
-
-            if (self::$sys['action'] !== false
-                && (method_exists($class, $method)
-                    || PHP_SAPI === 'cli')
-            ) {
+                if ($class !== false) {
+                    new $class();
+                }
+            } elseif (method_exists($class, $method)) {
                 $instance = new $class();
 
                 if ($method !== '__construct') {
                     $instance->$method();
                 }
-            } elseif (PHP_SAPI !== 'cli') {
+            } else {
                 $this->sys('Response')->errorPage(404);
             }
 
@@ -135,6 +137,29 @@ abstract class Runner extends Base
 
             // }}}
         }
+    }
+
+    /**
+     * Corrects server parameters.
+     */
+    private function correctServerParams(): void
+    {
+        $_SERVER['HTTP_HOST'] ??= 'localhost';
+
+        $_SERVER['HTTP_SCHEME'] = empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off'
+            ? 'http' : 'https';
+
+        $_SERVER['REMOTE_ADDR'] ??= '0.0.0.0';
+
+        $_SERVER['REQUEST_METHOD'] ??= 'GET';
+
+        $_SERVER['REQUEST_URI'] = $_SERVER['REDIRECT_REQUEST_URI'] ?? $_SERVER['REQUEST_URI'] ?? '/';
+
+        $chunks = explode('?', $_SERVER['REQUEST_URI'], 2);
+
+        $_SERVER['REQUEST_PATH'] = $chunks[0];
+
+        $_SERVER['QUERY_STRING'] = $chunks[1] ?? '';
     }
 
     /**
@@ -171,29 +196,6 @@ abstract class Runner extends Base
         }
 
         return true;
-    }
-
-    /**
-     * Corrects server parameters.
-     */
-    private function correctServerParams(): void
-    {
-        $_SERVER['HTTP_HOST'] ??= 'localhost';
-
-        $_SERVER['HTTP_SCHEME'] = empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off'
-            ? 'http' : 'https';
-
-        $_SERVER['REMOTE_ADDR'] ??= '0.0.0.0';
-
-        $_SERVER['REQUEST_METHOD'] ??= 'GET';
-
-        $_SERVER['REQUEST_URI'] = $_SERVER['REDIRECT_REQUEST_URI'] ?? $_SERVER['REQUEST_URI'] ?? '/';
-
-        $chunks = explode('?', $_SERVER['REQUEST_URI'], 2);
-
-        $_SERVER['REQUEST_URL'] = $chunks[0];
-
-        $_SERVER['REQUEST_QUERY'] = $chunks[1] ?? '';
     }
 
     /**

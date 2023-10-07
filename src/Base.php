@@ -62,19 +62,17 @@ abstract class Base extends \stdClass
      */
     public function exit(string|int $status = 0): void
     {
-        foreach (['Pgsql','Mysql'] as $driver) {
-            if (isset(self::$sysLazies[$driver])
-                && self::$sysLazies[$driver]->isInTrans()
+        unset(self::$sysLazies['Db']);
+
+        foreach (self::$sysLazies as $lazy) {
+            if ($lazy instanceof \SFW\Databaser\Driver
+                && $lazy->isInTrans()
             ) {
                 try {
-                    self::$sysLazies[$driver]->rollback();
+                    $lazy->rollback();
                 } catch (\SFW\Databaser\Exception) {
                 }
             }
-        }
-
-        if (isset(self::$sysLazies['Db'])) {
-            self::$sysLazies['Db'] = $this->sys(self::$config['sys']['db']['default']);
         }
 
         exit($status);

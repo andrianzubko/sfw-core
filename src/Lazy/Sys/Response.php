@@ -225,46 +225,36 @@ class Response extends \SFW\Lazy\Sys
         if (isset(self::$config['sys']['response']['stats'])
             && $mime === 'text/html'
         ) {
-            $contents .= $this->makeStats();
+            $timer = gettimeofday(true) - self::$startedTime;
+
+            $contents .= str_replace(
+                [
+                    '{SCR_T}',
+                    '{SQL_C}',
+                    '{SQL_T}',
+                    '{TPL_C}',
+                    '{TPL_T}',
+                    '{ALL_T}',
+                ], [
+                    sprintf('%.3f',
+                        $timer - $this->sys('Db')->getTimer() - $this->sys('Templater')->getTimer()
+                    ),
+                    $this->sys('Db')->getCounter(),
+                    sprintf('%.3f',
+                        $this->sys('Db')->getTimer()
+                    ),
+                    $this->sys('Templater')->getCounter(),
+                    sprintf('%.3f',
+                        $this->sys('Templater')->getTimer()
+                    ),
+                    sprintf('%.3f',
+                        $timer
+                    ),
+                ], self::$config['sys']['response']['stats']
+            );
         }
 
         return $this->inline($contents, $mime, code: $code);
-    }
-
-    /**
-     * Makes statistics line.
-     *
-     * Note: no checks for statistics pattern existence!
-     */
-    protected function makeStats(): string
-    {
-        $timer = gettimeofday(true) - self::$startedTime;
-
-        return str_replace(
-            [
-                '{SCR_T}',
-                '{SQL_C}',
-                '{SQL_T}',
-                '{TPL_C}',
-                '{TPL_T}',
-                '{ALL_T}',
-            ], [
-                sprintf('%.3f',
-                    $timer - $this->sys('Db')->getTimer() - $this->sys('Templater')->getTimer()
-                ),
-                $this->sys('Db')->getCounter(),
-                sprintf('%.3f',
-                    $this->sys('Db')->getTimer()
-                ),
-                $this->sys('Templater')->getCounter(),
-                sprintf('%.3f',
-                    $this->sys('Templater')->getTimer()
-                ),
-                sprintf('%.3f',
-                    $timer
-                ),
-            ], self::$config['sys']['response']['stats']
-        );
     }
 
     /**

@@ -117,7 +117,7 @@ class Transaction extends \SFW\Lazy\Sys
      */
     private function resetDriver(): self
     {
-        self::$sysLazies['Db'] = $this->sys(self::$config['sys']['db']['default']);
+        unset(self::$sysLazies['Db']);
 
         return $this;
     }

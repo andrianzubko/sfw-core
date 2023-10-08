@@ -219,7 +219,7 @@ class Response extends \SFW\Lazy\Sys
         $contents = $this->sys($processor)->transform($filename, $context);
 
         if (!isset($mime)) {
-            $mime = $this->sys($processor)->getLastMime();
+            $mime = $this->sys($processor)->getMime();
         }
 
         if (isset(self::$config['sys']['response']['stats'])
@@ -260,7 +260,7 @@ class Response extends \SFW\Lazy\Sys
     /**
      * Shows error page.
      */
-    public function errorPage(int $code, $exit = true): self
+    public function error(int $code, $exit = true): self
     {
         if (!headers_sent() && !ob_get_length()) {
             http_response_code($code);

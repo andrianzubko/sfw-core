@@ -3,7 +3,7 @@
 namespace SFW\Lazy\Sys;
 
 /**
- * CURL.
+ * Curl.
  */
 class Curl extends \SFW\Lazy\Sys
 {
@@ -27,9 +27,9 @@ class Curl extends \SFW\Lazy\Sys
     }
 
     /**
-     * Do CURL request with optional conversion to utf.
+     * Do Curl request with optional conversion to utf-8.
      */
-    public function request(array $options, bool $toUtf = false): string|false
+    public function request(array $options, bool $toUtf8 = false): string|false
     {
         $options[CURLOPT_RETURNTRANSFER] = true;
 
@@ -73,7 +73,7 @@ class Curl extends \SFW\Lazy\Sys
 
         $response = substr($response, $this->info['header_size']);
 
-        if ($toUtf
+        if ($toUtf8
             && !preg_match('//u', $response)
         ) {
             if (preg_match('/charset\s*=\s*([a-z\d\-#]+)/i', $this->info['content_type'], $M)) {

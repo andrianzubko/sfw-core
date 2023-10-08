@@ -79,16 +79,16 @@ abstract class Runner extends Base
             // }}}
             // {{{ routing
 
-            [self::$sys['action'], $class, $method] = (
-                PHP_SAPI === 'cli'
-                    ? new \SFW\Router\Command()
-                    : new \SFW\Router\Controller()
-            )->getTarget();
+            [self::$sys['action'], $class, $method] = PHP_SAPI === 'cli'
+                ? (new \SFW\Router\Command())
+                    ->getTarget()
+                : (new \SFW\Router\Controller())
+                    ->getTarget();
 
             if (self::$sys['action'] === false
                 && PHP_SAPI !== 'cli'
             ) {
-                $this->sys('Response')->errorPage(404);
+                $this->sys('Response')->error(404);
             }
 
             // }}}
@@ -112,7 +112,7 @@ abstract class Runner extends Base
                     $instance->$method();
                 }
             } else {
-                $this->sys('Response')->errorPage(404);
+                $this->sys('Response')->error(404);
             }
 
             // }}}
@@ -132,7 +132,7 @@ abstract class Runner extends Base
             if (PHP_SAPI === 'cli') {
                 $this->exit(1);
             } else {
-                $this->sys('Response')->errorPage(500);
+                $this->sys('Response')->error(500);
             }
 
             // }}}

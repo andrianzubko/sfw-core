@@ -8,6 +8,16 @@ namespace SFW\Lazy\Sys;
 class Curl extends \SFW\Lazy\Sys
 {
     /**
+     * Last request info.
+     */
+    protected array $info = [];
+
+    /**
+     * Last request headers.
+     */
+    protected array $headers = [];
+
+    /**
      * Just a placeholder.
      *
      * If your overrides constructor, don't forget call parent at first line! Even if it's empty!
@@ -17,17 +27,17 @@ class Curl extends \SFW\Lazy\Sys
     }
 
     /**
-     * Do CURL request with encoding detection.
+     * Do CURL request with optional conversion to utf.
      */
-    public function request(array $options, ?array &$headers = null): string|false
+    public function request(array $options, bool $toUtf = false): string|false
     {
         $options[CURLOPT_RETURNTRANSFER] = true;
 
-        $options[CURLOPT_SSL_VERIFYPEER] = false;
-
         $options[CURLOPT_HEADER] = true;
 
-        $options[CURLOPT_FOLLOWLOCATION] = true;
+        $options[CURLOPT_SSL_VERIFYPEER] ??= false;
+
+        $options[CURLOPT_FOLLOWLOCATION] ??= true;
 
         $curl = curl_init();
 
@@ -35,49 +45,64 @@ class Curl extends \SFW\Lazy\Sys
 
         $response = curl_exec($curl);
 
-        $info = curl_getinfo($curl);
+        $this->info = curl_getinfo($curl);
 
         curl_close($curl);
 
-        $headers = [];
+        $this->headers = [];
 
         if ($response === false) {
             return false;
         }
 
-        $headers = preg_split('/\r\n\r\n/',
-            substr($response, 0, $info['header_size']), flags: PREG_SPLIT_NO_EMPTY
+        $this->headers = preg_split('/\r\n\r\n/', substr($response, 0, $this->info['header_size']),
+            flags: PREG_SPLIT_NO_EMPTY
         );
 
-        if (!count($headers)) {
+        if (!$this->headers) {
             return false;
         }
 
-        $headers = preg_split('/\r\n/',
-            array_pop($headers), flags: PREG_SPLIT_NO_EMPTY
+        $this->headers = preg_split('/\r\n/', array_pop($this->headers),
+            flags: PREG_SPLIT_NO_EMPTY
         );
 
-        if ($info['header_size'] >= strlen($response)) {
+        if ($this->info['header_size'] >= strlen($response)) {
             return '';
         }
 
-        $response = substr($response, $info['header_size']);
+        $response = substr($response, $this->info['header_size']);
 
-        if (!mb_check_encoding($response)
-            && preg_match('~text/~i', $info['content_type'])
+        if ($toUtf
+            && !preg_match('//u', $response)
         ) {
-            if (preg_match('~charset\s*=\s*([a-z\d\-#]+)~i', $info['content_type'], $M)
-                || preg_match('~text/html~i', $info['content_type'])
-                    && preg_match('~<meta[^>]+content-type[^>]*>~i', $response, $N)
-                        && preg_match('~charset\s*=\s*([a-z\d\-#]+)~i', $N[0], $M)
-            ) {
+            if (preg_match('/charset\s*=\s*([a-z\d\-#]+)/i', $this->info['content_type'], $M)) {
                 try {
-                    return @mb_convert_encoding($response, 'utf-8', $M[1]);
+                    return mb_convert_encoding($response, 'utf-8', $M[1]);
                 } catch (\ValueError) {
+                    return false;
                 }
+            } else {
+                return false;
             }
         }
 
         return $response;
+    }
+
+    /**
+     * Gets last request info.
+     */
+    public function getInfo(): array
+    {
+        return $this->info;
+    }
+
+    /**
+     * Gets last request headers.
+     */
+    public function getHeaders(): array
+    {
+        return $this->headers;
     }
 }

@@ -8,38 +8,16 @@ namespace SFW\Lazy\Sys;
 class Response extends \SFW\Lazy\Sys
 {
     /**
-     * Mime types for compress via gzip.
-     */
-    protected array $compress = [
-        'text/html',
-        'text/plain',
-        'text/xml',
-        'text/css',
-        'application/x-javascript',
-        'application/javascript',
-        'application/ecmascript',
-        'application/rss+xml',
-        'application/xml',
-    ];
-
-    /**
-     * Just a placeholder.
-     *
-     * If your overrides constructor, don't forget call parent at first line! Even if it's empty!
-     */
-    public function __construct()
-    {
-    }
-
-    /**
      * Output some as inline pretty print json.
+     *
+     * @throws \SFW\LogicException
      */
     public function json(
         mixed $contents,
         string $mime = 'text/plain',
         ?string $filename = null,
-        int $expire = 0,
-        int $code = 200,
+        ?int $expire = null,
+        ?int $code = null,
         bool $pretty = false
     ): self {
         return $this->inline(
@@ -53,75 +31,88 @@ class Response extends \SFW\Lazy\Sys
 
     /**
      * Output string as inline.
+     *
+     * @throws \SFW\LogicException
      */
     public function inline(
         string $contents,
         string $mime = 'text/plain',
         ?string $filename = null,
-        int $expire = 0,
-        int $code = 200
+        ?int $expire = null,
+        ?int $code = null,
     ): self {
         return $this->output('inline', $contents, $mime, $filename, $expire, $code);
     }
 
     /**
      * Output string as attachment.
+     *
+     * @throws \SFW\LogicException
      */
     public function attachment(
         string $contents,
         string $mime = 'text/plain',
         ?string $filename = null,
-        int $expire = 0,
-        int $code = 200
+        ?int $expire = null,
+        ?int $code = null,
     ): self {
         return $this->output('attachment', $contents, $mime, $filename, $expire, $code);
     }
 
     /**
      * Base method for outputs.
+     *
+     * @throws \SFW\LogicException
      */
     protected function output(
         string $disposition,
         string $contents,
         string $mime,
         ?string $filename,
-        int $expire,
-        int $code
+        ?int $expire,
+        ?int $code,
     ): self {
+        if (headers_sent()) {
+            throw new \SFW\LogicException('Headers already sent');
+        }
+
         ini_set('zlib.output_compression', false);
 
-        http_response_code($code);
+        http_response_code($code ?? 200);
 
         header('Last-Modified: ' . gmdate('D, d M Y H:i:s \G\M\T', self::$sys['timestamp']));
 
-        header("Cache-Control: private, max-age=$expire");
+        header('Cache-Control: private, max-age=' . ($expire ?? 0));
 
         header("Content-Type: $mime; charset=utf-8");
 
-        if (strlen($contents) > 32 * 1024
-            && in_array($mime, $this->compress, true)
-                && str_contains($_SERVER['HTTP_ACCEPT_ENCODING'] ?? '', 'gzip')
-        ) {
-            header('Content-Encoding: gzip');
+        if (isset($filename)) {
+            header("Content-Disposition: $disposition; filename=\"$filename\"");
+        } else {
+            header("Content-Disposition: $disposition");
+        }
 
-            $contents = gzencode($contents, 1);
+        if (isset(self::$config['sys']['response']['compress_mimes'])
+            && strlen($contents) > self::$config['sys']['response']['compress_min']
+                && in_array($mime, self::$config['sys']['response']['compress_mimes'], true)
+                    && preg_match('/(deflate|gzip)/', $_SERVER['HTTP_ACCEPT_ENCODING'] ?? '', $M)
+        ) {
+            if ($M[1] === 'gzip') {
+                $contents = gzencode($contents, 1);
+            } else {
+                $contents = gzdeflate($contents, 1);
+            }
+
+            header("Content-Encoding: $M[1]");
+
+            header('Vary: Accept-Encoding');
         } else {
             header('Content-Encoding: none');
         }
 
         header('Content-Length: ' . strlen($contents));
 
-        if (isset($filename)) {
-            header("Content-Disposition: $disposition; filename=\"$filename\"");
-        } elseif (
-            $disposition === 'attachment'
-        ) {
-            header('Content-Disposition: attachment');
-        }
-
-        $ffrExists = function_exists('fastcgi_finish_request');
-
-        if (!$ffrExists) {
+        if (!function_exists('fastcgi_finish_request')) {
             header('Connection: close');
         }
 
@@ -133,7 +124,7 @@ class Response extends \SFW\Lazy\Sys
 
         flush();
 
-        if ($ffrExists) {
+        if (function_exists('fastcgi_finish_request')) {
             fastcgi_finish_request();
         }
 
@@ -145,13 +136,14 @@ class Response extends \SFW\Lazy\Sys
      *
      * If context is an object, then only public non-static properties will be taken.
      *
+     * @throws \SFW\LogicException
      * @throws \SFW\Templater\Exception
      */
     public function native(
         string $filename,
         array|object|null $context = null,
         ?string $mime = null,
-        int $code = 200
+        ?int $code = null
     ): self {
         return $this->transform('Native', $filename, $context, $mime, $code);
     }
@@ -161,13 +153,14 @@ class Response extends \SFW\Lazy\Sys
      *
      * If context is an object, then only public non-static properties will be taken.
      *
+     * @throws \SFW\LogicException
      * @throws \SFW\Templater\Exception
      */
     public function twig(
         string $filename,
         array|object|null $context = null,
         ?string $mime = null,
-        int $code = 200
+        ?int $code = null
     ): self {
         return $this->transform('Twig', $filename, $context, $mime, $code);
     }
@@ -177,13 +170,14 @@ class Response extends \SFW\Lazy\Sys
      *
      * If context is an object, then only public non-static properties will be taken.
      *
+     * @throws \SFW\LogicException
      * @throws \SFW\Templater\Exception
      */
     public function xslt(
         string $filename,
         array|object|null $context = null,
         ?string $mime = null,
-        int $code = 200
+        ?int $code = null
     ): self {
         return $this->transform('Xslt', $filename, $context, $mime, $code);
     }
@@ -193,13 +187,14 @@ class Response extends \SFW\Lazy\Sys
      *
      * If context is an object, then only public non-static properties will be taken.
      *
+     * @throws \SFW\LogicException
      * @throws \SFW\Templater\Exception
      */
     public function template(
         string $filename,
         array|object|null $context = null,
         ?string $mime = null,
-        int $code = 200
+        ?int $code = null
     ): self {
         return $this->transform('Templater', $filename, $context, $mime, $code);
     }
@@ -207,6 +202,7 @@ class Response extends \SFW\Lazy\Sys
     /**
      * Base method for template transformation.
      *
+     * @throws \SFW\LogicException
      * @throws \SFW\Templater\Exception
      */
     protected function transform(
@@ -214,13 +210,11 @@ class Response extends \SFW\Lazy\Sys
         string $filename,
         array|object|null $context,
         ?string $mime,
-        int $code
+        ?int $code
     ): self {
         $contents = $this->sys($processor)->transform($filename, $context);
 
-        if (!isset($mime)) {
-            $mime = $this->sys($processor)->getMime();
-        }
+        $mime ??= $this->sys($processor)->getMime();
 
         if (isset(self::$config['sys']['response']['stats'])
             && $mime === 'text/html'
@@ -260,7 +254,7 @@ class Response extends \SFW\Lazy\Sys
     /**
      * Shows error page.
      */
-    public function error(int $code, $exit = true): self
+    public function error(int $code, bool $exit = true): self
     {
         if (!headers_sent() && !ob_get_length()) {
             http_response_code($code);
@@ -285,21 +279,18 @@ class Response extends \SFW\Lazy\Sys
 
     /**
      * Redirect.
+     *
+     * @throws \SFW\LogicException
      */
-    public function redirect(string $url, $exit = true): self
+    public function redirect(string $uri, ?int $code = null, bool $exit = true): self
     {
-        if ($url === '') {
-            $url = self::$sys['url'] . '/';
-        } elseif (
-                str_starts_with($url, '/')
-            && !str_starts_with($url, '//')
-        ) {
-            $url = self::$sys['url'] . $url;
+        if (headers_sent()) {
+            throw new \SFW\LogicException('Headers already sent');
         }
 
-        http_response_code(302);
-
-        header("Location: $url");
+        header("Location: $uri",
+            response_code: $code ?? self::$config['sys']['response']['redirect_code']
+        );
 
         if ($exit) {
             $this->exit();

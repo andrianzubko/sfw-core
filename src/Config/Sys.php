@@ -232,6 +232,36 @@ class Sys extends \SFW\Config
         // }}}
         // {{{ response
 
+        /* Compress output with only these mime types.
+         *
+         * Set null to disable output compression.
+         *
+         * ?array
+         */
+        $sys['response']['compress_mimes'] = [
+            'text/html',
+            'text/plain',
+            'text/xml',
+            'text/css',
+            'application/x-javascript',
+            'application/javascript',
+            'application/ecmascript',
+            'application/rss+xml',
+            'application/xml',
+        ];
+
+        /* Compress output if size more this value in bytes.
+         *
+         * int
+         */
+        $sys['response']['compress_min'] = 32 * 1024;
+
+        /* Default redirect response code.
+         *
+         * int
+         */
+        $sys['response']['redirect_code'] = 302;
+
         /* Optional error document files pattern.
          *
          * ?string

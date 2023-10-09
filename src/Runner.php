@@ -79,15 +79,14 @@ abstract class Runner extends Base
             // }}}
             // {{{ routing
 
-            [self::$sys['action'], $class, $method] =
-                PHP_SAPI === 'cli'
-                    ? (new \SFW\Router\Command())->getTarget()
-                    : (new \SFW\Router\Controller())->getTarget();
+            if (PHP_SAPI === 'cli') {
+                [$class, $method, self::$sys['action']] = Router\Command::getTarget();
+            } else {
+                [$class, $method, self::$sys['action']] = Router\Controller::getTarget();
 
-            if (self::$sys['action'] === false
-                && PHP_SAPI !== 'cli'
-            ) {
-                $this->sys('Response')->error(404);
+                if ($class === false) {
+                    $this->sys('Response')->error(404);
+                }
             }
 
             // }}}
@@ -104,15 +103,22 @@ abstract class Runner extends Base
                 if ($class !== false) {
                     new $class();
                 }
-            } elseif (method_exists($class, $method)) {
-                $controller = new $class();
-
-                if ($method !== '__construct') {
-                    $controller->$method();
-                }
             } else {
-                $this->sys('Response')->error(404);
+                if (method_exists($class, $method)) {
+                    $controller = new $class();
+
+                    if ($method !== '__construct') {
+                        $controller->$method();
+                    }
+                } else {
+                    $this->sys('Response')->error(404);
+                }
             }
+
+            // }}}
+            // {{{ some important cleanups
+
+            Utility::cleanup();
 
             // }}}
         } catch (\Throwable $e) {
@@ -145,7 +151,8 @@ abstract class Runner extends Base
     {
         $_SERVER['HTTP_HOST'] ??= 'localhost';
 
-        $_SERVER['HTTP_SCHEME'] = empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off' ? 'http' : 'https';
+        $_SERVER['HTTP_SCHEME'] = empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off'
+            ? 'http' : 'https';
 
         $_SERVER['REMOTE_ADDR'] ??= '0.0.0.0';
 

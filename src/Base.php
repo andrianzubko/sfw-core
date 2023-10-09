@@ -62,18 +62,7 @@ abstract class Base extends \stdClass
      */
     public function exit(string|int $status = 0): void
     {
-        unset(self::$sysLazies['Db']);
-
-        foreach (self::$sysLazies as $lazy) {
-            if ($lazy instanceof \SFW\Databaser\Driver
-                && $lazy->isInTrans()
-            ) {
-                try {
-                    $lazy->rollback();
-                } catch (\SFW\Databaser\Exception) {
-                }
-            }
-        }
+        Utility::cleanup();
 
         exit($status);
     }

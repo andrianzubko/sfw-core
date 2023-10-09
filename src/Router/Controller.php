@@ -22,20 +22,22 @@ class Controller extends \SFW\Router
      *
      * @throws \SFW\RuntimeException
      */
-    public function getTarget(): array
+    public static function getTarget(): array
     {
+        $controller = new static();
+
         if (self::$cache === false) {
             self::$cache = @include self::$config['sys']['router']['cache'];
 
             if (self::$cache === false
                 || self::$config['sys']['env'] !== 'prod'
-                && $this->isOutdated()
+                    && $controller->isOutdated()
             ) {
-                $this->rebuild();
+                $controller->rebuild();
             }
         }
 
-        return $this->findInCache();
+        return $controller->findInCache();
     }
 
     /**
@@ -117,12 +119,12 @@ class Controller extends \SFW\Router
             $action = $actions[$_SERVER['REQUEST_METHOD']] ?? $actions[''] ?? null;
 
             if (isset($action)) {
+                $chunks = explode('::', "App\\Controller\\$action");
+
                 return [
-                    $action, ...array_pad(
-                        explode(
-                            '::', "App\\Controller\\$action", 2
-                        ), 2, '__construct'
-                    ),
+                    $chunks[0],
+                    $chunks[1] ?? '__construct',
+                    $action,
                 ];
             }
         }

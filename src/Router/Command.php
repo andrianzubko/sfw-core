@@ -12,14 +12,14 @@ class Command extends \SFW\Router
      *
      * Very poor implementation. Will be better soon.
      */
-    public function getTarget(): array
+    public static function getTarget(): array
     {
         if (isset($_SERVER['argv'][1])) {
-            $action = preg_replace_callback(
-                '/(?:^|:)(.)/', fn($M) => strtoupper($M[1]), $_SERVER['argv'][1]
+            $action = preg_replace_callback('/(?:^|:)(.)/',
+                fn($M) => strtoupper($M[1]), $_SERVER['argv'][1]
             );
 
-            return [$action, "App\\Command\\$action", '__construct'];
+            return ["App\\Command\\$action", '__construct', $action];
         }
 
         return [false, false, false];

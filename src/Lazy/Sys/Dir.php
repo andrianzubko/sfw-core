@@ -8,9 +8,14 @@ namespace SFW\Lazy\Sys;
 class Dir extends \SFW\Lazy\Sys
 {
     /**
-     * For temporary directory.
+     * Temporary directory.
      */
-    protected ?string $temporary;
+    protected string $tempDir;
+
+    /**
+     * Created temporary subdirectories (for cleaner).
+     */
+    protected array $tempSubDirs = [];
 
     /**
      * Just a placeholder.
@@ -188,24 +193,42 @@ class Dir extends \SFW\Lazy\Sys
      */
     public function temporary(): string
     {
-        if (!isset($this->temporary)) {
-            $this->temporary = realpath(sys_get_temp_dir());
+        if (!isset($this->tempDir)) {
+            $tempDir = realpath(sys_get_temp_dir());
+
+            if ($tempDir === false) {
+                throw new \SFW\RuntimeException('Invalid system temporary directory');
+            }
+
+            $this->tempDir = $tempDir;
+
+            register_shutdown_function(
+                function () {
+                    register_shutdown_function(
+                        function () {
+                            register_shutdown_function(
+                                function () {
+                                    foreach ($this->tempSubDirs as $dir) {
+                                        $this->remove($dir);
+                                    }
+                                }
+                            );
+                        }
+                    );
+                }
+            );
         }
 
         for ($i = 1; $i <= 7; $i++) {
-            $dir = sprintf('%s/%s', $this->temporary, $this->sys('Text')->random());
+            $tempSubDir = $this->tempDir . '/' . $this->sys('Text')->random();
 
-            if (@mkdir($dir, 0600, true)) {
-                register_shutdown_function(
-                    function () use ($dir) {
-                        $this->remove($dir);
-                    }
-                );
+            if (@mkdir($tempSubDir, 0600, true)) {
+                $this->tempSubDirs[] = $tempSubDir;
 
-                return $dir;
+                return $tempSubDir;
             }
         }
 
-        throw new \SFW\RuntimeException('Unable to create temporary directory');
+        throw new \SFW\RuntimeException('Unable to create temporary subdirectory');
     }
 }

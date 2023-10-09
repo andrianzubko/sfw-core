@@ -79,11 +79,10 @@ abstract class Runner extends Base
             // }}}
             // {{{ routing
 
-            [self::$sys['action'], $class, $method] = PHP_SAPI === 'cli'
-                ? (new \SFW\Router\Command())
-                    ->getTarget()
-                : (new \SFW\Router\Controller())
-                    ->getTarget();
+            [self::$sys['action'], $class, $method] =
+                PHP_SAPI === 'cli'
+                    ? (new \SFW\Router\Command())->getTarget()
+                    : (new \SFW\Router\Controller())->getTarget();
 
             if (self::$sys['action'] === false
                 && PHP_SAPI !== 'cli'
@@ -146,8 +145,7 @@ abstract class Runner extends Base
     {
         $_SERVER['HTTP_HOST'] ??= 'localhost';
 
-        $_SERVER['HTTP_SCHEME'] = empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off'
-            ? 'http' : 'https';
+        $_SERVER['HTTP_SCHEME'] = empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off' ? 'http' : 'https';
 
         $_SERVER['REMOTE_ADDR'] ??= '0.0.0.0';
 
@@ -210,9 +208,7 @@ abstract class Runner extends Base
         if (isset(self::$config['sys']['url'])) {
             $url = parse_url(self::$config['sys']['url']);
 
-            if (empty($url)
-                || !isset($url['host'])
-            ) {
+            if (empty($url) || !isset($url['host'])) {
                 throw new BadConfigurationException('Incorrect url in system config');
             }
 

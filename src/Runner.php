@@ -106,10 +106,10 @@ abstract class Runner extends Base
                     new $class();
                 }
             } elseif (method_exists($class, $method)) {
-                $instance = new $class();
+                $controller = new $class();
 
                 if ($method !== '__construct') {
-                    $instance->$method();
+                    $controller->$method();
                 }
             } else {
                 $this->sys('Response')->error(404);

@@ -256,12 +256,6 @@ class Sys extends \SFW\Config
          */
         $sys['response']['compress_min'] = 32 * 1024;
 
-        /* Default redirect response code.
-         *
-         * int
-         */
-        $sys['response']['redirect_code'] = 302;
-
         /* Optional error document files pattern.
          *
          * ?string

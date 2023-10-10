@@ -5,7 +5,7 @@ namespace SFW;
 /**
  * Utilities stateless methods.
  */
-abstract class Utility extends Base
+class Utility extends Base
 {
     /**
      * Makes some important cleanups.

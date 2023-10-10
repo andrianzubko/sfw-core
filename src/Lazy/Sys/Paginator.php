@@ -22,11 +22,7 @@ class Paginator extends \SFW\Lazy\Sys
         $param = self::$config['sys']['paginator']['param'];
 
         if (isset($param)) {
-            $query = preg_replace(
-                sprintf('/%s=[^&]+&*/',
-                    preg_quote($param)
-                ), '', $_SERVER['QUERY_STRING']
-            );
+            $query = preg_replace(sprintf('/%s=[^&]+&*/', preg_quote($param)), '', $_SERVER['QUERY_STRING']);
 
             if ($query === '') {
                 $this->url = sprintf('/?%s=', $param);

@@ -20,7 +20,7 @@ class Controller extends \SFW\Router
     /**
      * Gets action, full class and method name.
      *
-     * @throws \SFW\RuntimeException
+     * @throws \SFW\Exception\Runtime
      */
     public static function getTarget(): array
     {
@@ -43,7 +43,7 @@ class Controller extends \SFW\Router
     /**
      * Generates URL by action (or FQMN) and optional parameters.
      *
-     * @throws \SFW\RuntimeException
+     * @throws \SFW\Exception\Runtime
      */
     public function genUrl(string $action, string|int|float|null ...$params): string
     {
@@ -171,7 +171,7 @@ class Controller extends \SFW\Router
     /**
      * Rescans controllers and rebuilds cache.
      *
-     * @throws \SFW\RuntimeException
+     * @throws \SFW\Exception\Runtime
      */
     protected function rebuild(): void
     {
@@ -243,7 +243,7 @@ class Controller extends \SFW\Router
         if (!$this->sys('File')->putVar(
                 self::$config['sys']['router']['cache'], self::$cache, LOCK_EX)
         ) {
-            throw new \SFW\RuntimeException(
+            throw new \SFW\Exception\Runtime(
                 sprintf(
                     'Unable to write file %s',
                         self::$config['sys']['router']['cache']

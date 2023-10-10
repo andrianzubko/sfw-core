@@ -22,8 +22,8 @@ class Merger extends Base
     /**
      * Recombines if needed and returns merged paths.
      *
-     * @throws LogicException
-     * @throws RuntimeException
+     * @throws Exception\Logic
+     * @throws Exception\Runtime
      */
     public function process(): array
     {
@@ -149,8 +149,8 @@ class Merger extends Base
     /**
      * Recombines all.
      *
-     * @throws LogicException
-     * @throws RuntimeException
+     * @throws Exception\Logic
+     * @throws Exception\Runtime
      */
     protected function recombine(): void
     {
@@ -179,7 +179,7 @@ class Merger extends Base
                 }
 
                 if (!$this->sys('File')->put($file, $contents)) {
-                    throw new RuntimeException("Unable to write file $file");
+                    throw new Exception\Runtime("Unable to write file $file");
                 }
             }
         }
@@ -187,7 +187,7 @@ class Merger extends Base
         if (!$this->sys('File')->putVar(
                 self::$config['sys']['merger']['cache'], $this->cache)
         ) {
-            throw new RuntimeException(
+            throw new Exception\Runtime(
                 sprintf(
                     'Unable to write file %s',
                         self::$config['sys']['merger']['cache']
@@ -199,8 +199,8 @@ class Merger extends Base
     /**
      * Merges JS.
      *
-     * @throws LogicException
-     * @throws RuntimeException
+     * @throws Exception\Logic
+     * @throws Exception\Runtime
      */
     protected function mergeJs(array $files): string
     {
@@ -210,7 +210,7 @@ class Merger extends Base
             try {
                 $merged = (new JSMin($merged))->min();
             } catch (\Exception $e) {
-                throw (new LogicException($e->getMessage()))
+                throw (new Exception\Logic($e->getMessage()))
                     ->setFile($e->getFile())
                     ->setLine($e->getLine());
             }
@@ -222,7 +222,7 @@ class Merger extends Base
     /**
      * Merges CSS.
      *
-     * @throws RuntimeException
+     * @throws Exception\Runtime
      */
     protected function mergeCss(array $files): string
     {
@@ -272,7 +272,7 @@ class Merger extends Base
     /**
      * Merges files.
      *
-     * @throws RuntimeException
+     * @throws Exception\Runtime
      */
     protected function mergeFiles(array $files): string
     {
@@ -282,7 +282,7 @@ class Merger extends Base
             $contents = $this->sys('File')->get($file);
 
             if ($contents === false) {
-                throw new RuntimeException("Unable to read file $file");
+                throw new Exception\Runtime("Unable to read file $file");
             }
 
             $merged[] = $contents;

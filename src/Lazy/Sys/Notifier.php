@@ -88,7 +88,7 @@ class Notifier extends \SFW\Lazy\Sys
     /**
      * Sending single message.
      *
-     * @throws \SFW\LogicException
+     * @throws \SFW\Exception\Logic
      * @throws PHPMailerException
      */
     protected function send(\SFW\NotifyStruct $struct): void
@@ -102,7 +102,7 @@ class Notifier extends \SFW\Lazy\Sys
         $mailer->msgHTML($struct->body);
 
         if (empty($struct->sender)) {
-            throw new \SFW\LogicException('No sender in notify');
+            throw new \SFW\Exception\Logic('No sender in notify');
         }
 
         $mailer->setFrom(...(array) $struct->sender);
@@ -112,7 +112,7 @@ class Notifier extends \SFW\Lazy\Sys
         }
 
         if (empty($struct->recipients)) {
-            throw new \SFW\LogicException('No recipients in notify');
+            throw new \SFW\Exception\Logic('No recipients in notify');
         }
 
         foreach ($struct->recipients as $item) {

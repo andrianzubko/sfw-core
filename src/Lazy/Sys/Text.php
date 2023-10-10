@@ -109,17 +109,13 @@ class Text extends \SFW\Lazy\Sys
             return '';
         }
 
-        $string = trim(
-            preg_replace("/(?: |\t|\n|\r|\0|\x0B|\x0C|\u{A0}|\u{FEFF})+/S", ' ', $string)
-        );
+        $string = trim(preg_replace("/(?: |\t|\n|\r|\0|\x0B|\x0C|\u{A0}|\u{FEFF})+/S", ' ', $string));
 
         if ($limit <= 0) {
             return $string;
         }
 
-        return rtrim(
-            mb_substr($string, 0, $limit)
-        );
+        return rtrim(mb_substr($string, 0, $limit));
     }
 
     /**
@@ -131,17 +127,13 @@ class Text extends \SFW\Lazy\Sys
             return '';
         }
 
-        $string = trim(
-            preg_replace(['/\h+/u', '/\s*\v\s*/u'], [' ', "\n"], $string)
-        );
+        $string = trim(preg_replace(['/\h+/u', '/\s*\v\s*/u'], [' ', "\n"], $string));
 
         if ($limit <= 0) {
             return $string;
         }
 
-        return rtrim(
-            mb_substr($string, 0, $limit)
-        );
+        return rtrim(mb_substr($string, 0, $limit));
     }
 
     /**
@@ -153,23 +145,17 @@ class Text extends \SFW\Lazy\Sys
             return '';
         }
 
-        $string = trim(
-            preg_replace("/(?: |\t|\n|\r|\0|\x0B|\x0C|\u{A0}|\u{FEFF})+/S", ' ', $string)
-        );
+        $string = trim(preg_replace("/(?: |\t|\n|\r|\0|\x0B|\x0C|\u{A0}|\u{FEFF})+/S", ' ', $string));
 
         if (mb_strlen($string) > $min) {
             if (isset($max)) {
                 if (preg_match(sprintf('/^(.{%d,%d}?)[^\p{L}\d]/u', $min, $max - 1), $string, $M)) {
                     $string = $M[1];
                 } else {
-                    $string = rtrim(
-                        mb_substr($string, 0, $max - 1)
-                    );
+                    $string = rtrim(mb_substr($string, 0, $max - 1));
                 }
             } else {
-                $string = rtrim(
-                    mb_substr($string, 0, $min - 1)
-                );
+                $string = rtrim(mb_substr($string, 0, $min - 1));
             }
 
             $string .= '...';

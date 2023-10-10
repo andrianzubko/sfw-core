@@ -68,7 +68,7 @@ abstract class Runner extends Base
             // {{{ default timezone
 
             if (!date_default_timezone_set(self::$config['sys']['timezone'])) {
-                throw new BadConfigurationException(
+                throw new Exception\BadConfiguration(
                     sprintf(
                         'Unable to set timezone %s',
                             self::$config['sys']['timezone']
@@ -170,7 +170,7 @@ abstract class Runner extends Base
     /**
      * Custom error handler.
      *
-     * @throws LogicException
+     * @throws Exception\Logic
      */
     private function errorHandler(int $code, string $message, string $file, int $line): bool
     {
@@ -194,7 +194,7 @@ abstract class Runner extends Base
                     ]);
                     break;
                 default:
-                    throw (new LogicException($message))
+                    throw (new Exception\Logic($message))
                         ->setFile($file)
                         ->setLine($line);
             }
@@ -206,7 +206,7 @@ abstract class Runner extends Base
     /**
      * Initializes default environment.
      *
-     * @throws BadConfigurationException
+     * @throws Exception\BadConfiguration
      */
     private function defaultEnvironment(): void
     {
@@ -216,7 +216,7 @@ abstract class Runner extends Base
             $url = parse_url(self::$config['sys']['url']);
 
             if (empty($url) || !isset($url['host'])) {
-                throw new BadConfigurationException('Incorrect url in system config');
+                throw new Exception\BadConfiguration('Incorrect url in system config');
             }
 
             self::$sys['url_scheme'] = $url['scheme'] ?? 'http';

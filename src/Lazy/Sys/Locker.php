@@ -24,19 +24,19 @@ class Locker extends \SFW\Lazy\Sys
     /**
      * Locks file by key and returns true or returns false if file already in use.
      *
-     * @throws \SFW\LogicException
-     * @throws \SFW\RuntimeException
+     * @throws \SFW\Exception\Logic
+     * @throws \SFW\Exception\Runtime
      */
     public function lock(string $key): bool
     {
         if (isset($this->locks[$key])) {
-            throw new \SFW\LogicException("Lock with key '$key' is already in use");
+            throw new \SFW\Exception\Logic("Lock with key '$key' is already in use");
         }
 
         $file = str_replace('{KEY}', $key, self::$config['sys']['locker']['file']);
 
         if (!$this->sys('Dir')->create(dirname($file))) {
-            throw new \SFW\RuntimeException(
+            throw new \SFW\Exception\Runtime(
                 sprintf(
                     'Unable to create directory %s',
                         dirname($file)
@@ -47,7 +47,7 @@ class Locker extends \SFW\Lazy\Sys
         $handle = fopen($file, 'cb+');
 
         if ($handle === false) {
-            throw new \SFW\RuntimeException("Unable to open file $file");
+            throw new \SFW\Exception\Runtime("Unable to open file $file");
         }
 
         if (!flock($handle, LOCK_EX | LOCK_NB)) {
@@ -62,17 +62,17 @@ class Locker extends \SFW\Lazy\Sys
     /**
      * Unlocks file by key.
      *
-     * @throws \SFW\LogicException
-     * @throws \SFW\RuntimeException
+     * @throws \SFW\Exception\Logic
+     * @throws \SFW\Exception\Runtime
      */
     public function unlock(string $key): void
     {
         if (!isset($this->locks[$key])) {
-            throw new \SFW\LogicException("Lock with key '$key' is not exists");
+            throw new \SFW\Exception\Logic("Lock with key '$key' is not exists");
         }
 
         if (!fclose($this->locks[$key])) {
-            throw new \SFW\RuntimeException(
+            throw new \SFW\Exception\Runtime(
                 sprintf(
                     'Unable to close file %s',
                         $this->locks[$key]

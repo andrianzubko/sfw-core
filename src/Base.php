@@ -11,22 +11,22 @@ abstract class Base extends \stdClass
     /**
      * Started time.
      */
-    public static float $startedTime;
+    protected static float $startedTime;
 
     /**
      * All configs (only shared are available from templates).
      */
-    public static array $config = [];
+    protected static array $config = [];
 
     /**
      * System environment (available from templates).
      */
-    public static array $sys = [];
+    protected static array $sys = [];
 
     /**
      * Your environment (available from templates).
      */
-    public static array $my = [];
+    protected static array $my = [];
 
     /**
      * Instances of system Lazy classes.
@@ -41,7 +41,7 @@ abstract class Base extends \stdClass
     /**
      * Accessing system Lazy classes from anywhere except templates.
      */
-    public static function sys(string $name): object
+    final protected static function sys(string $name): object
     {
         if (!isset(self::$sysLazies[$name])) {
             if (class_exists("App\\Lazy\\Sys\\$name")) {
@@ -57,7 +57,7 @@ abstract class Base extends \stdClass
     /**
      * Accessing your Lazy classes from anywhere except templates.
      */
-    public static function my(string $name): object
+    final protected static function my(string $name): object
     {
         if (!isset(self::$myLazies[$name])) {
             self::$myLazies[$name] = "App\\Lazy\\My\\$name::getInstance"();

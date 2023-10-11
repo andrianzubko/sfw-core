@@ -35,7 +35,7 @@ class Locker extends \SFW\Lazy\Sys
 
         $file = str_replace('{KEY}', $key, self::$config['sys']['locker']['file']);
 
-        if (!$this->sys('Dir')->create(dirname($file))) {
+        if (!self::sys('Dir')->create(dirname($file))) {
             throw new \SFW\Exception\Runtime(
                 sprintf(
                     'Unable to create directory %s',

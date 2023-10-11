@@ -8,7 +8,7 @@ namespace SFW;
 abstract class Router extends Base
 {
     /**
-     * Gets action, full class and method name.
+     * Gets class, method and action names.
      */
     abstract public static function getTarget(): array;
 }

@@ -161,10 +161,8 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
         }
 
         if (isset($context['destination'])) {
-            $this->sys('File')->put($context['destination'],
-                sprintf("[%s] %s\n",
-                    date('d-M-Y H:i:s e'), $message
-                ), FILE_APPEND
+            self::sys('File')->put($context['destination'],
+                sprintf("[%s] %s\n", date('d-M-Y H:i:s e'), $message), FILE_APPEND
             );
         }
 
@@ -186,14 +184,11 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
             return;
         }
 
-        $message = sprintf("[%.2f] %s\n\t%s\n",
-            $timer,
-
+        $message = sprintf("[%.2f] %s\n\t%s\n", $timer,
             idn_to_utf8($_SERVER['HTTP_HOST']) . $_SERVER['REQUEST_URI'],
-
             implode("\n\t",
                 array_map(
-                    fn($a) => $this->sys('Text')->fTrim($a), $queries
+                    fn($a) => self::sys('Text')->fTrim($a), $queries
                 )
             )
         );
@@ -214,10 +209,7 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
             return;
         }
 
-        $message = sprintf("[%s] [%d] %s",
-            $state,
-            $retry,
-
+        $message = sprintf("[%s] [%d] %s", $state, $retry,
             idn_to_utf8($_SERVER['HTTP_HOST']) . $_SERVER['REQUEST_URI']
         );
 

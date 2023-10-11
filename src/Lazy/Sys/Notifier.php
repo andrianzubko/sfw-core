@@ -46,7 +46,7 @@ class Notifier extends \SFW\Lazy\Sys
      */
     public function add(\SFW\Notify $notify): self
     {
-        $this->sys('Transaction')->onSuccess(
+        self::sys('Transaction')->onSuccess(
             function () use ($notify) {
                 $this->notifies[] = $notify;
             }
@@ -66,11 +66,11 @@ class Notifier extends \SFW\Lazy\Sys
                     try {
                         $this->send($struct);
                     } catch (\Throwable $e) {
-                        $this->sys('Logger')->error($e);
+                        self::sys('Logger')->error($e);
                     }
                 }
             } catch (\Throwable $e) {
-                $this->sys('Logger')->error($e);
+                self::sys('Logger')->error($e);
             }
         }
     }

@@ -30,31 +30,33 @@ class Native extends \SFW\Lazy\Sys
 
             'sys' => self::$sys,
 
-            'lc' => $this->sys('Text')->lc(...),
+            'my' => self::$my,
 
-            'lcFirst' => $this->sys('Text')->lcFirst(...),
+            'lc' => self::sys('Text')->lc(...),
 
-            'uc' => $this->sys('Text')->uc(...),
+            'lcFirst' => self::sys('Text')->lcFirst(...),
 
-            'ucFirst' => $this->sys('Text')->ucFirst(...),
+            'uc' => self::sys('Text')->uc(...),
 
-            'trim' => $this->sys('Text')->trim(...),
+            'ucFirst' => self::sys('Text')->ucFirst(...),
 
-            'rTrim' => $this->sys('Text')->rTrim(...),
+            'trim' => self::sys('Text')->trim(...),
 
-            'lTrim' => $this->sys('Text')->lTrim(...),
+            'rTrim' => self::sys('Text')->rTrim(...),
 
-            'fTrim' => $this->sys('Text')->fTrim(...),
+            'lTrim' => self::sys('Text')->lTrim(...),
 
-            'mTrim' => $this->sys('Text')->mTrim(...),
+            'fTrim' => self::sys('Text')->fTrim(...),
 
-            'cut' => $this->sys('Text')->cut(...),
+            'mTrim' => self::sys('Text')->mTrim(...),
 
-            'random' => $this->sys('Text')->random(...),
+            'cut' => self::sys('Text')->cut(...),
 
-            'genUrl' => $this->sys('Router')->genUrl(...),
+            'random' => self::sys('Text')->random(...),
 
-            'genAbsoluteUrl' => $this->sys('Router')->genAbsoluteUrl(...),
+            'genUrl' => self::sys('Router')->genUrl(...),
+
+            'genAbsoluteUrl' => self::sys('Router')->genAbsoluteUrl(...),
         ];
     }
 

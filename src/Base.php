@@ -3,7 +3,7 @@
 namespace SFW;
 
 /**
- * Abstraction with basic environment.
+ * Abstraction for almost all framework classes.
  */
 #[\AllowDynamicProperties]
 abstract class Base extends \stdClass
@@ -14,14 +14,19 @@ abstract class Base extends \stdClass
     public static float $startedTime;
 
     /**
-     * All configs (not available from templates).
+     * All configs (only shared are available from templates).
      */
     public static array $config = [];
 
     /**
-     * System parameters.
+     * System environment (available from templates).
      */
     public static array $sys = [];
+
+    /**
+     * Your environment (available from templates).
+     */
+    public static array $my = [];
 
     /**
      * Instances of system Lazy classes.
@@ -35,26 +40,30 @@ abstract class Base extends \stdClass
 
     /**
      * Accessing system Lazy classes from anywhere except templates.
-     *
-     * $this->sys('SomeSysLazyClass')->someMethod()
      */
-    public function sys(string $name): object
+    public static function sys(string $name): object
     {
-        if (class_exists("App\\Lazy\\Sys\\$name")) {
-            return self::$sysLazies[$name] ??= "App\\Lazy\\Sys\\$name::getInstance"();
+        if (!isset(self::$sysLazies[$name])) {
+            if (class_exists("App\\Lazy\\Sys\\$name")) {
+                self::$sysLazies[$name] = "App\\Lazy\\Sys\\$name::getInstance"();
+            } else {
+                self::$sysLazies[$name] = "SFW\\Lazy\\Sys\\$name::getInstance"();
+            }
         }
 
-        return self::$sysLazies[$name] ??= "SFW\\Lazy\\Sys\\$name::getInstance"();
+        return self::$sysLazies[$name];
     }
 
     /**
      * Accessing your Lazy classes from anywhere except templates.
-     *
-     * $this->my('SomeMyLazyClass')->someMethod()
      */
-    public function my(string $name): object
+    public static function my(string $name): object
     {
-        return self::$myLazies[$name] ??= "App\\Lazy\\My\\$name::getInstance"();
+        if (!isset(self::$myLazies[$name])) {
+            self::$myLazies[$name] = "App\\Lazy\\My\\$name::getInstance"();
+        }
+
+        return self::$myLazies[$name];
     }
 
     /**

@@ -93,9 +93,9 @@ class Response extends \SFW\Lazy\Sys
         int $code,
         int $expire,
     ): self {
-        $contents = $this->sys($processor)->transform($filename, $context);
+        $contents = self::sys($processor)->transform($filename, $context);
 
-        $mime ??= $this->sys($processor)->getMime();
+        $mime ??= self::sys($processor)->getMime();
 
         if (isset(self::$config['sys']['response']['stats'])
             && $mime === 'text/html'
@@ -112,15 +112,15 @@ class Response extends \SFW\Lazy\Sys
                     '{ALL_T}',
                 ], [
                     sprintf('%.3f',
-                        $timer - $this->sys('Db')->getTimer() - $this->sys('Templater')->getTimer()
+                        $timer - self::sys('Db')->getTimer() - self::sys('Templater')->getTimer()
                     ),
-                    $this->sys('Db')->getCounter(),
+                    self::sys('Db')->getCounter(),
                     sprintf('%.3f',
-                        $this->sys('Db')->getTimer()
+                        self::sys('Db')->getTimer()
                     ),
-                    $this->sys('Templater')->getCounter(),
+                    self::sys('Templater')->getCounter(),
                     sprintf('%.3f',
-                        $this->sys('Templater')->getTimer()
+                        self::sys('Templater')->getTimer()
                     ),
                     sprintf('%.3f',
                         $timer
@@ -215,12 +215,13 @@ class Response extends \SFW\Lazy\Sys
             header("Content-Disposition: $disposition");
         }
 
-        if (isset(
-                self::$config['sys']['response']['compress_mimes'],
-                    $_SERVER['HTTP_ACCEPT_ENCODING']
-            )
-            && strlen($contents) > self::$config['sys']['response']['compress_min']
-                && in_array($mime, self::$config['sys']['response']['compress_mimes'], true)
+        $compressMimes = self::$config['sys']['response']['compress_mimes'];
+
+        $compressMin = self::$config['sys']['response']['compress_min'];
+
+        if (isset($compressMimes, $_SERVER['HTTP_ACCEPT_ENCODING'])
+            && strlen($contents) > $compressMin
+                && in_array($mime, $compressMimes, true)
                     && preg_match('/(deflate|gzip)/', $_SERVER['HTTP_ACCEPT_ENCODING'], $M)
         ) {
             if ($M[1] === 'gzip') {
@@ -285,10 +286,10 @@ class Response extends \SFW\Lazy\Sys
         if (!headers_sent() && !ob_get_length()) {
             http_response_code($code);
 
-            if (isset(self::$config['sys']['response']['error_document'])) {
-                $errorDocument = str_replace('{CODE}', $code,
-                    self::$config['sys']['response']['error_document']
-                );
+            $errorDocument = self::$config['sys']['response']['error_document'];
+
+            if (isset($errorDocument)) {
+                $errorDocument = str_replace('{CODE}', $code, $errorDocument);
 
                 if (is_file($errorDocument)) {
                     include $errorDocument;

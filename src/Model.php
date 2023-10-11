@@ -3,7 +3,7 @@
 namespace SFW;
 
 /**
- * Abstraction for all Model classes.
+ * Abstraction for Model classes.
  */
 abstract class Model extends Base
 {

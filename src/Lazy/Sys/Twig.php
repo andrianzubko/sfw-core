@@ -31,34 +31,36 @@ class Twig extends \SFW\Lazy\Sys
             'config' => self::$config['shared'],
 
             'sys' => self::$sys,
+
+            'my' => self::$my,
         ];
 
         $this->options['functions'] = [
-            'lc' => $this->sys('Text')->lc(...),
+            'lc' => self::sys('Text')->lc(...),
 
-            'lcFirst' => $this->sys('Text')->lcFirst(...),
+            'lcFirst' => self::sys('Text')->lcFirst(...),
 
-            'uc' => $this->sys('Text')->uc(...),
+            'uc' => self::sys('Text')->uc(...),
 
-            'ucFirst' => $this->sys('Text')->ucFirst(...),
+            'ucFirst' => self::sys('Text')->ucFirst(...),
 
-            'trim' => $this->sys('Text')->trim(...),
+            'trim' => self::sys('Text')->trim(...),
 
-            'rTrim' => $this->sys('Text')->rTrim(...),
+            'rTrim' => self::sys('Text')->rTrim(...),
 
-            'lTrim' => $this->sys('Text')->lTrim(...),
+            'lTrim' => self::sys('Text')->lTrim(...),
 
-            'fTrim' => $this->sys('Text')->fTrim(...),
+            'fTrim' => self::sys('Text')->fTrim(...),
 
-            'mTrim' => $this->sys('Text')->mTrim(...),
+            'mTrim' => self::sys('Text')->mTrim(...),
 
-            'cut' => $this->sys('Text')->cut(...),
+            'cut' => self::sys('Text')->cut(...),
 
-            'random' => $this->sys('Text')->random(...),
+            'random' => self::sys('Text')->random(...),
 
-            'genUrl' => $this->sys('Router')->genUrl(...),
+            'genUrl' => self::sys('Router')->genUrl(...),
 
-            'genAbsoluteUrl' => $this->sys('Router')->genAbsoluteUrl(...),
+            'genAbsoluteUrl' => self::sys('Router')->genAbsoluteUrl(...),
         ];
     }
 

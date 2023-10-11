@@ -3,7 +3,7 @@
 namespace SFW;
 
 /**
- * Abstraction for all Controller classes.
+ * Abstraction for Controller classes.
  */
 abstract class Controller extends Base
 {

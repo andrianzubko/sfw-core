@@ -64,33 +64,33 @@ class Transaction extends \SFW\Lazy\Sys
             try {
                 $this->callbacks['success'] = [];
 
-                $this->sys('Db')->begin($isolation);
+                self::sys('Db')->begin($isolation);
 
                 if ($body() !== false) {
-                    $this->sys('Db')->commit();
+                    self::sys('Db')->commit();
 
                     foreach ($this->callbacks['success'] as $callback) {
                         $callback();
                     }
                 } else {
-                    $this->sys('Db')->rollback();
+                    self::sys('Db')->rollback();
                 }
 
                 return $this->resetDriver();
             } catch (\SFW\Databaser\Exception $e) {
                 try {
-                    $this->sys('Db')->rollback();
+                    self::sys('Db')->rollback();
                 } catch (\SFW\Databaser\Exception) {
                 }
 
                 if (in_array($e->getSqlState(), $retryAt, true)
                     && $retry < self::$config['sys']['transaction']['retries']
                 ) {
-                    $this->sys('Logger')->logTransactionFail(
+                    self::sys('Logger')->logTransactionFail(
                         \Psr\Log\LogLevel::INFO, $e->getSqlState(), $retry
                     );
                 } else {
-                    $this->sys('Logger')->logTransactionFail(
+                    self::sys('Logger')->logTransactionFail(
                         \Psr\Log\LogLevel::ERROR, $e->getSqlState(), $retry
                     );
 
@@ -109,7 +109,7 @@ class Transaction extends \SFW\Lazy\Sys
      */
     private function setDriver(string $driver): void
     {
-        self::$sysLazies['Db'] = $this->sys($driver);
+        self::$sysLazies['Db'] = self::sys($driver);
     }
 
     /**
@@ -129,7 +129,7 @@ class Transaction extends \SFW\Lazy\Sys
      */
     public function onSuccess(callable $callback): self
     {
-        if ($this->sys('Db')->isInTrans()) {
+        if (self::sys('Db')->isInTrans()) {
             $this->callbacks['success'][] = $callback;
         } else {
             $callback();

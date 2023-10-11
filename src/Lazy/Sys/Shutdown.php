@@ -33,7 +33,7 @@ class Shutdown extends \SFW\Lazy\Sys
                         try {
                             $callback();
                         } catch (\Throwable $e) {
-                            $this->sys('Logger')->error($e);
+                            self::sys('Logger')->error($e);
                         }
                     }
                 }

@@ -3,7 +3,7 @@
 namespace SFW;
 
 /**
- * Abstraction for all Command classes.
+ * Abstraction for Command classes.
  */
 abstract class Command extends Base
 {

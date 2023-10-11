@@ -3,7 +3,7 @@
 namespace SFW;
 
 /**
- * Abstraction for all Config classes.
+ * Abstraction for Config classes.
  */
 abstract class Config
 {

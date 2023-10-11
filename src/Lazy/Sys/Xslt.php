@@ -27,6 +27,8 @@ class Xslt extends \SFW\Lazy\Sys
             'config' => self::$config['shared'],
 
             'sys' => self::$sys,
+
+            'my' => self::$my,
         ];
     }
 

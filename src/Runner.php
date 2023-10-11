@@ -34,9 +34,12 @@ abstract class Runner extends Base
             ini_set('ignore_user_abort', true);
 
             // }}}
-            // {{{ default locale and encoding
+            // {{{ default locale
 
             setlocale(LC_ALL, 'C');
+
+            // }}}
+            // {{{ default encoding
 
             mb_internal_encoding('UTF-8');
 
@@ -85,16 +88,19 @@ abstract class Runner extends Base
                 [$class, $method, self::$sys['action']] = Router\Controller::getTarget();
 
                 if ($class === false) {
-                    $this->sys('Response')->error(404);
+                    self::sys('Response')->error(404);
                 }
             }
 
             // }}}
-            // {{{ initializing environments
+            // {{{ initializing system environment
 
-            $this->defaultEnvironment();
+            $this->sysEnvironment();
 
-            $this->additionalEnvironment();
+            // }}}
+            // {{{ initializing your environment
+
+            $this->myEnvironment();
 
             // }}}
             // {{{ calling Command or Controller action
@@ -111,7 +117,7 @@ abstract class Runner extends Base
                         $controller->$method();
                     }
                 } else {
-                    $this->sys('Response')->error(404);
+                    self::sys('Response')->error(404);
                 }
             }
 
@@ -124,20 +130,20 @@ abstract class Runner extends Base
         } catch (\Throwable $e) {
             // {{{ something wrong
 
-            $this->sys('Notifier')->removeAll();
+            self::sys('Notifier')->removeAll();
 
-            $this->sys('Shutdown')->unregisterAll();
+            self::sys('Shutdown')->unregisterAll();
 
-            $this->sys('Logger')->error($e);
+            self::sys('Logger')->error($e);
 
-            $this->sys('Logger')->emergency('Application terminated!', [
+            self::sys('Logger')->emergency('Application terminated!', [
                 'append_file_and_line' => false
             ]);
 
             if (PHP_SAPI === 'cli') {
                 $this->exit(1);
             } else {
-                $this->sys('Response')->error(500);
+                self::sys('Response')->error(500);
             }
 
             // }}}
@@ -178,7 +184,7 @@ abstract class Runner extends Base
             switch ($code) {
                 case E_NOTICE:
                 case E_USER_NOTICE:
-                    $this->sys('Logger')->notice($message, [
+                    self::sys('Logger')->notice($message, [
                         'file' => $file,
                         'line' => $line
                     ]);
@@ -188,7 +194,7 @@ abstract class Runner extends Base
                 case E_DEPRECATED:
                 case E_USER_DEPRECATED:
                 case E_STRICT:
-                    $this->sys('Logger')->warning($message, [
+                    self::sys('Logger')->warning($message, [
                         'file' => $file,
                         'line' => $line
                     ]);
@@ -204,11 +210,11 @@ abstract class Runner extends Base
     }
 
     /**
-     * Initializes default environment.
+     * Initializes system environment.
      *
      * @throws Exception\BadConfiguration
      */
-    private function defaultEnvironment(): void
+    private function sysEnvironment(): void
     {
         self::$sys['timestamp'] = (int) self::$startedTime;
 
@@ -237,12 +243,12 @@ abstract class Runner extends Base
         if (isset(self::$config['sys']['merger']['sources'])
             && PHP_SAPI !== 'cli'
         ) {
-            self::$sys['merged'] = (new Merger())->process();
+            self::$sys['merged'] = Merger::process();
         }
     }
 
     /**
-     * Initializes additional environment.
+     * Initializes your environment (self::$my).
      */
-    abstract protected function additionalEnvironment(): void;
+    abstract protected function myEnvironment(): void;
 }

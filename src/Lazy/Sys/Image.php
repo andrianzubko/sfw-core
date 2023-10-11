@@ -39,7 +39,7 @@ class Image extends \SFW\Lazy\Sys
      */
     public function fromFile(string $file): \GdImage|false
     {
-        return $this->fromString($this->sys('File')->get($file));
+        return $this->fromString(self::sys('File')->get($file));
     }
 
     /**

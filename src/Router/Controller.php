@@ -18,91 +18,23 @@ class Controller extends \SFW\Router
     protected static array $cFiles;
 
     /**
-     * Gets action, full class and method name.
+     * Gets class, method and action names.
      *
      * @throws \SFW\Exception\Runtime
      */
     public static function getTarget(): array
     {
-        $controller = new static();
-
         if (self::$cache === false) {
             self::$cache = @include self::$config['sys']['router']['cache'];
 
             if (self::$cache === false
                 || self::$config['sys']['env'] !== 'prod'
-                    && $controller->isOutdated()
+                    && static::isOutdated()
             ) {
-                $controller->rebuild();
+                static::rebuild();
             }
         }
 
-        return $controller->findInCache();
-    }
-
-    /**
-     * Generates URL by action (or FQMN) and optional parameters.
-     *
-     * @throws \SFW\Exception\Runtime
-     */
-    public function genUrl(string $action, string|int|float|null ...$params): string
-    {
-        if (self::$cache === false) {
-            self::$cache = @include self::$config['sys']['router']['cache'];
-
-            if (self::$cache === false) {
-                $this->rebuild();
-            }
-        }
-
-        $pCount = count($params);
-
-        $url = self::$cache['urls'][$action][$pCount]
-            ?? self::$cache['urls'][$this->FullToAction($action)][$pCount]
-            ?? null;
-
-        if (!isset($url)) {
-            if ($pCount) {
-                $this->sys('Logger')->warning(
-                    sprintf(
-                        'Unable to make URL with %d parameter%s by action %s',
-                            $pCount,
-                            $pCount === 1 ? '' : 's',
-                            $action
-                    ), debug_backtrace(2)[1]
-                );
-            } else {
-                $this->sys('Logger')->warning(
-                    sprintf(
-                        'Unable to make URL by action %s',
-                            $action
-                    ), debug_backtrace(2)[1]
-                );
-            }
-
-            return '/';
-        }
-
-        if ($params) {
-            foreach ($params as $i => $value) {
-                if (isset($value)) {
-                    $url[$i * 2 + 1] = $value;
-                }
-            }
-
-            return implode($url);
-        }
-
-        return $url;
-    }
-
-    /**
-     * Finds action in cache and transforms to usable variant.
-     *
-     * Note: no checks for cache existence!
-     */
-    protected function findInCache(): array
-    {
         $actions = self::$cache['static'][$_SERVER['REQUEST_PATH']] ?? null;
 
         if (!isset($actions)
@@ -133,14 +65,70 @@ class Controller extends \SFW\Router
     }
 
     /**
+     * Generates URL by action (or FQMN) and optional parameters.
+     *
+     * @throws \SFW\Exception\Runtime
+     */
+    public static function genUrl(string $action, string|int|float|null ...$params): string
+    {
+        if (self::$cache === false) {
+            self::$cache = @include self::$config['sys']['router']['cache'];
+
+            if (self::$cache === false) {
+                static::rebuild();
+            }
+        }
+
+        $pCount = count($params);
+
+        $url = self::$cache['urls'][$action][$pCount]
+            ?? self::$cache['urls'][static::FullToAction($action)][$pCount]
+            ?? null;
+
+        if (!isset($url)) {
+            if ($pCount) {
+                self::sys('Logger')->warning(
+                    sprintf(
+                        'Unable to make URL with %d parameter%s by action %s',
+                            $pCount,
+                            $pCount === 1 ? '' : 's',
+                            $action
+                    ), debug_backtrace(2)[1]
+                );
+            } else {
+                self::sys('Logger')->warning(
+                    sprintf(
+                        'Unable to make URL by action %s',
+                            $action
+                    ), debug_backtrace(2)[1]
+                );
+            }
+
+            return '/';
+        }
+
+        if ($params) {
+            foreach ($params as $i => $value) {
+                if (isset($value)) {
+                    $url[$i * 2 + 1] = $value;
+                }
+            }
+
+            return implode($url);
+        }
+
+        return $url;
+    }
+
+    /**
      * Gets controller files.
      */
-    protected function getControllerFiles(): array
+    protected static function getControllerFiles(): array
     {
         if (!isset(self::$cFiles)) {
             self::$cFiles = [];
 
-            foreach ($this->sys('Dir')->scan(APP_DIR . '/src/Controller', true, true) as $item) {
+            foreach (self::sys('Dir')->scan(APP_DIR . '/src/Controller', true, true) as $item) {
                 if (is_file($item)
                     && str_ends_with($item, '.php')
                 ) {
@@ -157,9 +145,9 @@ class Controller extends \SFW\Router
      *
      * Note: no checks for cache existence!
      */
-    protected function isOutdated(): bool
+    protected static function isOutdated(): bool
     {
-        foreach ($this->getControllerFiles() as $file) {
+        foreach (static::getControllerFiles() as $file) {
             if ((int) filemtime($file) > self::$cache['time']) {
                 return true;
             }
@@ -173,9 +161,9 @@ class Controller extends \SFW\Router
      *
      * @throws \SFW\Exception\Runtime
      */
-    protected function rebuild(): void
+    protected static function rebuild(): void
     {
-        foreach ($this->getControllerFiles() as $file) {
+        foreach (static::getControllerFiles() as $file) {
             require_once $file;
         }
 
@@ -209,7 +197,7 @@ class Controller extends \SFW\Router
 
                 foreach ($route->url as $url) {
                     foreach ($route->method as $method) {
-                        self::$cache['static'][$url][$method] = $this->FullToAction($name);
+                        self::$cache['static'][$url][$method] = static::FullToAction($name);
                     }
                 }
             }
@@ -240,7 +228,7 @@ class Controller extends \SFW\Router
 
         self::$cache['regex'] = sprintf('{^(?|%s)$}', implode('|', self::$cache['regex']));
 
-        if (!$this->sys('File')->putVar(
+        if (!self::sys('File')->putVar(
                 self::$config['sys']['router']['cache'], self::$cache, LOCK_EX)
         ) {
             throw new \SFW\Exception\Runtime(
@@ -255,7 +243,7 @@ class Controller extends \SFW\Router
     /**
      * Makes action from fully qualified method name.
      */
-    protected function FullToAction(string $name): string
+    protected static function FullToAction(string $name): string
     {
         return preg_replace('/(?:^App\\\\Controller\\\\|::__construct$)/', '', $name);
     }

@@ -167,7 +167,7 @@ class Dir extends \SFW\Lazy\Sys
                     if (!$this->copy("$source/$item", "$target/$item")) {
                         $success = false;
                     }
-                } elseif (!$this->sys('File')->copy("$source/$item", "$target/$item", false)) {
+                } elseif (!self::sys('File')->copy("$source/$item", "$target/$item", false)) {
                     $success = false;
                 }
             }
@@ -220,7 +220,7 @@ class Dir extends \SFW\Lazy\Sys
         }
 
         for ($i = 1; $i <= 7; $i++) {
-            $tempSubDir = $this->tempDir . '/' . $this->sys('Text')->random();
+            $tempSubDir = $this->tempDir . '/' . self::sys('Text')->random();
 
             if (@mkdir($tempSubDir, 0600, true)) {
                 $this->tempSubDirs[] = $tempSubDir;

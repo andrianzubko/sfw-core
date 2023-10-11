@@ -29,7 +29,8 @@ class Pgsql extends \SFW\Lazy\Sys
 
         $options['cleanup'] = false;
 
-        return (new \SFW\Databaser\Pgsql($options))
-            ->setProfiler((new static())->sys('Logger')->logDbSlowQuery(...));
+        return (new \SFW\Databaser\Pgsql($options))->setProfiler(
+            (new static())->sys('Logger')->logDbSlowQuery(...)
+        );
     }
 }

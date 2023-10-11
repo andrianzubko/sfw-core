@@ -25,9 +25,9 @@ class Paginator extends \SFW\Lazy\Sys
             $query = preg_replace(sprintf('/%s=[^&]+&*/', preg_quote($param)), '', $_SERVER['QUERY_STRING']);
 
             if ($query === '') {
-                $this->url = sprintf('/?%s=', $param);
+                $this->url = "/?$param=";
             } else {
-                $this->url = sprintf('/?%s&%s=', $query, $param);
+                $this->url = "/?$query&$param=";
             }
         }
     }

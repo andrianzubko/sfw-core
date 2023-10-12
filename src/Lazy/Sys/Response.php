@@ -12,7 +12,6 @@ class Response extends \SFW\Lazy\Sys
      *
      * If context is an object, then only public non-static properties will be taken.
      *
-     * @throws \SFW\Exception\Logic
      * @throws \SFW\Templater\Exception
      */
     public function native(
@@ -30,7 +29,6 @@ class Response extends \SFW\Lazy\Sys
      *
      * If context is an object, then only public non-static properties will be taken.
      *
-     * @throws \SFW\Exception\Logic
      * @throws \SFW\Templater\Exception
      */
     public function twig(
@@ -48,7 +46,6 @@ class Response extends \SFW\Lazy\Sys
      *
      * If context is an object, then only public non-static properties will be taken.
      *
-     * @throws \SFW\Exception\Logic
      * @throws \SFW\Templater\Exception
      */
     public function xslt(
@@ -66,7 +63,6 @@ class Response extends \SFW\Lazy\Sys
      *
      * If context is an object, then only public non-static properties will be taken.
      *
-     * @throws \SFW\Exception\Logic
      * @throws \SFW\Templater\Exception
      */
     public function template(
@@ -82,7 +78,6 @@ class Response extends \SFW\Lazy\Sys
     /**
      * Base method for template transformation.
      *
-     * @throws \SFW\Exception\Logic
      * @throws \SFW\Templater\Exception
      */
     protected function transform(
@@ -134,8 +129,6 @@ class Response extends \SFW\Lazy\Sys
 
     /**
      * Output json as inline.
-     *
-     * @throws \SFW\Exception\Logic
      */
     public function json(
         mixed $contents,
@@ -154,8 +147,6 @@ class Response extends \SFW\Lazy\Sys
 
     /**
      * Output contents as inline.
-     *
-     * @throws \SFW\Exception\Logic
      */
     public function inline(
         string $contents,
@@ -169,8 +160,6 @@ class Response extends \SFW\Lazy\Sys
 
     /**
      * Output contents as attachment.
-     *
-     * @throws \SFW\Exception\Logic
      */
     public function attachment(
         string $contents,
@@ -184,8 +173,6 @@ class Response extends \SFW\Lazy\Sys
 
     /**
      * Base method for outputs.
-     *
-     * @throws \SFW\Exception\Logic
      */
     protected function output(
         string $disposition,
@@ -195,10 +182,6 @@ class Response extends \SFW\Lazy\Sys
         int $expire,
         ?string $filename,
     ): self {
-        if (headers_sent()) {
-            throw new \SFW\Exception\Logic('Headers already sent');
-        }
-
         ini_set('zlib.output_compression', false);
 
         http_response_code($code);
@@ -260,15 +243,9 @@ class Response extends \SFW\Lazy\Sys
 
     /**
      * Redirect.
-     *
-     * @throws \SFW\Exception\Logic
      */
     public function redirect(string $uri, int $code = 302, bool $exit = true): self
     {
-        if (headers_sent()) {
-            throw new \SFW\Exception\Logic('Headers already sent');
-        }
-
         header("Location: $uri", response_code: $code);
 
         if ($exit) {

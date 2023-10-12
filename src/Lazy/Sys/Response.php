@@ -272,7 +272,7 @@ class Response extends \SFW\Lazy\Sys
         header("Location: $uri", response_code: $code);
 
         if ($exit) {
-            $this->exit();
+            exit(0);
         }
 
         return $this;
@@ -298,9 +298,17 @@ class Response extends \SFW\Lazy\Sys
         }
 
         if ($exit) {
-            $this->exit(1);
+            exit(1);
         }
 
         return $this;
+    }
+
+    /**
+     * Just exit for fluent syntax.
+     */
+    public function exit(string|int $status = 0): void
+    {
+        exit($status);
     }
 }

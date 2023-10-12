@@ -65,14 +65,4 @@ abstract class Base extends \stdClass
 
         return self::$myLazies[$name];
     }
-
-    /**
-     * Makes some important cleanups and exit.
-     */
-    public function exit(string|int $status = 0): void
-    {
-        Utility::cleanup();
-
-        exit($status);
-    }
 }

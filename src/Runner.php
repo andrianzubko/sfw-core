@@ -98,6 +98,11 @@ abstract class Runner extends Base
             $this->sysEnvironment();
 
             // }}}
+            // {{{ registering cleanups at shutdown
+
+            register_shutdown_function($this->cleanupAtShutdown(...));
+
+            // }}}
             // {{{ initializing your environment
 
             $this->myEnvironment();
@@ -122,11 +127,6 @@ abstract class Runner extends Base
             }
 
             // }}}
-            // {{{ some important cleanups
-
-            Utility::cleanup();
-
-            // }}}
         } catch (\Throwable $e) {
             // {{{ something wrong
 
@@ -141,7 +141,7 @@ abstract class Runner extends Base
             ]);
 
             if (PHP_SAPI === 'cli') {
-                $this->exit(1);
+                exit(1);
             } else {
                 self::sys('Response')->error(500);
             }
@@ -248,7 +248,26 @@ abstract class Runner extends Base
     }
 
     /**
-     * Initializes your environment (self::$my).
+     * Cleanups at shutdown.
+     */
+    private function cleanupAtShutdown(): void
+    {
+        unset(self::$sysLazies['Db']);
+
+        foreach (self::$sysLazies as $lazy) {
+            if ($lazy instanceof \SFW\Databaser\Driver
+                && $lazy->isInTrans()
+            ) {
+                try {
+                    $lazy->rollback();
+                } catch (\SFW\Databaser\Exception) {
+                }
+            }
+        }
+    }
+
+    /**
+     * Initializes your environment.
      */
     abstract protected function myEnvironment(): void;
 }

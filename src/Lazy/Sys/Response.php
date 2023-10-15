@@ -8,6 +8,11 @@ namespace SFW\Lazy\Sys;
 class Response extends \SFW\Lazy\Sys
 {
     /**
+     * Exit after any response.
+     */
+    protected bool $exit = true;
+
+    /**
      * Process and output native template.
      *
      * If context is an object, then only public non-static properties will be taken.
@@ -21,8 +26,8 @@ class Response extends \SFW\Lazy\Sys
         ?string $mime = null,
         int $code = 200,
         int $expire = 0,
-    ): self {
-        return $this->transform('Native', $filename, $context, $mime, $code, $expire);
+    ): void {
+        $this->transform('Native', $filename, $context, $mime, $code, $expire);
     }
 
     /**
@@ -39,8 +44,8 @@ class Response extends \SFW\Lazy\Sys
         ?string $mime = null,
         int $code = 200,
         int $expire = 0,
-    ): self {
-        return $this->transform('Twig', $filename, $context, $mime, $code, $expire);
+    ): void {
+        $this->transform('Twig', $filename, $context, $mime, $code, $expire);
     }
 
     /**
@@ -57,8 +62,8 @@ class Response extends \SFW\Lazy\Sys
         ?string $mime = null,
         int $code = 200,
         int $expire = 0,
-    ): self {
-        return $this->transform('Xslt', $filename, $context, $mime, $code, $expire);
+    ): void {
+        $this->transform('Xslt', $filename, $context, $mime, $code, $expire);
     }
 
     /**
@@ -75,8 +80,8 @@ class Response extends \SFW\Lazy\Sys
         ?string $mime = null,
         int $code = 200,
         int $expire = 0,
-    ): self {
-        return $this->transform('Templater', $filename, $context, $mime, $code, $expire);
+    ): void {
+        $this->transform('Templater', $filename, $context, $mime, $code, $expire);
     }
 
     /**
@@ -92,7 +97,7 @@ class Response extends \SFW\Lazy\Sys
         ?string $mime,
         int $code,
         int $expire,
-    ): self {
+    ): void {
         $contents = self::sys($processor)->transform($filename, $context);
 
         $mime ??= self::sys($processor)->getMime();
@@ -129,7 +134,7 @@ class Response extends \SFW\Lazy\Sys
             );
         }
 
-        return $this->inline($contents, $mime, $code, $expire);
+        $this->inline($contents, $mime, $code, $expire);
     }
 
     /**
@@ -142,8 +147,8 @@ class Response extends \SFW\Lazy\Sys
         bool $pretty = false,
         int $code = 200,
         int $expire = 0,
-    ): self {
-        return $this->output('inline',
+    ): void {
+        $this->output('inline',
             json_encode($contents,
                 $pretty
                     ? JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT
@@ -163,8 +168,8 @@ class Response extends \SFW\Lazy\Sys
         int $code = 200,
         int $expire = 0,
         ?string $filename = null,
-    ): self {
-        return $this->output('inline', $contents, $mime, $code, $expire, $filename);
+    ): void {
+        $this->output('inline', $contents, $mime, $code, $expire, $filename);
     }
 
     /**
@@ -178,8 +183,8 @@ class Response extends \SFW\Lazy\Sys
         int $code = 200,
         int $expire = 0,
         ?string $filename = null,
-    ): self {
-        return $this->output('attachment', $contents, $mime, $code, $expire, $filename);
+    ): void {
+        $this->output('attachment', $contents, $mime, $code, $expire, $filename);
     }
 
     /**
@@ -194,7 +199,7 @@ class Response extends \SFW\Lazy\Sys
         int $code,
         int $expire,
         ?string $filename,
-    ): self {
+    ): void {
         if (headers_sent()) {
             throw new \SFW\Exception\Logic('Headers already sent');
         }
@@ -255,7 +260,9 @@ class Response extends \SFW\Lazy\Sys
             fastcgi_finish_request();
         }
 
-        return $this;
+        if ($this->exit) {
+            exit(0);
+        }
     }
 
     /**
@@ -263,7 +270,7 @@ class Response extends \SFW\Lazy\Sys
      *
      * @throws \SFW\Exception\Logic
      */
-    public function redirect(string $uri, int $code = 302, bool $exit = true): self
+    public function redirect(string $uri, int $code = 302): void
     {
         if (headers_sent()) {
             throw new \SFW\Exception\Logic('Headers already sent');
@@ -271,17 +278,15 @@ class Response extends \SFW\Lazy\Sys
 
         header("Location: $uri", response_code: $code);
 
-        if ($exit) {
+        if ($this->exit) {
             exit(0);
         }
-
-        return $this;
     }
 
     /**
      * Shows error page.
      */
-    public function error(int $code, bool $exit = true): self
+    public function error(int $code): void
     {
         if (!headers_sent() && !ob_get_length()) {
             http_response_code($code);
@@ -297,18 +302,18 @@ class Response extends \SFW\Lazy\Sys
             }
         }
 
-        if ($exit) {
+        if ($this->exit) {
             exit(1);
         }
-
-        return $this;
     }
 
     /**
-     * Just exit for fluent syntax.
+     * For prevents exit after response.
      */
-    public function exit(string|int $status = 0): void
+    public function exit(bool $exit): self
     {
-        exit($status);
+        $this->exit = $exit;
+
+        return $this;
     }
 }

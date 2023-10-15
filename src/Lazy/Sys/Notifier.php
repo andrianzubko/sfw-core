@@ -46,7 +46,7 @@ class Notifier extends \SFW\Lazy\Sys
      */
     public function add(\SFW\Notify $notify): self
     {
-        self::sys('Transaction')->onSuccess(
+        self::sys('Transaction')->addListener('after_commit',
             function () use ($notify) {
                 $this->notifies[] = $notify;
             }

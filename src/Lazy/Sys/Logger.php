@@ -176,7 +176,7 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
     /**
      * Logs database slow query.
      */
-    public function logDbSlowQuery(float $timer, array $queries): void
+    public function dbSlowQuery(float $timer, array $queries): void
     {
         if (!isset(self::$config['sys']['db']['slow_queries_log'])
             || $timer < self::$config['sys']['db']['slow_queries_min']
@@ -203,7 +203,7 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
     /**
      * Logs transactions fails.
      */
-    public function logTransactionFail(string $level, string $state, int $retry): void
+    public function transactionFail(string $level, string $state, int $retry): void
     {
         if (!isset(self::$config['sys']['transaction']['fails_log'])) {
             return;

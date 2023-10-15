@@ -8,9 +8,9 @@ namespace SFW\Lazy\Sys;
 class Transaction extends \SFW\Lazy\Sys
 {
     /**
-     * Registered callbacks.
+     * Registered events callbacks.
      */
-    protected array $callbacks = [];
+    protected array $events = [];
 
     /**
      * Just a placeholder.
@@ -62,14 +62,14 @@ class Transaction extends \SFW\Lazy\Sys
 
         for ($retry = 1; $retry <= self::$config['sys']['transaction']['retries']; $retry++) {
             try {
-                $this->callbacks['success'] = [];
+                $this->events['after_commit'] = [];
 
                 self::sys('Db')->begin($isolation);
 
                 if ($body() !== false) {
                     self::sys('Db')->commit();
 
-                    foreach ($this->callbacks['success'] as $callback) {
+                    foreach ($this->events['after_commit'] as $callback) {
                         $callback();
                     }
                 } else {
@@ -86,11 +86,11 @@ class Transaction extends \SFW\Lazy\Sys
                 if (in_array($e->getSqlState(), $retryAt, true)
                     && $retry < self::$config['sys']['transaction']['retries']
                 ) {
-                    self::sys('Logger')->logTransactionFail(
+                    self::sys('Logger')->transactionFail(
                         \Psr\Log\LogLevel::INFO, $e->getSqlState(), $retry
                     );
                 } else {
-                    self::sys('Logger')->logTransactionFail(
+                    self::sys('Logger')->transactionFail(
                         \Psr\Log\LogLevel::ERROR, $e->getSqlState(), $retry
                     );
 
@@ -102,6 +102,26 @@ class Transaction extends \SFW\Lazy\Sys
         }
 
         return $this->resetDriver();
+    }
+
+    /**
+     * Adds event listener.
+     *
+     * @throws \SFW\Exception\Logic
+     */
+    public function addListener(string $eventName, callable $callback): self
+    {
+        if ($eventName === 'after_commit') {
+            if (self::sys('Db')->isInTrans()) {
+                $this->events[$eventName][] = $callback;
+            } else {
+                $callback();
+            }
+        } else {
+            throw new \SFW\Exception\Logic("Unknown event $eventName");
+        }
+
+        return $this;
     }
 
     /**
@@ -118,22 +138,6 @@ class Transaction extends \SFW\Lazy\Sys
     private function resetDriver(): self
     {
         unset(self::$sysLazies['Db']);
-
-        return $this;
-    }
-
-    /**
-     * Do some action on successful commit of current transaction.
-     *
-     * If you call this method outside of transaction, then callback will be called immediately.
-     */
-    public function onSuccess(callable $callback): self
-    {
-        if (self::sys('Db')->isInTrans()) {
-            $this->callbacks['success'][] = $callback;
-        } else {
-            $callback();
-        }
 
         return $this;
     }

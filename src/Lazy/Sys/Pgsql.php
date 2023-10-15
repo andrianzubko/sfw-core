@@ -30,7 +30,7 @@ class Pgsql extends \SFW\Lazy\Sys
         $options['cleanup'] = false;
 
         return (new \SFW\Databaser\Pgsql($options))->setProfiler(
-            self::sys('Logger')->logDbSlowQuery(...)
+            self::sys('Logger')->dbSlowQuery(...)
         );
     }
 }

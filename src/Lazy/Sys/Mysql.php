@@ -30,7 +30,7 @@ class Mysql extends \SFW\Lazy\Sys
         $options['cleanup'] = false;
 
         return (new \SFW\Databaser\Mysql($options))->setProfiler(
-            self::sys('Logger')->logDbSlowQuery(...)
+            self::sys('Logger')->dbSlowQuery(...)
         );
     }
 }

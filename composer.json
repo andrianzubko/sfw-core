@@ -27,7 +27,7 @@
         "andrianzubko/sfw-exception": "^0",
         "andrianzubko/sfw-cacher": "^0",
         "andrianzubko/sfw-databaser": "^0",
-        "andrianzubko/sfw-paginator": "^0",
+        "andrianzubko/sfw-paginator": "^0.1",
         "andrianzubko/sfw-templater": "^0"
     }
 }

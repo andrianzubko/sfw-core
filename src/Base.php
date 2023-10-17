@@ -39,7 +39,7 @@ abstract class Base extends \stdClass
     protected static array $myLazies = [];
 
     /**
-     * Accessing system Lazy classes from anywhere except templates.
+     * Accesses system Lazy classes from anywhere except templates.
      */
     final protected static function sys(string $name): object
     {
@@ -55,7 +55,7 @@ abstract class Base extends \stdClass
     }
 
     /**
-     * Accessing your Lazy classes from anywhere except templates.
+     * Accesses your Lazy classes from anywhere except templates.
      */
     final protected static function my(string $name): object
     {

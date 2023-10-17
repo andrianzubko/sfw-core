@@ -102,7 +102,7 @@ class Response extends \SFW\Lazy\Sys
 
         $mime ??= self::sys($processor)->getMime();
 
-        if (isset(self::$config['sys']['response']['stats'])
+        if (self::$config['sys']['response']['stats'] !== null
             && $mime === 'text/html'
         ) {
             $timer = gettimeofday(true) - self::$startedTime;
@@ -214,7 +214,7 @@ class Response extends \SFW\Lazy\Sys
 
         header("Content-Type: $mime; charset=utf-8");
 
-        if (isset($filename)) {
+        if ($filename !== null) {
             header("Content-Disposition: $disposition; filename=\"$filename\"");
         } else {
             header("Content-Disposition: $disposition");
@@ -293,7 +293,7 @@ class Response extends \SFW\Lazy\Sys
 
             $errorDocument = self::$config['sys']['response']['error_document'];
 
-            if (isset($errorDocument)) {
+            if ($errorDocument !== null) {
                 $errorDocument = str_replace('{CODE}', $code, $errorDocument);
 
                 if (is_file($errorDocument)) {

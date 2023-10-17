@@ -218,7 +218,7 @@ abstract class Runner extends Base
     {
         self::$sys['timestamp'] = (int) self::$startedTime;
 
-        if (isset(self::$config['sys']['url'])) {
+        if (self::$config['sys']['url'] !== null) {
             $url = parse_url(self::$config['sys']['url']);
 
             if (empty($url) || !isset($url['host'])) {
@@ -240,7 +240,7 @@ abstract class Runner extends Base
 
         self::$sys['url'] = self::$sys['url_scheme'] . '://' . self::$sys['url_host'];
 
-        if (isset(self::$config['sys']['merger']['sources'])
+        if (self::$config['sys']['merger']['sources'] !== null
             && PHP_SAPI !== 'cli'
         ) {
             self::$sys['merged'] = Merger::process();

@@ -40,7 +40,7 @@ class Shutdown extends \SFW\Lazy\Sys
             );
         }
 
-        if (isset($name)) {
+        if ($name !== null) {
             $this->callbacks[$name] = $callback;
         } else {
             $this->callbacks[] = $callback;

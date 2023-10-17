@@ -37,7 +37,7 @@ class Controller extends \SFW\Router
 
         $actions = self::$cache['static'][$_SERVER['REQUEST_PATH']] ?? null;
 
-        if (!isset($actions)
+        if ($actions === null
             && preg_match(self::$cache['regex'], $_SERVER['REQUEST_PATH'], $M)
         ) {
             [$actions, $keys] = self::$cache['dynamic'][$M['MARK']];
@@ -47,10 +47,10 @@ class Controller extends \SFW\Router
             }
         }
 
-        if (isset($actions)) {
+        if ($actions !== null) {
             $action = $actions[$_SERVER['REQUEST_METHOD']] ?? $actions[''] ?? null;
 
-            if (isset($action)) {
+            if ($action !== null) {
                 $chunks = explode('::', "App\\Controller\\$action");
 
                 return [
@@ -85,7 +85,7 @@ class Controller extends \SFW\Router
             ?? self::$cache['urls'][static::FullToAction($action)][$pCount]
             ?? null;
 
-        if (!isset($url)) {
+        if ($url === null) {
             if ($pCount) {
                 self::sys('Logger')->warning(
                     sprintf(
@@ -109,7 +109,7 @@ class Controller extends \SFW\Router
 
         if ($params) {
             foreach ($params as $i => $value) {
-                if (isset($value)) {
+                if ($value !== null) {
                     $url[$i * 2 + 1] = $value;
                 }
             }

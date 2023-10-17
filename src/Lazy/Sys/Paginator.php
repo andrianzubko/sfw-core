@@ -21,7 +21,7 @@ class Paginator extends \SFW\Lazy\Sys
     {
         $param = self::$config['sys']['paginator']['param'];
 
-        if (isset($param)) {
+        if ($param !== null) {
             $query = preg_replace(sprintf('/%s=[^&]+&*/', preg_quote($param)), '', $_SERVER['QUERY_STRING']);
 
             if ($query === '') {
@@ -39,7 +39,7 @@ class Paginator extends \SFW\Lazy\Sys
     {
         $pagination = (new \SFW\Paginator(...func_get_args()))->toArray();
 
-        if (isset($this->url)) {
+        if ($this->url !== null) {
             $pagination['url'] = $this->url;
         }
 

@@ -49,7 +49,7 @@ class Image extends \SFW\Lazy\Sys
     {
         imagesavealpha($image, true);
 
-        if (isset($file)) {
+        if ($file !== null) {
             $success = imagepng($image, $file, $quality);
 
             if ($success) {
@@ -85,7 +85,7 @@ class Image extends \SFW\Lazy\Sys
 
         imageinterlace($fixed, true);
 
-        if (isset($file)) {
+        if ($file !== null) {
             $success = imagejpeg($fixed, $file, $quality);
 
             if ($success) {

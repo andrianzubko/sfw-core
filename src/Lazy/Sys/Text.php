@@ -21,7 +21,7 @@ class Text extends \SFW\Lazy\Sys
      */
     public function lc(?string $string): string
     {
-        if (!isset($string)) {
+        if ($string === null) {
             return '';
         }
 
@@ -33,7 +33,7 @@ class Text extends \SFW\Lazy\Sys
      */
     public function lcFirst(?string $string): string
     {
-        if (!isset($string)) {
+        if ($string === null) {
             return '';
         }
 
@@ -45,7 +45,7 @@ class Text extends \SFW\Lazy\Sys
      */
     public function uc(?string $string): string
     {
-        if (!isset($string)) {
+        if ($string === null) {
             return '';
         }
 
@@ -57,7 +57,7 @@ class Text extends \SFW\Lazy\Sys
      */
     public function ucFirst(?string $string): string
     {
-        if (!isset($string)) {
+        if ($string === null) {
             return '';
         }
 
@@ -69,7 +69,7 @@ class Text extends \SFW\Lazy\Sys
      */
     public function trim(?string $string): string
     {
-        if (!isset($string)) {
+        if ($string === null) {
             return '';
         }
 
@@ -81,7 +81,7 @@ class Text extends \SFW\Lazy\Sys
      */
     public function rTrim(?string $string): string
     {
-        if (!isset($string)) {
+        if ($string === null) {
             return '';
         }
 
@@ -93,7 +93,7 @@ class Text extends \SFW\Lazy\Sys
      */
     public function lTrim(?string $string): string
     {
-        if (!isset($string)) {
+        if ($string === null) {
             return '';
         }
 
@@ -105,7 +105,7 @@ class Text extends \SFW\Lazy\Sys
      */
     public function fTrim(?string $string, int $limit = 0): string
     {
-        if (!isset($string)) {
+        if ($string === null) {
             return '';
         }
 
@@ -123,7 +123,7 @@ class Text extends \SFW\Lazy\Sys
      */
     public function mTrim(?string $string, int $limit = 0): string
     {
-        if (!isset($string)) {
+        if ($string === null) {
             return '';
         }
 
@@ -141,14 +141,14 @@ class Text extends \SFW\Lazy\Sys
      */
     public function cut(?string $string, int $min, ?int $max = null): string
     {
-        if (!isset($string)) {
+        if ($string === null) {
             return '';
         }
 
         $string = trim(preg_replace("/(?: |\t|\n|\r|\0|\x0B|\x0C|\u{A0}|\u{FEFF})+/S", ' ', $string));
 
         if (mb_strlen($string) > $min) {
-            if (isset($max)) {
+            if ($max !== null) {
                 if (preg_match(sprintf('/^(.{%d,%d}?)[^\p{L}\d]/u', $min, $max - 1), $string, $M)) {
                     $string = $M[1];
                 } else {

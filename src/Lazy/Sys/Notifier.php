@@ -107,7 +107,7 @@ class Notifier extends \SFW\Lazy\Sys
 
         $mailer->setFrom(...(array) $struct->sender);
 
-        if (isset(self::$config['sys']['notifier']['recipients'])) {
+        if (self::$config['sys']['notifier']['recipients'] !== null) {
             $struct->recipients = self::$config['sys']['notifier']['recipients'];
         }
 

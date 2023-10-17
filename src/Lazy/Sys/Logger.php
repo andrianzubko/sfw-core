@@ -100,9 +100,7 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
     {
         set_error_handler(fn() => true);
 
-        if (!isset($level)
-            || !is_string($level)
-        ) {
+        if (!is_string($level)) {
             $level = LogLevel::ERROR;
         }
 
@@ -117,9 +115,7 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
                     $context['file'],
                     $context['line']
                 );
-            } elseif (
-                isset($context['trace'])
-            ) {
+            } elseif (isset($context['trace'])) {
                 $message = sprintf('%s in %s:%s',
                     $message,
                     $context['trace'][0]['file'],
@@ -155,7 +151,7 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
         if (!isset($context['destination'])) {
             error_log($message);
 
-            if (isset(self::$config['sys']['logger']['file'])) {
+            if (self::$config['sys']['logger']['file'] !== null) {
                 $context['destination'] = self::$config['sys']['logger']['file'];
             }
         }
@@ -166,7 +162,7 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
             );
         }
 
-        if (isset($tzPrev)) {
+        if ($tzPrev !== null) {
             date_default_timezone_set($tzPrev);
         }
 
@@ -178,7 +174,7 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
      */
     public function dbSlowQuery(float $timer, array $queries): void
     {
-        if (!isset(self::$config['sys']['db']['slow_queries_log'])
+        if (self::$config['sys']['db']['slow_queries_log'] !== null
             || $timer < self::$config['sys']['db']['slow_queries_min']
         ) {
             return;
@@ -205,7 +201,7 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
      */
     public function transactionFail(string $level, string $state, int $retry): void
     {
-        if (!isset(self::$config['sys']['transaction']['fails_log'])) {
+        if (self::$config['sys']['transaction']['fails_log'] === null) {
             return;
         }
 

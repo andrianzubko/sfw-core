@@ -17,7 +17,7 @@ class Merger extends Base
     /**
      * Scanned sources files.
      */
-    protected static ?array $sources = null;
+    protected static array $sources;
 
     /**
      * Recombines if needed and returns merged paths.
@@ -72,7 +72,7 @@ class Merger extends Base
      */
     protected static function getSources(): array
     {
-        if (self::$sources === null) {
+        if (!isset(self::$sources)) {
             self::$sources = [];
 
             foreach (self::$config['sys']['merger']['sources'] as $target => $sources) {

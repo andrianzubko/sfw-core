@@ -10,7 +10,7 @@ abstract class Config
     /**
      * Parameters from env file.
      */
-    private static ?array $env = null;
+    private static array $env;
 
     /**
      * Returns array with config parameters.
@@ -22,7 +22,7 @@ abstract class Config
      */
     protected static function env(string $key, mixed $default = null): mixed
     {
-        if (self::$env === null) {
+        if (!isset(self::$env)) {
             if (isset($_SERVER['APP_ENV'])) {
                 self::$env = require APP_DIR . sprintf('/.env.%s.php', $_SERVER['APP_ENV']);
             } else {

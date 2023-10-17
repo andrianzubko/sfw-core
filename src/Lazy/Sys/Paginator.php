@@ -10,7 +10,7 @@ class Paginator extends \SFW\Lazy\Sys
     /**
      * Prepared url for page number substitution.
      */
-    protected ?string $url = null;
+    protected string $url;
 
     /**
      * Building url for page number substitution.
@@ -39,7 +39,7 @@ class Paginator extends \SFW\Lazy\Sys
     {
         $pagination = (new \SFW\Paginator(...func_get_args()))->toArray();
 
-        if ($this->url !== null) {
+        if (isset($this->url)) {
             $pagination['url'] = $this->url;
         }
 

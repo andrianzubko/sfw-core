@@ -16,7 +16,6 @@ namespace PHPSTORM_META {
         'Native',
         'Nocache',
         'Notifier',
-        'Number',
         'Paginator',
         'Pgsql',
         'Redis',

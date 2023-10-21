@@ -35,15 +35,10 @@ class Locker extends \SFW\Lazy\Sys
             throw new Logic("Lock with key '$key' is already in use");
         }
 
-        $file = str_replace('{KEY}', $key, self::$config['sys']['locker']['file']);
+        $file = str_replace('{KEY}', $key, self::$config['sys']['locker_file']);
 
         if (!self::sys('Dir')->create(dirname($file))) {
-            throw new Runtime(
-                sprintf(
-                    'Unable to create directory %s',
-                        dirname($file)
-                )
-            );
+            throw new Runtime(sprintf('Unable to create directory %s', dirname($file)));
         }
 
         $handle = fopen($file, 'cb+');
@@ -74,12 +69,7 @@ class Locker extends \SFW\Lazy\Sys
         }
 
         if (!fclose($this->locks[$key])) {
-            throw new Runtime(
-                sprintf(
-                    'Unable to close file %s',
-                        $this->locks[$key]
-                )
-            );
+            throw new Runtime(sprintf('Unable to close file %s', $this->locks[$key]));
         }
 
         unset($this->locks[$key]);

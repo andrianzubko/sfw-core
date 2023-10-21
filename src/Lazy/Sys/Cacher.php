@@ -25,6 +25,6 @@ class Cacher extends \SFW\Lazy\Sys
      */
     public static function getInstance(): \SFW\Cacher\Driver
     {
-        return self::sys(self::$config['sys']['cacher']['default']);
+        return self::sys(self::$config['sys']['cacher_default']);
     }
 }

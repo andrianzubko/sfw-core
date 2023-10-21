@@ -142,17 +142,15 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
 
         $tzPrev = date_default_timezone_get();
 
-        if ($tzPrev === $context['timezone']
-            || !date_default_timezone_set($context['timezone'])
-        ) {
+        if ($tzPrev === $context['timezone'] || !date_default_timezone_set($context['timezone'])) {
             $tzPrev = null;
         }
 
         if (!isset($context['destination'])) {
             error_log($message);
 
-            if (self::$config['sys']['logger']['file'] !== null) {
-                $context['destination'] = self::$config['sys']['logger']['file'];
+            if (self::$config['sys']['logger_file'] !== null) {
+                $context['destination'] = self::$config['sys']['logger_file'];
             }
         }
 
@@ -174,8 +172,8 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
      */
     public function dbSlowQuery(float $timer, array $queries): void
     {
-        if (self::$config['sys']['db']['slow_queries_log'] !== null
-            || $timer < self::$config['sys']['db']['slow_queries_min']
+        if (self::$config['sys']['db_slow_queries_log'] !== null
+            || $timer < self::$config['sys']['db_slow_queries_min']
         ) {
             return;
         }
@@ -190,7 +188,7 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
         );
 
         $this->info($message, [
-            'destination' => self::$config['sys']['db']['slow_queries_log'],
+            'destination' => self::$config['sys']['db_slow_queries_log'],
 
             'append_file_and_line' => false,
         ]);
@@ -201,7 +199,7 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
      */
     public function transactionFail(string $level, string $state, int $retry): void
     {
-        if (self::$config['sys']['transaction']['fails_log'] === null) {
+        if (self::$config['sys']['transaction_fails_log'] === null) {
             return;
         }
 
@@ -210,7 +208,7 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
         );
 
         $this->log($level, $message, [
-            'destination' => self::$config['sys']['transaction']['fails_log'],
+            'destination' => self::$config['sys']['transaction_fails_log'],
 
             'append_file_and_line' => false,
         ]);

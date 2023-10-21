@@ -10,12 +10,26 @@ namespace SFW\Lazy\Sys;
 class Memcached extends \SFW\Lazy\Sys
 {
     /**
-     * Just a placeholder.
-     *
-     * If your overrides constructor, don't forget call parent at first line! Even if it's empty!
+     * Options for cacher.
      */
-    public function __construct()
+    protected array $options;
+
+    /**
+     * Initializes options for cacher.
+     *
+     * If your overrides constructor, don't forget call parent at first line!
+     */
+    protected function __construct()
     {
+        $this->options = [
+            'ttl' => self::$config['sys']['cacher_memcached_ttl'],
+
+            'ns' => self::$config['sys']['cacher_memcached_ns'],
+
+            'servers' => self::$config['sys']['cacher_memcached_servers'],
+
+            'options' => self::$config['sys']['cacher_memcached_options'],
+        ];
     }
 
     /**
@@ -25,6 +39,6 @@ class Memcached extends \SFW\Lazy\Sys
      */
     public static function getInstance(): \SFW\Cacher\Driver
     {
-        return new \SFW\Cacher\Memcached(self::$config['sys']['cacher']['memcached']);
+        return new \SFW\Cacher\Memcached((new static())->options);
     }
 }

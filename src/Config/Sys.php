@@ -47,57 +47,57 @@ class Sys extends \SFW\Config
          *
          * string 'Pgsql' or 'Mysql'
          */
-        $sys['db']['default'] = 'Pgsql';
+        $sys['db_default'] = 'Pgsql';
 
         /**
          * Pgsql.
          */
-        $sys['db']['pgsql']['host'] = 'localhost';
+        $sys['db_pgsql_host'] = 'localhost';
 
-        $sys['db']['pgsql']['port'] = 5432;
+        $sys['db_pgsql_port'] = 5432;
 
-        $sys['db']['pgsql']['db'] = null;
+        $sys['db_pgsql_db'] = null;
 
-        $sys['db']['pgsql']['user'] = null;
+        $sys['db_pgsql_user'] = null;
 
-        $sys['db']['pgsql']['pass'] = null;
+        $sys['db_pgsql_pass'] = null;
 
-        $sys['db']['pgsql']['persistent'] = false;
+        $sys['db_pgsql_persistent'] = false;
 
-        $sys['db']['pgsql']['charset'] = 'utf-8';
+        $sys['db_pgsql_charset'] = 'utf-8';
 
-        $sys['db']['pgsql']['mode'] = \SFW\Databaser::ASSOC;
+        $sys['db_pgsql_mode'] = \SFW\Databaser::ASSOC;
 
         /**
          * Mysql.
          */
-        $sys['db']['mysql']['host'] = 'localhost';
+        $sys['db_mysql_host'] = 'localhost';
 
-        $sys['db']['mysql']['port'] = 3306;
+        $sys['db_mysql_port'] = 3306;
 
-        $sys['db']['mysql']['db'] = null;
+        $sys['db_mysql_db'] = null;
 
-        $sys['db']['mysql']['user'] = null;
+        $sys['db_mysql_user'] = null;
 
-        $sys['db']['mysql']['pass'] = null;
+        $sys['db_mysql_pass'] = null;
 
-        $sys['db']['mysql']['persistent'] = false;
+        $sys['db_mysql_persistent'] = false;
 
-        $sys['db']['mysql']['charset'] = 'utf8mb4';
+        $sys['db_mysql_charset'] = 'utf8mb4';
 
-        $sys['db']['mysql']['mode'] = \SFW\Databaser::ASSOC;
+        $sys['db_mysql_mode'] = \SFW\Databaser::ASSOC;
 
         /* Log slow queries.
          *
          * ?string
          */
-        $sys['db']['slow_queries_log'] = APP_DIR . '/var/log/slow.queries.log';
+        $sys['db_slow_queries_log'] = APP_DIR . '/var/log/slow.queries.log';
 
         /* Log slow queries with minimal time in seconds.
          *
          * float
          */
-        $sys['db']['slow_queries_min'] = 0.5;
+        $sys['db_slow_queries_min'] = 0.5;
 
         // }}}
         // {{{ transaction
@@ -106,13 +106,13 @@ class Sys extends \SFW\Config
          *
          * int
          */
-        $sys['transaction']['retries'] = 7;
+        $sys['transaction_retries'] = 7;
 
         /* Log transactions fails.
          *
          * ?string
          */
-        $sys['transaction']['fails_log'] = APP_DIR . '/var/log/transaction.fails.log';
+        $sys['transaction_fails_log'] = APP_DIR . '/var/log/transaction.fails.log';
 
         // }}}
         // {{{ cacher
@@ -121,33 +121,33 @@ class Sys extends \SFW\Config
          *
          * string 'Nocache', 'Apc', 'Memcached' or 'Redis'
          */
-        $sys['cacher']['default'] = 'Apc';
+        $sys['cacher_default'] = 'Apc';
 
         /* Apc.
          */
-        $sys['cacher']['apc']['ttl'] = 3600;
+        $sys['cacher_apc_ttl'] = 3600;
 
-        $sys['cacher']['apc']['ns'] = md5(__FILE__);
+        $sys['cacher_apc_ns'] = md5(__FILE__);
 
         /* Memcached.
          */
-        $sys['cacher']['memcached']['ttl'] = $sys['cacher']['apc']['ttl'];
+        $sys['cacher_memcached_ttl'] = $sys['cacher_apc_ttl'];
 
-        $sys['cacher']['memcached']['ns'] = $sys['cacher']['apc']['ns'];
+        $sys['cacher_memcached_ns'] = $sys['cacher_apc_ns'];
 
-        $sys['cacher']['memcached']['servers'] = [['127.0.0.1', 11211]];
+        $sys['cacher_memcached_servers'] = [['127.0.0.1', 11211]];
 
-        $sys['cacher']['memcached']['options'] = null;
+        $sys['cacher_memcached_options'] = null;
 
         /* Redis.
          */
-        $sys['cacher']['redis']['ttl'] = $sys['cacher']['apc']['ttl'];
+        $sys['cacher_redis_ttl'] = $sys['cacher_apc_ttl'];
 
-        $sys['cacher']['redis']['ns'] = $sys['cacher']['apc']['ns'];
+        $sys['cacher_redis_ns'] = $sys['cacher_apc_ns'];
 
-        $sys['cacher']['redis']['connect'] = ['127.0.0.1', 6379, 2.5];
+        $sys['cacher_redis_connect'] = ['127.0.0.1', 6379, 2.5];
 
-        $sys['cacher']['redis']['options'] = null;
+        $sys['cacher_redis_options'] = null;
 
         // }}}
         // {{{ templater
@@ -156,29 +156,29 @@ class Sys extends \SFW\Config
          *
          * string 'Native', 'Twig' or 'Xslt'
          */
-        $sys['templater']['default'] = 'Native';
+        $sys['templater_default'] = 'Native';
 
         /* Native
          */
-        $sys['templater']['native']['dir'] = APP_DIR . '/templates';
+        $sys['templater_native_dir'] = APP_DIR . '/templates';
 
-        $sys['templater']['native']['minify'] = false;
+        $sys['templater_native_minify'] = false;
 
         /* Twig
          */
-        $sys['templater']['twig']['dir'] = APP_DIR . '/templates';
+        $sys['templater_twig_dir'] = APP_DIR . '/templates';
 
-        $sys['templater']['twig']['cache'] = APP_DIR . '/var/cache/twig';
+        $sys['templater_twig_cache'] = APP_DIR . '/var/cache/twig';
 
-        $sys['templater']['twig']['strict'] = true;
+        $sys['templater_twig_strict'] = true;
 
         /* Xslt
          */
-        $sys['templater']['xslt']['dir'] = APP_DIR . '/templates';
+        $sys['templater_xslt_dir'] = APP_DIR . '/templates';
 
-        $sys['templater']['xslt']['root'] = 'root';
+        $sys['templater_xslt_root'] = 'root';
 
-        $sys['templater']['xslt']['item'] = 'item';
+        $sys['templater_xslt_item'] = 'item';
 
         // }}}
         // {{{ notifier
@@ -189,25 +189,25 @@ class Sys extends \SFW\Config
          *
          * bool
          */
-        $sys['notifier']['enabled'] = true;
+        $sys['notifier_enabled'] = true;
 
         /* Instead of disabling, you can override recipients by your email.
          *
          * ?array('EMAIL' or array('EMAIL'[, 'NAME']), ...)
          */
-        $sys['notifier']['recipients'] = null;
+        $sys['notifier_recipients'] = null;
 
         /* Default sender.
          *
          * 'EMAIL' or array('EMAIL'[, 'NAME']) or null
          */
-        $sys['notifier']['sender'] = null;
+        $sys['notifier_sender'] = null;
 
         /* Default replies.
          *
          * array('EMAIL' or array('EMAIL'[, 'NAME']), ...)
          */
-        $sys['notifier']['replies'] = [];
+        $sys['notifier_replies'] = [];
 
         // }}}
         // {{{ locker
@@ -216,7 +216,7 @@ class Sys extends \SFW\Config
          *
          * string
          */
-        $sys['locker']['file'] = APP_DIR . '/var/locks/{KEY}.lock';
+        $sys['locker_file'] = APP_DIR . '/var/locks/{KEY}.lock';
 
         // }}}
         // {{{ logger
@@ -225,7 +225,7 @@ class Sys extends \SFW\Config
          *
          * ?string
          */
-        $sys['logger']['file'] = APP_DIR . '/var/log/errors.log';
+        $sys['logger_file'] = APP_DIR . '/var/log/errors.log';
 
         // }}}
         // {{{ response
@@ -236,7 +236,7 @@ class Sys extends \SFW\Config
          *
          * ?array
          */
-        $sys['response']['compress_mimes'] = [
+        $sys['response_compress_mimes'] = [
             'text/html',
             'text/plain',
             'text/xml',
@@ -252,19 +252,19 @@ class Sys extends \SFW\Config
          *
          * int
          */
-        $sys['response']['compress_min'] = 32 * 1024;
+        $sys['response_compress_min'] = 32 * 1024;
 
         /* Optional error document files pattern.
          *
          * ?string
          */
-        $sys['response']['error_document'] = APP_DIR . '/public/.bin/errors/{CODE}.html.php';
+        $sys['response_error_document'] = APP_DIR . '/public/.bin/errors/{CODE}.html.php';
 
         /* Pattern for statistics to each html page generated by templater.
          *
          * ?string
          */
-        $sys['response']['stats'] = '<!-- script {SCR_T} + sql({SQL_C}) {SQL_T} + template({TPL_C}) {TPL_T} = {ALL_T} -->';
+        $sys['response_stats'] = '<!-- script {SCR_T} + sql({SQL_C}) {SQL_T} + tpl({TPL_C}) {TPL_T} = {ALL_T} -->';
 
         // }}}
         // {{{ dir
@@ -273,7 +273,7 @@ class Sys extends \SFW\Config
          *
          * int
          */
-        $sys['dir']['mode'] = 0777;
+        $sys['dir_mode'] = 0777;
 
         // }}}
         // {{{ file
@@ -282,7 +282,7 @@ class Sys extends \SFW\Config
          *
          * int
          */
-        $sys['file']['mode'] = 0666;
+        $sys['file_mode'] = 0666;
 
         // }}}
         // {{{ merger
@@ -293,25 +293,25 @@ class Sys extends \SFW\Config
          *
          * ?array
          */
-        $sys['merger']['sources'] = null;
+        $sys['merger_sources'] = null;
 
         /* URL location with merged JS and CSS files.
          *
          * string
          */
-        $sys['merger']['location'] = '/.merged';
+        $sys['merger_location'] = '/.merged';
 
         /* Directory for merged JS and CSS files.
          *
          * string
          */
-        $sys['merger']['dir'] = APP_DIR . '/var/cache/merged';
+        $sys['merger_dir'] = APP_DIR . '/var/cache/merged';
 
         /* Cache file with merger internal data.
          *
          * string
          */
-        $sys['merger']['cache'] = APP_DIR . '/var/cache/merger.php';
+        $sys['merger_cache'] = APP_DIR . '/var/cache/merger.php';
 
         // }}}
         // {{{ router
@@ -320,7 +320,7 @@ class Sys extends \SFW\Config
          *
          * string
          */
-        $sys['router']['cache'] = APP_DIR . '/var/cache/router.php';
+        $sys['router_cache'] = APP_DIR . '/var/cache/router.php';
 
         // }}}
         // {{{ paginator
@@ -329,7 +329,7 @@ class Sys extends \SFW\Config
          *
          * ?string
          */
-        $sys['paginator']['param'] = 'page';
+        $sys['paginator_param'] = 'page';
 
         // }}}
 

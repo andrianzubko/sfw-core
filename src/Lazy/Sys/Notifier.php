@@ -28,15 +28,13 @@ class Notifier extends \SFW\Lazy\Sys
     {
         $this->defaultStruct = new \SFW\NotifyStruct();
 
-        $this->defaultStruct->sender = self::$config['sys']['notifier']['sender'];
+        $this->defaultStruct->sender = self::$config['sys']['notifier_sender'];
 
-        $this->defaultStruct->replies = self::$config['sys']['notifier']['replies'];
+        $this->defaultStruct->replies = self::$config['sys']['notifier_replies'];
 
         register_shutdown_function(
             function () {
-                register_shutdown_function(
-                    $this->processAll(...)
-                );
+                register_shutdown_function($this->processAll(...));
             }
         );
     }
@@ -107,8 +105,8 @@ class Notifier extends \SFW\Lazy\Sys
 
         $mailer->setFrom(...(array) $struct->sender);
 
-        if (self::$config['sys']['notifier']['recipients'] !== null) {
-            $struct->recipients = self::$config['sys']['notifier']['recipients'];
+        if (self::$config['sys']['notifier_recipients'] !== null) {
+            $struct->recipients = self::$config['sys']['notifier_recipients'];
         }
 
         if (empty($struct->recipients)) {
@@ -141,7 +139,7 @@ class Notifier extends \SFW\Lazy\Sys
             $mailer->addStringAttachment(...$item);
         }
 
-        if (self::$config['sys']['notifier']['enabled']) {
+        if (self::$config['sys']['notifier_enabled']) {
             try {
                 $mailer->send();
             } catch (PHPMailerException) {

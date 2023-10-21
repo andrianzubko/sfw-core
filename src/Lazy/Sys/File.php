@@ -35,7 +35,7 @@ class File extends \SFW\Lazy\Sys
             return false;
         }
 
-        @chmod($file, self::$config['sys']['file']['mode']);
+        @chmod($file, self::$config['sys']['file_mode']);
 
         return true;
     }
@@ -45,16 +45,11 @@ class File extends \SFW\Lazy\Sys
      */
     public function putVar(string $file, mixed $variable, int $flags = 0, bool $createDir = true): bool
     {
-        $success = $this->put($file,
-            sprintf(
-                "<?php\n\nreturn %s;\n",
-                    var_export($variable, true)
-            ), $flags, $createDir
-        );
+        $contents = sprintf("<?php\n\nreturn %s;\n", var_export($variable, true));
 
-        if ($success
-            && extension_loaded('zend-opcache')
-        ) {
+        $success = $this->put($file, $contents, $flags, $createDir);
+
+        if ($success && extension_loaded('zend-opcache')) {
             opcache_invalidate($file, true);
         }
 
@@ -85,7 +80,7 @@ class File extends \SFW\Lazy\Sys
             return false;
         }
 
-        @chmod($target, self::$config['sys']['file']['mode']);
+        @chmod($target, self::$config['sys']['file_mode']);
 
         return true;
     }

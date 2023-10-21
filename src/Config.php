@@ -13,7 +13,7 @@ abstract class Config
     private static array $env;
 
     /**
-     * Returns array with config parameters.
+     * Returns array with configuration parameters.
      */
     abstract public static function get(): array;
 

@@ -27,7 +27,7 @@ class Merger extends Base
      */
     public static function process(): array
     {
-        self::$cache = @include self::$config['sys']['merger']['cache'];
+        self::$cache = @include self::$config['sys']['merger_cache'];
 
         if (self::$cache !== false
             && self::$config['sys']['env'] === 'prod'
@@ -58,9 +58,9 @@ class Merger extends Base
 
         $time = self::$cache ? self::$cache['time'] : 0;
 
-        $location = self::$config['sys']['merger']['location'];
+        $location = self::$config['sys']['merger_location'];
 
-        foreach (self::$config['sys']['merger']['sources'] as $target => $sources) {
+        foreach (self::$config['sys']['merger_sources'] as $target => $sources) {
             $paths[$target] = "$location/$time.$target";
         }
 
@@ -75,7 +75,7 @@ class Merger extends Base
         if (!isset(self::$sources)) {
             self::$sources = [];
 
-            foreach (self::$config['sys']['merger']['sources'] as $target => $sources) {
+            foreach (self::$config['sys']['merger_sources'] as $target => $sources) {
                 foreach ((array) $sources as $source) {
                     if (preg_match('/\.(css|js)$/', $source, $M)) {
                         self::$sources[$M[1]][$target] ??= [];
@@ -98,15 +98,13 @@ class Merger extends Base
      */
     protected static function isOutdated(): bool
     {
-        if (self::$cache === false
-            || self::$config['sys']['debug'] !== self::$cache['debug']
-        ) {
+        if (self::$cache === false || self::$config['sys']['debug'] !== self::$cache['debug']) {
             return true;
         }
 
         $targets = [];
 
-        foreach (self::sys('Dir')->scan(self::$config['sys']['merger']['dir'], false, true) as $item) {
+        foreach (self::sys('Dir')->scan(self::$config['sys']['merger_dir'], false, true) as $item) {
             if (is_file($item)
                 && preg_match('~/(\d+)\.(.+)$~', $item, $M)
                     && (int) $M[1] === self::$cache['time']
@@ -119,14 +117,7 @@ class Merger extends Base
 
         $sources = static::getSources();
 
-        if (array_diff(
-                array_keys(
-                    array_merge(
-                        ...array_values($sources)
-                    )
-                ), $targets
-            )
-        ) {
+        if (array_diff(array_keys(array_merge(...array_values($sources))), $targets)) {
             return true;
         }
 
@@ -151,7 +142,7 @@ class Merger extends Base
      */
     protected static function recombine(): void
     {
-        self::sys('Dir')->clear(self::$config['sys']['merger']['dir']);
+        self::sys('Dir')->clear(self::$config['sys']['merger_dir']);
 
         self::$cache = [
             'time' => time(),
@@ -164,7 +155,7 @@ class Merger extends Base
             foreach ($sources[$type] as $target => $files) {
                 $file = sprintf(
                     '%s/%s.%s',
-                        self::$config['sys']['merger']['dir'],
+                        self::$config['sys']['merger_dir'],
                         self::$cache['time'],
                         $target
                 );
@@ -181,13 +172,11 @@ class Merger extends Base
             }
         }
 
-        if (!self::sys('File')->putVar(
-                self::$config['sys']['merger']['cache'], self::$cache)
-        ) {
+        if (!self::sys('File')->putVar(self::$config['sys']['merger_cache'], self::$cache)) {
             throw new Exception\Runtime(
                 sprintf(
                     'Unable to write file %s',
-                        self::$config['sys']['merger']['cache']
+                        self::$config['sys']['merger_cache']
                 )
             );
         }
@@ -248,9 +237,7 @@ class Merger extends Base
 
                     $size = @filesize(APP_DIR . '/public/' . $M[1]);
 
-                    if ($size !== false
-                        && $size <= 32 * 1024
-                    ) {
+                    if ($size !== false && $size <= 32 * 1024) {
                         $data = self::sys('File')->get(APP_DIR . '/public/' . $M[1]);
                     }
                 }

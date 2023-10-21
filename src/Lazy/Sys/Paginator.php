@@ -19,7 +19,7 @@ class Paginator extends \SFW\Lazy\Sys
      */
     public function __construct()
     {
-        $param = self::$config['sys']['paginator']['param'];
+        $param = self::$config['sys']['paginator_param'];
 
         if ($param !== null) {
             parse_str($_SERVER['QUERY_STRING'], $query);

@@ -37,25 +37,25 @@ class Dir extends \SFW\Lazy\Sys
     ): array {
         $scanned = [];
 
-        if (is_dir($dir)
-            && ($items = scandir($dir, $order)) !== false
-        ) {
+        if (is_dir($dir) && ($items = scandir($dir, $order)) !== false) {
             foreach ($items as $item) {
                 if ($item === '.' || $item === '..') {
                     continue;
                 }
 
-                if (!$recursive
-                    || is_file("$dir/$item")
-                ) {
-                    $scanned[] = $withDir
-                        ? "$dir/$item"
-                        : "$item";
+                if (!$recursive || is_file("$dir/$item")) {
+                    if ($withDir) {
+                        $scanned[] = "$dir/$item";
+                    } else {
+                        $scanned[] = $item;
+                    }
                 } else {
                     foreach ($this->scan("$dir/$item", true, false, $order) as $subItem) {
-                        $scanned[] = $withDir
-                            ? "$dir/$item/$subItem"
-                            : "$item/$subItem";
+                        if ($withDir) {
+                            $scanned[] = "$dir/$item/$subItem";
+                        } else {
+                            $scanned[] = "$item/$subItem";
+                        }
                     }
                 }
             }
@@ -76,7 +76,7 @@ class Dir extends \SFW\Lazy\Sys
         $success = mkdir($dir, recursive: true);
 
         if ($success) {
-            @chmod($dir, self::$config['sys']['dir']['mode']);
+            @chmod($dir, self::$config['sys']['dir_mode']);
         }
 
         return $success;
@@ -155,9 +155,7 @@ class Dir extends \SFW\Lazy\Sys
     {
         $success = true;
 
-        if ($this->create($target)
-            && ($items = scandir($source)) !== false
-        ) {
+        if ($this->create($target) && ($items = scandir($source)) !== false) {
             foreach ($items as $item) {
                 if ($item === '.' || $item === '..') {
                     continue;

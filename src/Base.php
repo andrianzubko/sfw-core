@@ -9,12 +9,7 @@ namespace SFW;
 abstract class Base extends \stdClass
 {
     /**
-     * Started time.
-     */
-    protected static float $startedTime;
-
-    /**
-     * All configs (only shared are available from templates).
+     * All configurations (only shared are available from templates).
      */
     protected static array $config = [];
 
@@ -31,27 +26,27 @@ abstract class Base extends \stdClass
     /**
      * Instances of system Lazy classes.
      */
-    protected static array $sysLazies = [];
+    protected static array $sysLazyInstances = [];
 
     /**
      * Instances of your Lazy classes.
      */
-    protected static array $myLazies = [];
+    protected static array $myLazyInstances = [];
 
     /**
      * Accesses system Lazy classes from anywhere except templates.
      */
     final protected static function sys(string $name): object
     {
-        if (!isset(self::$sysLazies[$name])) {
+        if (!isset(self::$sysLazyInstances[$name])) {
             if (class_exists("App\\Lazy\\Sys\\$name")) {
-                self::$sysLazies[$name] = "App\\Lazy\\Sys\\$name::getInstance"();
+                self::$sysLazyInstances[$name] = "App\\Lazy\\Sys\\$name::getInstance"();
             } else {
-                self::$sysLazies[$name] = "SFW\\Lazy\\Sys\\$name::getInstance"();
+                self::$sysLazyInstances[$name] = "SFW\\Lazy\\Sys\\$name::getInstance"();
             }
         }
 
-        return self::$sysLazies[$name];
+        return self::$sysLazyInstances[$name];
     }
 
     /**
@@ -59,10 +54,10 @@ abstract class Base extends \stdClass
      */
     final protected static function my(string $name): object
     {
-        if (!isset(self::$myLazies[$name])) {
-            self::$myLazies[$name] = "App\\Lazy\\My\\$name::getInstance"();
+        if (!isset(self::$myLazyInstances[$name])) {
+            self::$myLazyInstances[$name] = "App\\Lazy\\My\\$name::getInstance"();
         }
 
-        return self::$myLazies[$name];
+        return self::$myLazyInstances[$name];
     }
 }

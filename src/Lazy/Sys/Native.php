@@ -21,42 +21,46 @@ class Native extends \SFW\Lazy\Sys
      */
     protected function __construct()
     {
-        $this->options = self::$config['sys']['templater']['native'];
+        $this->options = [
+            'dir' => self::$config['sys']['templater_native_dir'],
 
-        $this->options['debug'] = self::$config['sys']['debug'];
+            'minify' => self::$config['sys']['templater_native_minify'],
 
-        $this->options['properties'] = [
-            'config' => self::$config['shared'],
+            'debug' => self::$config['sys']['debug'],
 
-            'sys' => self::$sys,
+            'properties' => [
+                'config' => self::$config['shared'],
 
-            'my' => self::$my,
+                'sys' => self::$sys,
 
-            'lc' => self::sys('Text')->lc(...),
+                'my' => self::$my,
 
-            'lcFirst' => self::sys('Text')->lcFirst(...),
+                'lc' => self::sys('Text')->lc(...),
 
-            'uc' => self::sys('Text')->uc(...),
+                'lcFirst' => self::sys('Text')->lcFirst(...),
 
-            'ucFirst' => self::sys('Text')->ucFirst(...),
+                'uc' => self::sys('Text')->uc(...),
 
-            'trim' => self::sys('Text')->trim(...),
+                'ucFirst' => self::sys('Text')->ucFirst(...),
 
-            'rTrim' => self::sys('Text')->rTrim(...),
+                'trim' => self::sys('Text')->trim(...),
 
-            'lTrim' => self::sys('Text')->lTrim(...),
+                'rTrim' => self::sys('Text')->rTrim(...),
 
-            'fTrim' => self::sys('Text')->fTrim(...),
+                'lTrim' => self::sys('Text')->lTrim(...),
 
-            'mTrim' => self::sys('Text')->mTrim(...),
+                'fTrim' => self::sys('Text')->fTrim(...),
 
-            'cut' => self::sys('Text')->cut(...),
+                'mTrim' => self::sys('Text')->mTrim(...),
 
-            'random' => self::sys('Text')->random(...),
+                'cut' => self::sys('Text')->cut(...),
 
-            'genUrl' => self::sys('Router')->genUrl(...),
+                'random' => self::sys('Text')->random(...),
 
-            'genAbsoluteUrl' => self::sys('Router')->genAbsoluteUrl(...),
+                'genUrl' => self::sys('Router')->genUrl(...),
+
+                'genAbsoluteUrl' => self::sys('Router')->genAbsoluteUrl(...),
+            ],
         ];
     }
 

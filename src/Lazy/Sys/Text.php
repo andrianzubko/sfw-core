@@ -127,9 +127,7 @@ class Text extends \SFW\Lazy\Sys
             return '';
         }
 
-        $string = trim(
-            preg_replace(['/\h+/', "/[ \t\n\r\v\f\0]*\\v[ \t\n\r\v\f\0]*/"], [' ', "\n"], $string)
-        );
+        $string = trim(preg_replace(['/\h+/', "/[ \t\n\r\v\f\0]*\\v[ \t\n\r\v\f\0]*/"], [' ', "\n"], $string));
 
         if ($limit <= 0) {
             return $string;

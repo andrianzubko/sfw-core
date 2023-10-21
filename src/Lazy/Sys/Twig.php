@@ -21,46 +21,51 @@ class Twig extends \SFW\Lazy\Sys
      */
     protected function __construct()
     {
-        $this->options = self::$config['sys']['templater']['twig'];
+        $this->options = [
+            'dir' => self::$config['sys']['templater_twig_dir'],
 
-        $this->options['reload'] = self::$config['sys']['env'] !== 'prod';
+            'cache' => self::$config['sys']['templater_twig_cache'],
 
-        $this->options['debug'] = self::$config['sys']['debug'];
+            'strict' => self::$config['sys']['templater_twig_strict'],
 
-        $this->options['globals'] = [
-            'config' => self::$config['shared'],
+            'reload' => self::$config['sys']['env'] !== 'prod',
 
-            'sys' => self::$sys,
+            'debug' => self::$config['sys']['debug'],
 
-            'my' => self::$my,
-        ];
+            'globals' => [
+                'config' => self::$config['shared'],
 
-        $this->options['functions'] = [
-            'lc' => self::sys('Text')->lc(...),
+                'sys' => self::$sys,
 
-            'lcFirst' => self::sys('Text')->lcFirst(...),
+                'my' => self::$my,
+            ],
+            'functions' => [
+                'lc' => self::sys('Text')->lc(...),
 
-            'uc' => self::sys('Text')->uc(...),
+                'lcFirst' => self::sys('Text')->lcFirst(...),
 
-            'ucFirst' => self::sys('Text')->ucFirst(...),
+                'uc' => self::sys('Text')->uc(...),
 
-            'trim' => self::sys('Text')->trim(...),
+                'ucFirst' => self::sys('Text')->ucFirst(...),
 
-            'rTrim' => self::sys('Text')->rTrim(...),
+                'trim' => self::sys('Text')->trim(...),
 
-            'lTrim' => self::sys('Text')->lTrim(...),
+                'rTrim' => self::sys('Text')->rTrim(...),
 
-            'fTrim' => self::sys('Text')->fTrim(...),
+                'lTrim' => self::sys('Text')->lTrim(...),
 
-            'mTrim' => self::sys('Text')->mTrim(...),
+                'fTrim' => self::sys('Text')->fTrim(...),
 
-            'cut' => self::sys('Text')->cut(...),
+                'mTrim' => self::sys('Text')->mTrim(...),
 
-            'random' => self::sys('Text')->random(...),
+                'cut' => self::sys('Text')->cut(...),
 
-            'genUrl' => self::sys('Router')->genUrl(...),
+                'random' => self::sys('Text')->random(...),
 
-            'genAbsoluteUrl' => self::sys('Router')->genAbsoluteUrl(...),
+                'genUrl' => self::sys('Router')->genUrl(...),
+
+                'genAbsoluteUrl' => self::sys('Router')->genAbsoluteUrl(...),
+            ],
         ];
     }
 

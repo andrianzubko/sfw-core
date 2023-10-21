@@ -15,14 +15,14 @@ abstract class Runner extends Base
         try {
             // {{{ prevent multiple initializations
 
-            if (isset(self::$startedTime)) {
+            if (isset(self::$sys['started'])) {
                 return;
             }
 
             // }}}
             // {{{ started time
 
-            self::$startedTime = gettimeofday(true);
+            self::$sys['started'] = gettimeofday(true);
 
             // }}}
             // {{{ important PHP parameters.
@@ -54,7 +54,7 @@ abstract class Runner extends Base
             define('APP_DIR', dirname((new \ReflectionClass(static::class))->getFileName(), 2));
 
             // }}}
-            // {{{ configs
+            // {{{ configurations
 
             self::$config['sys'] = \App\Config\Sys::get();
 
@@ -157,8 +157,7 @@ abstract class Runner extends Base
     {
         $_SERVER['HTTP_HOST'] ??= 'localhost';
 
-        $_SERVER['HTTP_SCHEME'] = empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off'
-            ? 'http' : 'https';
+        $_SERVER['HTTP_SCHEME'] = empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off' ? 'http' : 'https';
 
         $_SERVER['REMOTE_ADDR'] ??= '0.0.0.0';
 
@@ -200,9 +199,7 @@ abstract class Runner extends Base
                     ]);
                     break;
                 default:
-                    throw (new Exception\Logic($message))
-                        ->setFile($file)
-                        ->setLine($line);
+                    throw (new Exception\Logic($message))->setFile($file)->setLine($line);
             }
         }
 
@@ -216,7 +213,7 @@ abstract class Runner extends Base
      */
     private function sysEnvironment(): void
     {
-        self::$sys['timestamp'] = (int) self::$startedTime;
+        self::$sys['timestamp'] = (int) self::$sys['started'];
 
         if (self::$config['sys']['url'] !== null) {
             $url = parse_url(self::$config['sys']['url']);
@@ -240,9 +237,7 @@ abstract class Runner extends Base
 
         self::$sys['url'] = self::$sys['url_scheme'] . '://' . self::$sys['url_host'];
 
-        if (self::$config['sys']['merger']['sources'] !== null
-            && PHP_SAPI !== 'cli'
-        ) {
+        if (self::$config['sys']['merger_sources'] !== null && PHP_SAPI !== 'cli') {
             self::$sys['merged'] = Merger::process();
         }
     }
@@ -252,12 +247,10 @@ abstract class Runner extends Base
      */
     private function cleanupAtShutdown(): void
     {
-        unset(self::$sysLazies['Db']);
+        unset(self::$sysLazyInstances['Db']);
 
-        foreach (self::$sysLazies as $lazy) {
-            if ($lazy instanceof \SFW\Databaser\Driver
-                && $lazy->isInTrans()
-            ) {
+        foreach (self::$sysLazyInstances as $lazy) {
+            if ($lazy instanceof \SFW\Databaser\Driver && $lazy->isInTrans()) {
                 try {
                     $lazy->rollback();
                 } catch (\SFW\Databaser\Exception) {

@@ -102,10 +102,8 @@ class Response extends \SFW\Lazy\Sys
 
         $mime ??= self::sys($processor)->getMime();
 
-        if (self::$config['sys']['response']['stats'] !== null
-            && $mime === 'text/html'
-        ) {
-            $timer = gettimeofday(true) - self::$startedTime;
+        if (self::$config['sys']['response_stats'] !== null && $mime === 'text/html') {
+            $timer = gettimeofday(true) - self::$sys['started'];
 
             $contents .= str_replace(
                 [
@@ -116,21 +114,13 @@ class Response extends \SFW\Lazy\Sys
                     '{TPL_T}',
                     '{ALL_T}',
                 ], [
-                    sprintf('%.3f',
-                        $timer - self::sys('Db')->getTimer() - self::sys('Templater')->getTimer()
-                    ),
+                    sprintf('%.3f', $timer - self::sys('Db')->getTimer() - self::sys('Templater')->getTimer()),
                     self::sys('Db')->getCounter(),
-                    sprintf('%.3f',
-                        self::sys('Db')->getTimer()
-                    ),
+                    sprintf('%.3f', self::sys('Db')->getTimer()),
                     self::sys('Templater')->getCounter(),
-                    sprintf('%.3f',
-                        self::sys('Templater')->getTimer()
-                    ),
-                    sprintf('%.3f',
-                        $timer
-                    ),
-                ], self::$config['sys']['response']['stats']
+                    sprintf('%.3f', self::sys('Templater')->getTimer()),
+                    sprintf('%.3f', $timer),
+                ], self::$config['sys']['response_stats']
             );
         }
 
@@ -148,13 +138,11 @@ class Response extends \SFW\Lazy\Sys
         int $code = 200,
         int $expire = 0,
     ): void {
-        $this->output('inline',
-            json_encode($contents,
-                $pretty
-                    ? JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT
-                    : JSON_UNESCAPED_UNICODE
-            ), 'application/json', $code, $expire, null
+        $contents = json_encode($contents,
+            $pretty ? JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT : JSON_UNESCAPED_UNICODE
         );
+
+        $this->output('inline', $contents, 'application/json', $code, $expire, null);
     }
 
     /**
@@ -220,9 +208,9 @@ class Response extends \SFW\Lazy\Sys
             header("Content-Disposition: $disposition");
         }
 
-        $compressMimes = self::$config['sys']['response']['compress_mimes'];
+        $compressMimes = self::$config['sys']['response_compress_mimes'];
 
-        $compressMin = self::$config['sys']['response']['compress_min'];
+        $compressMin = self::$config['sys']['response_compress_min'];
 
         if (isset($compressMimes, $_SERVER['HTTP_ACCEPT_ENCODING'])
             && strlen($contents) > $compressMin
@@ -291,7 +279,7 @@ class Response extends \SFW\Lazy\Sys
         if (!headers_sent() && !ob_get_length()) {
             http_response_code($code);
 
-            $errorDocument = self::$config['sys']['response']['error_document'];
+            $errorDocument = self::$config['sys']['response_error_document'];
 
             if ($errorDocument !== null) {
                 $errorDocument = str_replace('{CODE}', $code, $errorDocument);

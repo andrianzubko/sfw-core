@@ -53,7 +53,7 @@ class Image extends \SFW\Lazy\Sys
             $success = imagepng($image, $file, $quality);
 
             if ($success) {
-                @chmod($file, self::$config['sys']['file']['mode']);
+                @chmod($file, self::$config['sys']['file_mode']);
             }
 
             return $success;
@@ -77,9 +77,7 @@ class Image extends \SFW\Lazy\Sys
 
         $fixed = imagecreatetruecolor($w, $h);
 
-        imagefill($fixed, 0, 0,
-            imagecolorallocate($fixed, 255, 255, 255)
-        );
+        imagefill($fixed, 0, 0, imagecolorallocate($fixed, 255, 255, 255));
 
         imagecopy($fixed, $image, 0, 0, 0, 0, $w, $h);
 
@@ -89,7 +87,7 @@ class Image extends \SFW\Lazy\Sys
             $success = imagejpeg($fixed, $file, $quality);
 
             if ($success) {
-                @chmod($file, self::$config['sys']['file']['mode']);
+                @chmod($file, self::$config['sys']['file_mode']);
             }
 
             return $success;
@@ -110,9 +108,7 @@ class Image extends \SFW\Lazy\Sys
 
         $oH = imagesy($image);
 
-        if ($oW == $nW && $oH == $nH
-            || !$fit && $oW <= $nW && $oH <= $nH
-        ) {
+        if ($oW == $nW && $oH == $nH || !$fit && $oW <= $nW && $oH <= $nH) {
             return $image;
         }
 
@@ -148,9 +144,7 @@ class Image extends \SFW\Lazy\Sys
 
         $resized = imagecreatetruecolor($nW, $nH);
 
-        imagefill($resized, 0, 0,
-            imagecolorallocatealpha($resized, 0, 0, 0, 127)
-        );
+        imagefill($resized, 0, 0, imagecolorallocatealpha($resized, 0, 0, 0, 127));
 
         imagecopyresampled($resized, $image, $cX, $cY, 0, 0, $cW, $cH, $oW, $oH);
 
@@ -172,9 +166,7 @@ class Image extends \SFW\Lazy\Sys
 
         $resized = imagecreatetruecolor($nW, $nH);
 
-        imagefill($resized, 0, 0,
-            imagecolorallocatealpha($resized, 0, 0, 0, 127)
-        );
+        imagefill($resized, 0, 0, imagecolorallocatealpha($resized, 0, 0, 0, 127));
 
         imagecopyresampled($resized, $image, 0, 0, 0, 0, $nW, $nH, $oW, $oH);
 

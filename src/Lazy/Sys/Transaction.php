@@ -2,6 +2,8 @@
 
 namespace SFW\Lazy\Sys;
 
+use Psr\Log\LogLevel;
+
 /**
  * Transaction.
  */
@@ -60,7 +62,7 @@ class Transaction extends \SFW\Lazy\Sys
     {
         $this->setDriver($driver);
 
-        for ($retry = 1; $retry <= self::$config['sys']['transaction']['retries']; $retry++) {
+        for ($retry = 1; $retry <= self::$config['sys']['transaction_retries']; $retry++) {
             try {
                 $this->events['after_commit'] = [];
 
@@ -84,15 +86,11 @@ class Transaction extends \SFW\Lazy\Sys
                 }
 
                 if (in_array($e->getSqlState(), $retryAt, true)
-                    && $retry < self::$config['sys']['transaction']['retries']
+                    && $retry < self::$config['sys']['transaction_retries']
                 ) {
-                    self::sys('Logger')->transactionFail(
-                        \Psr\Log\LogLevel::INFO, $e->getSqlState(), $retry
-                    );
+                    self::sys('Logger')->transactionFail(LogLevel::INFO, $e->getSqlState(), $retry);
                 } else {
-                    self::sys('Logger')->transactionFail(
-                        \Psr\Log\LogLevel::ERROR, $e->getSqlState(), $retry
-                    );
+                    self::sys('Logger')->transactionFail(LogLevel::ERROR, $e->getSqlState(), $retry);
 
                     $this->resetDriver();
 
@@ -129,7 +127,7 @@ class Transaction extends \SFW\Lazy\Sys
      */
     private function setDriver(string $driver): void
     {
-        self::$sysLazies['Db'] = self::sys($driver);
+        self::$sysLazyInstances['Db'] = self::sys($driver);
     }
 
     /**
@@ -137,7 +135,7 @@ class Transaction extends \SFW\Lazy\Sys
      */
     private function resetDriver(): self
     {
-        unset(self::$sysLazies['Db']);
+        unset(self::$sysLazyInstances['Db']);
 
         return $this;
     }

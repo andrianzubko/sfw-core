@@ -15,9 +15,7 @@ class Command extends \SFW\Router
     public static function getTarget(): array
     {
         if (isset($_SERVER['argv'][1])) {
-            $action = preg_replace_callback('/(?:^|:)(.)/',
-                fn($M) => strtoupper($M[1]), $_SERVER['argv'][1]
-            );
+            $action = preg_replace_callback('/(?:^|:)(.)/', fn($M) => strtoupper($M[1]), $_SERVER['argv'][1]);
 
             return ["App\\Command\\$action", '__construct', $action];
         }

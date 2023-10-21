@@ -73,9 +73,7 @@ class Curl extends \SFW\Lazy\Sys
 
         $response = substr($response, $this->info['header_size']);
 
-        if ($toUtf8
-            && !mb_check_encoding($response)
-        ) {
+        if ($toUtf8 && !mb_check_encoding($response)) {
             if (preg_match('/charset\s*=\s*([a-z\d\-#]+)/i', $this->info['content_type'], $M)) {
                 try {
                     return mb_convert_encoding($response, 'utf-8', $M[1]);

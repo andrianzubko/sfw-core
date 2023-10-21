@@ -73,7 +73,7 @@ class Text extends \SFW\Lazy\Sys
             return '';
         }
 
-        return trim($string, " \t\n\r\0\x0B\x0C\u{A0}\u{FEFF}");
+        return trim($string, " \t\n\r\v\f\0");
     }
 
     /**
@@ -85,7 +85,7 @@ class Text extends \SFW\Lazy\Sys
             return '';
         }
 
-        return rtrim($string, " \t\n\r\0\x0B\x0C\u{A0}\u{FEFF}");
+        return rtrim($string, " \t\n\r\v\f\0");
     }
 
     /**
@@ -97,7 +97,7 @@ class Text extends \SFW\Lazy\Sys
             return '';
         }
 
-        return ltrim($string, " \t\n\r\0\x0B\x0C\u{A0}\u{FEFF}");
+        return ltrim($string, " \t\n\r\v\f\0");
     }
 
     /**
@@ -109,7 +109,7 @@ class Text extends \SFW\Lazy\Sys
             return '';
         }
 
-        $string = trim(preg_replace("/(?: |\t|\n|\r|\0|\x0B|\x0C|\u{A0}|\u{FEFF})+/S", ' ', $string));
+        $string = trim(preg_replace("/[ \t\n\r\v\f\0]+/", ' ', $string));
 
         if ($limit <= 0) {
             return $string;
@@ -127,7 +127,9 @@ class Text extends \SFW\Lazy\Sys
             return '';
         }
 
-        $string = trim(preg_replace(['/\h+/u', '/\s*\v\s*/u'], [' ', "\n"], $string));
+        $string = trim(
+            preg_replace(['/\h+/', "/[ \t\n\r\v\f\0]*\\v[ \t\n\r\v\f\0]*/"], [' ', "\n"], $string)
+        );
 
         if ($limit <= 0) {
             return $string;
@@ -145,7 +147,7 @@ class Text extends \SFW\Lazy\Sys
             return '';
         }
 
-        $string = trim(preg_replace("/(?: |\t|\n|\r|\0|\x0B|\x0C|\u{A0}|\u{FEFF})+/S", ' ', $string));
+        $string = trim(preg_replace("/[ \t\n\r\v\f\0]+/", ' ', $string));
 
         if (mb_strlen($string) > $min) {
             if ($max !== null) {

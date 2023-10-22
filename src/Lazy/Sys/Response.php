@@ -213,8 +213,8 @@ class Response extends \SFW\Lazy\Sys
         $compressMin = self::$config['sys']['response_compress_min'];
 
         if (isset($compressMimes, $_SERVER['HTTP_ACCEPT_ENCODING'])
-            && strlen($contents) > $compressMin
-                && in_array($mime, $compressMimes, true)
+            && \strlen($contents) > $compressMin
+                && \in_array($mime, $compressMimes, true)
                     && preg_match('/(deflate|gzip)/', $_SERVER['HTTP_ACCEPT_ENCODING'], $M)
         ) {
             if ($M[1] === 'gzip') {
@@ -230,7 +230,7 @@ class Response extends \SFW\Lazy\Sys
             header('Content-Encoding: none');
         }
 
-        header('Content-Length: ' . strlen($contents));
+        header('Content-Length: ' . \strlen($contents));
 
         if (!function_exists('fastcgi_finish_request')) {
             header('Connection: close');

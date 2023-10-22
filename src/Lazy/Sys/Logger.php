@@ -100,7 +100,7 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
     {
         set_error_handler(fn() => true);
 
-        if (!is_string($level)) {
+        if (!\is_string($level)) {
             $level = LogLevel::ERROR;
         }
 

@@ -223,9 +223,9 @@ class Merger extends Base
                 $data = $type = false;
 
                 if (preg_match('/\.(gif|png|jpg|jpeg|svg|woff|woff2)$/ui', $M[1], $N)
-                    && str_starts_with($M[1], '/')
-                        && !str_starts_with($M[1], '//')
-                            && !str_contains($M[1], '..')
+                    && \str_starts_with($M[1], '/')
+                        && !\str_starts_with($M[1], '//')
+                            && !\str_contains($M[1], '..')
                 ) {
                     $type = strtolower($N[1]);
 

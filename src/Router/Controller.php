@@ -74,7 +74,7 @@ class Controller extends \SFW\Router
             }
         }
 
-        $pCount = count($params);
+        $pCount = \count($params);
 
         $url = self::$cache['urls'][$action][$pCount]
             ?? self::$cache['urls'][static::FullToAction($action)][$pCount]
@@ -124,7 +124,7 @@ class Controller extends \SFW\Router
             self::$cFiles = [];
 
             foreach (self::sys('Dir')->scan(APP_DIR . '/src/Controller', true, true) as $item) {
-                if (is_file($item) && str_ends_with($item, '.php')) {
+                if (is_file($item) && \str_ends_with($item, '.php')) {
                     self::$cFiles[] = $item;
                 }
             }
@@ -171,7 +171,7 @@ class Controller extends \SFW\Router
         $objects = [];
 
         foreach (get_declared_classes() as $class) {
-            if (str_starts_with($class, 'App\\Controller\\')) {
+            if (\str_starts_with($class, 'App\\Controller\\')) {
                 $rClass = new \ReflectionClass($class);
 
                 $objects[] = [$rClass, $class];
@@ -202,13 +202,13 @@ class Controller extends \SFW\Router
 
                 self::$cache['regex'][] = sprintf("%s(*:%d)",
                     preg_replace('/\\\\{[^}]+}/', '([^/]+)', preg_quote($url)),
-                        count(self::$cache['dynamic'])
+                        \count(self::$cache['dynamic'])
                 );
 
                 self::$cache['dynamic'][] = [$actions, $M[1]];
 
                 foreach ($actions as $action) {
-                    self::$cache['urls'][$action][count($M[1])] = preg_split('/({[^}]+})/', $url,
+                    self::$cache['urls'][$action][\count($M[1])] = preg_split('/({[^}]+})/', $url,
                         flags: PREG_SPLIT_DELIM_CAPTURE
                     );
                 }

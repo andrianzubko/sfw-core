@@ -85,7 +85,7 @@ class Transaction extends \SFW\Lazy\Sys
                 } catch (\SFW\Databaser\Exception) {
                 }
 
-                if (in_array($e->getSqlState(), $retryAt, true)
+                if (\in_array($e->getSqlState(), $retryAt, true)
                     && $retry < self::$config['sys']['transaction_retries']
                 ) {
                     self::sys('Logger')->transactionFail(LogLevel::INFO, $e->getSqlState(), $retry);

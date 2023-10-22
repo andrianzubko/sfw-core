@@ -147,7 +147,7 @@ class Text extends \SFW\Lazy\Sys
 
         $string = trim(preg_replace("/[ \t\n\r\v\f\0]+/", ' ', $string));
 
-        if (mb_strlen($string) > $min) {
+        if (mb_\strlen($string) > $min) {
             if ($max !== null) {
                 if (preg_match(sprintf('/^(.{%d,%d}?)[^\p{L}\d]/u', $min, $max - 1), $string, $M)) {
                     $string = $M[1];
@@ -185,7 +185,7 @@ class Text extends \SFW\Lazy\Sys
 
         $string = str_repeat(' ', $size);
 
-        for ($i = 0, $max = strlen($chars) - 1; $i < $size; $i++) {
+        for ($i = 0, $max = \strlen($chars) - 1; $i < $size; $i++) {
             $string[$i] = $chars[mt_rand(0, $max)];
         }
 

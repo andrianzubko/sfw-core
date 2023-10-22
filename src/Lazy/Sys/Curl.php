@@ -67,7 +67,7 @@ class Curl extends \SFW\Lazy\Sys
             flags: PREG_SPLIT_NO_EMPTY
         );
 
-        if ($this->info['header_size'] >= strlen($response)) {
+        if ($this->info['header_size'] >= \strlen($response)) {
             return '';
         }
 

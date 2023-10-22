@@ -2,6 +2,8 @@
 
 namespace SFW;
 
+use function array_key_exists;
+
 /**
  * Abstraction for Config classes.
  */
@@ -30,6 +32,14 @@ abstract class Config
             }
         }
 
-        return $_SERVER[$key] ?? self::$env[$key] ?? $default;
+        if (array_key_exists($key, $_SERVER)) {
+            return $_SERVER[$key];
+        }
+
+        if (array_key_exists($key, self::$env)) {
+            return self::$env[$key];
+        }
+
+        return $default;
     }
 }

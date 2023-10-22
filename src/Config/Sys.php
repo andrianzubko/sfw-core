@@ -3,12 +3,12 @@
 namespace SFW\Config;
 
 /**
- * System config (not available from templates).
+ * System configuration (not available from templates).
  */
 class Sys extends \SFW\Config
 {
     /**
-     * Returns array with config parameters.
+     * Returns array with configuration parameters.
      */
     public static function get(): array
     {
@@ -127,13 +127,13 @@ class Sys extends \SFW\Config
          */
         $sys['cacher_apc_ttl'] = 3600;
 
-        $sys['cacher_apc_ns'] = md5(__FILE__);
+        $sys['cacher_apc_ns'] = null;
 
         /* Memcached.
          */
-        $sys['cacher_memcached_ttl'] = $sys['cacher_apc_ttl'];
+        $sys['cacher_memcached_ttl'] = 3600;
 
-        $sys['cacher_memcached_ns'] = $sys['cacher_apc_ns'];
+        $sys['cacher_memcached_ns'] = null;
 
         $sys['cacher_memcached_servers'] = [['127.0.0.1', 11211]];
 
@@ -141,9 +141,9 @@ class Sys extends \SFW\Config
 
         /* Redis.
          */
-        $sys['cacher_redis_ttl'] = $sys['cacher_apc_ttl'];
+        $sys['cacher_redis_ttl'] = 3600;
 
-        $sys['cacher_redis_ns'] = $sys['cacher_apc_ns'];
+        $sys['cacher_redis_ns'] = null;
 
         $sys['cacher_redis_connect'] = ['127.0.0.1', 6379, 2.5];
 

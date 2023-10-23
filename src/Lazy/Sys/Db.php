@@ -25,6 +25,6 @@ class Db extends \SFW\Lazy\Sys
      */
     public static function getInstance(): \SFW\Databaser\Driver
     {
-        return self::sys(self::$sys['config']['db_default']);
+        return self::sys(self::$sys['config']['db']);
     }
 }

@@ -59,11 +59,6 @@ abstract class Runner extends Base
             self::$sys['config'] = \App\Config\Sys::init();
 
             // }}}
-            // {{{ initializing your configuration
-
-            self::$my['config'] = \App\Config\My::init();
-
-            // }}}
             // {{{ custom error handler
 
             set_error_handler($this->errorHandler(...));
@@ -99,6 +94,11 @@ abstract class Runner extends Base
             // {{{ registering cleanups at shutdown
 
             register_shutdown_function($this->cleanupAtShutdown(...));
+
+            // }}}
+            // {{{ initializing your configuration
+
+            self::$my['config'] = \App\Config\My::init();
 
             // }}}
             // {{{ initializing your environment
@@ -221,7 +221,7 @@ abstract class Runner extends Base
             $url = parse_url(self::$sys['config']['url']);
 
             if (empty($url) || !isset($url['host'])) {
-                throw new Exception\BadConfiguration('Incorrect url in system config');
+                throw new Exception\BadConfiguration('Incorrect url in system configuration');
             }
 
             self::$sys['url_scheme'] = $url['scheme'] ?? 'http';

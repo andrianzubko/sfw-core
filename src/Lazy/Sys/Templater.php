@@ -25,6 +25,6 @@ class Templater extends \SFW\Lazy\Sys
      */
     public static function getInstance(): \SFW\Templater\Processor
     {
-        return self::sys(self::$sys['config']['templater_default']);
+        return self::sys(self::$sys['config']['templater']);
     }
 }

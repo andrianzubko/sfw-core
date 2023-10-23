@@ -14,14 +14,14 @@ abstract class Base extends \stdClass
     protected static array $sys = [];
 
     /**
-     * Instances of system Lazy classes.
-     */
-    protected static array $sysLazyInstances = [];
-
-    /**
      * Your environment.
      */
     protected static array $my = [];
+
+    /**
+     * Instances of system Lazy classes.
+     */
+    protected static array $sysLazyInstances = [];
 
     /**
      * Instances of your Lazy classes.

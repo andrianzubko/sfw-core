@@ -56,7 +56,7 @@ abstract class Sys extends \SFW\Config
          *
          * string 'Pgsql' or 'Mysql'
          */
-        $config['db_default'] = 'Pgsql';
+        $config['db'] = 'Pgsql';
 
         /**
          * Pgsql.
@@ -130,7 +130,7 @@ abstract class Sys extends \SFW\Config
          *
          * string 'Nocache', 'Apc', 'Memcached' or 'Redis'
          */
-        $config['cacher_default'] = 'Apc';
+        $config['cacher'] = 'Apc';
 
         /* Apc.
          */
@@ -165,7 +165,7 @@ abstract class Sys extends \SFW\Config
          *
          * string 'Native', 'Twig' or 'Xslt'
          */
-        $config['templater_default'] = 'Native';
+        $config['templater'] = 'Native';
 
         /* Native
          */

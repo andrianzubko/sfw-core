@@ -54,13 +54,14 @@ abstract class Runner extends Base
             define('APP_DIR', dirname((new \ReflectionClass(static::class))->getFileName(), 2));
 
             // }}}
-            // {{{ configurations
+            // {{{ initializing system configuration
 
-            self::$config['sys'] = \App\Config\Sys::get();
+            self::$sys['config'] = \App\Config\Sys::init();
 
-            self::$config['my'] = \App\Config\My::get();
+            // }}}
+            // {{{ initializing your configuration
 
-            self::$config['shared'] = \App\Config\Shared::get();
+            self::$my['config'] = \App\Config\My::init();
 
             // }}}
             // {{{ custom error handler
@@ -70,12 +71,9 @@ abstract class Runner extends Base
             // }}}
             // {{{ default timezone
 
-            if (!date_default_timezone_set(self::$config['sys']['timezone'])) {
+            if (!date_default_timezone_set(self::$sys['config']['timezone'])) {
                 throw new Exception\BadConfiguration(
-                    sprintf(
-                        'Unable to set timezone %s',
-                            self::$config['sys']['timezone']
-                    )
+                    sprintf('Unable to set timezone %s', self::$sys['config']['timezone'])
                 );
             }
 
@@ -130,9 +128,13 @@ abstract class Runner extends Base
         } catch (\Throwable $e) {
             // {{{ something wrong
 
-            self::sys('Notifier')->removeAll();
+            if (isset(self::$sysLazyInstances['Notifier'])) {
+                self::sys('Notifier')->removeAll();
+            }
 
-            self::sys('Shutdown')->unregisterAll();
+            if (isset(self::$sysLazyInstances['Shutdown'])) {
+                self::sys('Shutdown')->unregisterAll();
+            }
 
             self::sys('Logger')->error($e);
 
@@ -215,8 +217,8 @@ abstract class Runner extends Base
     {
         self::$sys['timestamp'] = (int) self::$sys['started'];
 
-        if (self::$config['sys']['url'] !== null) {
-            $url = parse_url(self::$config['sys']['url']);
+        if (self::$sys['config']['url'] !== null) {
+            $url = parse_url(self::$sys['config']['url']);
 
             if (empty($url) || !isset($url['host'])) {
                 throw new Exception\BadConfiguration('Incorrect url in system config');
@@ -237,7 +239,7 @@ abstract class Runner extends Base
 
         self::$sys['url'] = self::$sys['url_scheme'] . '://' . self::$sys['url_host'];
 
-        if (self::$config['sys']['merger_sources'] !== null && PHP_SAPI !== 'cli') {
+        if (PHP_SAPI !== 'cli' && self::$sys['config']['merger_sources'] !== null) {
             self::$sys['merged'] = Merger::process();
         }
     }

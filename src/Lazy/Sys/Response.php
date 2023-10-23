@@ -102,7 +102,7 @@ class Response extends \SFW\Lazy\Sys
 
         $mime ??= self::sys($processor)->getMime();
 
-        if (self::$config['sys']['response_stats'] !== null && $mime === 'text/html') {
+        if (self::$sys['config']['response_stats'] !== null && $mime === 'text/html') {
             $timer = gettimeofday(true) - self::$sys['started'];
 
             $contents .= str_replace(
@@ -120,7 +120,7 @@ class Response extends \SFW\Lazy\Sys
                     self::sys('Templater')->getCounter(),
                     sprintf('%.3f', self::sys('Templater')->getTimer()),
                     sprintf('%.3f', $timer),
-                ], self::$config['sys']['response_stats']
+                ], self::$sys['config']['response_stats']
             );
         }
 
@@ -208,9 +208,9 @@ class Response extends \SFW\Lazy\Sys
             header("Content-Disposition: $disposition");
         }
 
-        $compressMimes = self::$config['sys']['response_compress_mimes'];
+        $compressMimes = self::$sys['config']['response_compress_mimes'];
 
-        $compressMin = self::$config['sys']['response_compress_min'];
+        $compressMin = self::$sys['config']['response_compress_min'];
 
         if (isset($compressMimes, $_SERVER['HTTP_ACCEPT_ENCODING'])
             && \strlen($contents) > $compressMin
@@ -279,7 +279,7 @@ class Response extends \SFW\Lazy\Sys
         if (!headers_sent() && !ob_get_length()) {
             http_response_code($code);
 
-            $errorDocument = self::$config['sys']['response_error_document'];
+            $errorDocument = self::$sys['config']['response_error_document'];
 
             if ($errorDocument !== null) {
                 $errorDocument = str_replace('{CODE}', $code, $errorDocument);

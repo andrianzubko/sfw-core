@@ -22,21 +22,21 @@ class Pgsql extends \SFW\Lazy\Sys
     protected function __construct()
     {
         $this->options = [
-            'host' => self::$config['sys']['db_pgsql_host'],
+            'host' => self::$sys['config']['db_pgsql_host'],
 
-            'port' => self::$config['sys']['db_pgsql_port'],
+            'port' => self::$sys['config']['db_pgsql_port'],
 
-            'db' => self::$config['sys']['db_pgsql_db'],
+            'db' => self::$sys['config']['db_pgsql_db'],
 
-            'user' => self::$config['sys']['db_pgsql_user'],
+            'user' => self::$sys['config']['db_pgsql_user'],
 
-            'pass' => self::$config['sys']['db_pgsql_pass'],
+            'pass' => self::$sys['config']['db_pgsql_pass'],
 
-            'persistent' => self::$config['sys']['db_pgsql_persistent'],
+            'persistent' => self::$sys['config']['db_pgsql_persistent'],
 
-            'charset' => self::$config['sys']['db_pgsql_charset'],
+            'charset' => self::$sys['config']['db_pgsql_charset'],
 
-            'mode' => self::$config['sys']['db_pgsql_mode'],
+            'mode' => self::$sys['config']['db_pgsql_mode'],
 
             'cleanup' => false,
         ];

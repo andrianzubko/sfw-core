@@ -25,9 +25,9 @@ class Controller extends \SFW\Router
     public static function getTarget(): array
     {
         if (self::$cache === false) {
-            self::$cache = @include self::$config['sys']['router_cache'];
+            self::$cache = @include self::$sys['config']['router_cache'];
 
-            if (self::$cache === false || self::$config['sys']['env'] !== 'prod' && static::isOutdated()) {
+            if (self::$cache === false || self::$sys['config']['env'] !== 'prod' && static::isOutdated()) {
                 static::rebuild();
             }
         }
@@ -67,7 +67,7 @@ class Controller extends \SFW\Router
     public static function genUrl(string $action, string|int|float|null ...$params): string
     {
         if (self::$cache === false) {
-            self::$cache = @include self::$config['sys']['router_cache'];
+            self::$cache = @include self::$sys['config']['router_cache'];
 
             if (self::$cache === false) {
                 static::rebuild();
@@ -124,7 +124,7 @@ class Controller extends \SFW\Router
             self::$cFiles = [];
 
             foreach (self::sys('Dir')->scan(APP_DIR . '/src/Controller', true, true) as $item) {
-                if (is_file($item) && \str_ends_with($item, '.php')) {
+                if (is_file($item) && str_ends_with($item, '.php')) {
                     self::$cFiles[] = $item;
                 }
             }
@@ -171,7 +171,7 @@ class Controller extends \SFW\Router
         $objects = [];
 
         foreach (get_declared_classes() as $class) {
-            if (\str_starts_with($class, 'App\\Controller\\')) {
+            if (str_starts_with($class, 'App\\Controller\\')) {
                 $rClass = new \ReflectionClass($class);
 
                 $objects[] = [$rClass, $class];
@@ -221,11 +221,11 @@ class Controller extends \SFW\Router
 
         self::$cache['regex'] = sprintf('{^(?|%s)$}', implode('|', self::$cache['regex']));
 
-        if (!self::sys('File')->putVar(self::$config['sys']['router_cache'], self::$cache, LOCK_EX)) {
+        if (!self::sys('File')->putVar(self::$sys['config']['router_cache'], self::$cache, LOCK_EX)) {
             throw new \SFW\Exception\Runtime(
                 sprintf(
                     'Unable to write file %s',
-                        self::$config['sys']['router_cache']
+                        self::$sys['config']['router_cache']
                 )
             );
         }

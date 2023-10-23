@@ -35,7 +35,7 @@ class Locker extends \SFW\Lazy\Sys
             throw new Logic("Lock with key '$key' is already in use");
         }
 
-        $file = str_replace('{KEY}', $key, self::$config['sys']['locker_file']);
+        $file = str_replace('{KEY}', $key, self::$sys['config']['locker_file']);
 
         if (!self::sys('Dir')->create(dirname($file))) {
             throw new Runtime(sprintf('Unable to create directory %s', dirname($file)));

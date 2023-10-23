@@ -22,22 +22,20 @@ class Twig extends \SFW\Lazy\Sys
     protected function __construct()
     {
         $this->options = [
-            'dir' => self::$config['sys']['templater_twig_dir'],
+            'dir' => self::$sys['config']['templater_twig_dir'],
 
-            'cache' => self::$config['sys']['templater_twig_cache'],
+            'cache' => self::$sys['config']['templater_twig_cache'],
 
-            'strict' => self::$config['sys']['templater_twig_strict'],
+            'strict' => self::$sys['config']['templater_twig_strict'],
 
-            'reload' => self::$config['sys']['env'] !== 'prod',
+            'reload' => self::$sys['config']['env'] !== 'prod',
 
-            'debug' => self::$config['sys']['debug'],
+            'debug' => self::$sys['config']['debug'],
 
             'globals' => [
-                'config' => self::$config['shared'],
+                'sys' => $this->filterConfig(self::$sys),
 
-                'sys' => self::$sys,
-
-                'my' => self::$my,
+                'my' => $this->filterConfig(self::$my),
             ],
             'functions' => [
                 'lc' => self::sys('Text')->lc(...),

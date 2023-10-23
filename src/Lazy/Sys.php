@@ -7,4 +7,15 @@ namespace SFW\Lazy;
  */
 abstract class Sys extends \SFW\Lazy
 {
+    /**
+     * Leave only allowed configuration parameters.
+     *
+     * @internal
+     */
+    protected function filterConfig(array $params): array
+    {
+        $params['config'] = array_intersect_key($params['config'], array_flip($params['config']['shared']));
+
+        return $params;
+    }
 }

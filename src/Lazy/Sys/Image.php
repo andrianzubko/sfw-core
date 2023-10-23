@@ -53,7 +53,7 @@ class Image extends \SFW\Lazy\Sys
             $success = imagepng($image, $file, $quality);
 
             if ($success) {
-                @chmod($file, self::$config['sys']['file_mode']);
+                @chmod($file, self::$sys['config']['file_mode']);
             }
 
             return $success;
@@ -87,7 +87,7 @@ class Image extends \SFW\Lazy\Sys
             $success = imagejpeg($fixed, $file, $quality);
 
             if ($success) {
-                @chmod($file, self::$config['sys']['file_mode']);
+                @chmod($file, self::$sys['config']['file_mode']);
             }
 
             return $success;

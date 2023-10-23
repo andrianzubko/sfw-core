@@ -13,9 +13,9 @@ abstract class Config
     private static array $env;
 
     /**
-     * Returns array with configuration parameters.
+     * If you need some of these parameters to be available in templates, list them in 'shared' parameter.
      */
-    abstract public static function get(): array;
+    abstract public static function init(): array;
 
     /**
      * Gets parameter from server environment or env file.

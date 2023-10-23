@@ -22,18 +22,16 @@ class Xslt extends \SFW\Lazy\Sys
     protected function __construct()
     {
         $this->options = [
-            'dir' => self::$config['sys']['templater_xslt_dir'],
+            'dir' => self::$sys['config']['templater_xslt_dir'],
 
-            'root' => self::$config['sys']['templater_xslt_root'],
+            'root' => self::$sys['config']['templater_xslt_root'],
 
-            'item' => self::$config['sys']['templater_xslt_item'],
+            'item' => self::$sys['config']['templater_xslt_item'],
 
             'globals' => [
-                'config' => self::$config['shared'],
+                'sys' => $this->filterConfig(self::$sys),
 
-                'sys' => self::$sys,
-
-                'my' => self::$my,
+                'my' => $this->filterConfig(self::$my),
             ],
         ];
     }

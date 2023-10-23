@@ -9,24 +9,19 @@ namespace SFW;
 abstract class Base extends \stdClass
 {
     /**
-     * All configurations (only shared are available from templates).
-     */
-    protected static array $config = [];
-
-    /**
-     * System environment (available from templates).
+     * System environment.
      */
     protected static array $sys = [];
-
-    /**
-     * Your environment (available from templates).
-     */
-    protected static array $my = [];
 
     /**
      * Instances of system Lazy classes.
      */
     protected static array $sysLazyInstances = [];
+
+    /**
+     * Your environment.
+     */
+    protected static array $my = [];
 
     /**
      * Instances of your Lazy classes.

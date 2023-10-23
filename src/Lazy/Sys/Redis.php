@@ -22,13 +22,13 @@ class Redis extends \SFW\Lazy\Sys
     protected function __construct()
     {
         $this->options = [
-            'ttl' => self::$config['sys']['cacher_redis_ttl'],
+            'ttl' => self::$sys['config']['cacher_redis_ttl'],
 
-            'ns' => self::$config['sys']['cacher_redis_ns'],
+            'ns' => self::$sys['config']['cacher_redis_ns'],
 
-            'connect' => self::$config['sys']['cacher_redis_connect'],
+            'connect' => self::$sys['config']['cacher_redis_connect'],
 
-            'options' => self::$config['sys']['cacher_redis_options'],
+            'options' => self::$sys['config']['cacher_redis_options'],
         ];
     }
 

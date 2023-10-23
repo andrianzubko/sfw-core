@@ -22,18 +22,16 @@ class Native extends \SFW\Lazy\Sys
     protected function __construct()
     {
         $this->options = [
-            'dir' => self::$config['sys']['templater_native_dir'],
+            'dir' => self::$sys['config']['templater_native_dir'],
 
-            'minify' => self::$config['sys']['templater_native_minify'],
+            'minify' => self::$sys['config']['templater_native_minify'],
 
-            'debug' => self::$config['sys']['debug'],
+            'debug' => self::$sys['config']['debug'],
 
             'properties' => [
-                'config' => self::$config['shared'],
+                'sys' => $this->filterConfig(self::$sys),
 
-                'sys' => self::$sys,
-
-                'my' => self::$my,
+                'my' => $this->filterConfig(self::$my),
 
                 'lc' => self::sys('Text')->lc(...),
 

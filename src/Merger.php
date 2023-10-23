@@ -27,11 +27,11 @@ class Merger extends Base
      */
     public static function process(): array
     {
-        self::$cache = @include self::$config['sys']['merger_cache'];
+        self::$cache = @include self::$sys['config']['merger_cache'];
 
         if (self::$cache !== false
-            && self::$config['sys']['env'] === 'prod'
-            && self::$config['sys']['debug'] === self::$cache['debug']
+            && self::$sys['config']['env'] === 'prod'
+            && self::$sys['config']['debug'] === self::$cache['debug']
         ) {
             return static::getPaths();
         }
@@ -58,9 +58,9 @@ class Merger extends Base
 
         $time = self::$cache ? self::$cache['time'] : 0;
 
-        $location = self::$config['sys']['merger_location'];
+        $location = self::$sys['config']['merger_location'];
 
-        foreach (self::$config['sys']['merger_sources'] as $target => $sources) {
+        foreach (self::$sys['config']['merger_sources'] as $target => $sources) {
             $paths[$target] = "$location/$time.$target";
         }
 
@@ -75,7 +75,7 @@ class Merger extends Base
         if (!isset(self::$sources)) {
             self::$sources = [];
 
-            foreach (self::$config['sys']['merger_sources'] as $target => $sources) {
+            foreach (self::$sys['config']['merger_sources'] as $target => $sources) {
                 foreach ((array) $sources as $source) {
                     if (preg_match('/\.(css|js)$/', $source, $M)) {
                         self::$sources[$M[1]][$target] ??= [];
@@ -98,13 +98,13 @@ class Merger extends Base
      */
     protected static function isOutdated(): bool
     {
-        if (self::$cache === false || self::$config['sys']['debug'] !== self::$cache['debug']) {
+        if (self::$cache === false || self::$sys['config']['debug'] !== self::$cache['debug']) {
             return true;
         }
 
         $targets = [];
 
-        foreach (self::sys('Dir')->scan(self::$config['sys']['merger_dir'], false, true) as $item) {
+        foreach (self::sys('Dir')->scan(self::$sys['config']['merger_dir'], false, true) as $item) {
             if (is_file($item)
                 && preg_match('~/(\d+)\.(.+)$~', $item, $M)
                     && (int) $M[1] === self::$cache['time']
@@ -142,11 +142,11 @@ class Merger extends Base
      */
     protected static function recombine(): void
     {
-        self::sys('Dir')->clear(self::$config['sys']['merger_dir']);
+        self::sys('Dir')->clear(self::$sys['config']['merger_dir']);
 
         self::$cache = [
             'time' => time(),
-            'debug' => self::$config['sys']['debug'],
+            'debug' => self::$sys['config']['debug'],
         ];
 
         $sources = static::getSources();
@@ -155,7 +155,7 @@ class Merger extends Base
             foreach ($sources[$type] as $target => $files) {
                 $file = sprintf(
                     '%s/%s.%s',
-                        self::$config['sys']['merger_dir'],
+                        self::$sys['config']['merger_dir'],
                         self::$cache['time'],
                         $target
                 );
@@ -172,11 +172,11 @@ class Merger extends Base
             }
         }
 
-        if (!self::sys('File')->putVar(self::$config['sys']['merger_cache'], self::$cache)) {
+        if (!self::sys('File')->putVar(self::$sys['config']['merger_cache'], self::$cache)) {
             throw new Exception\Runtime(
                 sprintf(
                     'Unable to write file %s',
-                        self::$config['sys']['merger_cache']
+                        self::$sys['config']['merger_cache']
                 )
             );
         }
@@ -192,7 +192,7 @@ class Merger extends Base
     {
         $merged = static::mergeFiles($files);
 
-        if (!self::$config['sys']['debug']) {
+        if (!self::$sys['config']['debug']) {
             try {
                 $merged = (new JSMin($merged))->min();
             } catch (\Exception $e) {
@@ -214,7 +214,7 @@ class Merger extends Base
     {
         $merged = static::mergeFiles($files);
 
-        if (!self::$config['sys']['debug']) {
+        if (!self::$sys['config']['debug']) {
             $merged = self::sys('Text')->fTrim(preg_replace('~/\*(.*?)\*/~us', '', $merged));
         }
 
@@ -223,9 +223,9 @@ class Merger extends Base
                 $data = $type = false;
 
                 if (preg_match('/\.(gif|png|jpg|jpeg|svg|woff|woff2)$/ui', $M[1], $N)
-                    && \str_starts_with($M[1], '/')
-                        && !\str_starts_with($M[1], '//')
-                            && !\str_contains($M[1], '..')
+                    && str_starts_with($M[1], '/')
+                        && !str_starts_with($M[1], '//')
+                            && !str_contains($M[1], '..')
                 ) {
                     $type = strtolower($N[1]);
 

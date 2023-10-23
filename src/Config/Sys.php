@@ -3,17 +3,26 @@
 namespace SFW\Config;
 
 /**
- * System configuration (not available from templates).
+ * Abstraction for system configuration.
  */
-class Sys extends \SFW\Config
+abstract class Sys extends \SFW\Config
 {
     /**
-     * Returns array with configuration parameters.
+     * Default system configuration.
      */
-    public static function get(): array
+    protected static function defaults(): array
     {
         $sys = [];
 
+        // {{{ access control
+
+        /* List of parameter names that will be available in templates.
+         *
+         * array
+         */
+        $sys['shared'] = [];
+
+        // }}}
         // {{{ general
 
         /* Environment mode.

@@ -35,7 +35,7 @@ class File extends \SFW\Lazy\Sys
             return false;
         }
 
-        @chmod($file, self::$config['sys']['file_mode']);
+        @chmod($file, self::$sys['config']['file_mode']);
 
         return true;
     }
@@ -80,7 +80,7 @@ class File extends \SFW\Lazy\Sys
             return false;
         }
 
-        @chmod($target, self::$config['sys']['file_mode']);
+        @chmod($target, self::$sys['config']['file_mode']);
 
         return true;
     }

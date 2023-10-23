@@ -62,7 +62,7 @@ class Transaction extends \SFW\Lazy\Sys
     {
         $this->setDriver($driver);
 
-        for ($retry = 1; $retry <= self::$config['sys']['transaction_retries']; $retry++) {
+        for ($retry = 1; $retry <= self::$sys['config']['transaction_retries']; $retry++) {
             try {
                 $this->events['after_commit'] = [];
 
@@ -86,7 +86,7 @@ class Transaction extends \SFW\Lazy\Sys
                 }
 
                 if (\in_array($e->getSqlState(), $retryAt, true)
-                    && $retry < self::$config['sys']['transaction_retries']
+                    && $retry < self::$sys['config']['transaction_retries']
                 ) {
                     self::sys('Logger')->transactionFail(LogLevel::INFO, $e->getSqlState(), $retry);
                 } else {

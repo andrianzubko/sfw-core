@@ -76,7 +76,7 @@ class Dir extends \SFW\Lazy\Sys
         $success = mkdir($dir, recursive: true);
 
         if ($success) {
-            @chmod($dir, self::$config['sys']['dir_mode']);
+            @chmod($dir, self::$sys['config']['dir_mode']);
         }
 
         return $success;

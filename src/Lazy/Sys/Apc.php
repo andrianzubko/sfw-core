@@ -22,9 +22,9 @@ class Apc extends \SFW\Lazy\Sys
     protected function __construct()
     {
         $this->options = [
-            'ttl' => self::$config['sys']['cacher_apc_ttl'],
+            'ttl' => self::$sys['config']['cacher_apc_ttl'],
 
-            'ns' => self::$config['sys']['cacher_apc_ns'],
+            'ns' => self::$sys['config']['cacher_apc_ns'],
         ];
     }
 

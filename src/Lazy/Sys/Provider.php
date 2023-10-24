@@ -67,10 +67,10 @@ class Provider extends \SFW\Lazy\Sys implements ListenerProviderInterface
     /**
      * Removes listeners by event type.
      */
-    public function removeListenersByType(string $type): self
+    public function removeListenersByType(array|string $type): self
     {
         foreach ($this->listeners as $i => $listener) {
-            if (is_a($listener->type, $type, true)) {
+            if (\in_array($listener->type, (array) $type, true)) {
                 unset($this->listeners[$i]);
             }
         }
@@ -81,10 +81,10 @@ class Provider extends \SFW\Lazy\Sys implements ListenerProviderInterface
     /**
      * Removes listeners by tag.
      */
-    public function removeListenersByTag(string $tag): self
+    public function removeListenersByTag(array|string $tag): self
     {
         foreach ($this->listeners as $i => $listener) {
-            if ($listener->tag === $tag) {
+            if (\in_array($listener->tag, (array) $tag, true)) {
                 unset($this->listeners[$i]);
             }
         }
@@ -108,7 +108,7 @@ class Provider extends \SFW\Lazy\Sys implements ListenerProviderInterface
     public function getListenersForEvent(object $event): iterable
     {
         foreach ($this->listeners as $i => $listener) {
-            if (is_a($listener->type, $event::class, true)) {
+            if ($event instanceof $listener->type) {
                 if (!$listener->persistent) {
                     unset($this->listeners[$i]);
                 }

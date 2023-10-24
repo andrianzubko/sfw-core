@@ -7,6 +7,7 @@ namespace PHPSTORM_META {
         'Curl',
         'Db',
         'Dir',
+        'Dispatcher',
         'File',
         'Image',
         'Locker',
@@ -18,10 +19,10 @@ namespace PHPSTORM_META {
         'Notifier',
         'Paginator',
         'Pgsql',
+        'Provider',
         'Redis',
         'Response',
         'Router',
-        'Shutdown',
         'Templater',
         'Text',
         'Transaction',
@@ -32,4 +33,7 @@ namespace PHPSTORM_META {
     override(\SFW\Base::sys(0), map([
         '' => 'App\Lazy\My\@|\SFW\Lazy\Sys\@',
     ]));
+
+    override(\App\Lazy\Sys\Dispatcher::dispatch(0), type(0));
+    override(\SFW\Lazy\Sys\Dispatcher::dispatch(0), type(0));
 }

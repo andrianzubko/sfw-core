@@ -3,6 +3,7 @@
 namespace SFW\Lazy\Sys;
 
 use PHPMailer\PHPMailer\{PHPMailer, Exception AS PHPMailerException};
+use SFW\Exception\Logic;
 
 /**
  * Notifier.
@@ -32,8 +33,8 @@ class Notifier extends \SFW\Lazy\Sys
 
         $this->defaultStruct->replies = self::$sys['config']['notifier_replies'];
 
-        register_shutdown_function(
-            function () {
+        self::sys('Provider')->addListener(
+            function (\SFW\Event\Shutdown $event) {
                 register_shutdown_function($this->processAll(...));
             }
         );
@@ -44,11 +45,15 @@ class Notifier extends \SFW\Lazy\Sys
      */
     public function add(\SFW\Notify $notify): self
     {
-        self::sys('Transaction')->addListener('after_commit',
-            function () use ($notify) {
-                $this->notifies[] = $notify;
-            }
-        );
+        if (self::sys('Db')->isInTrans()) {
+            self::sys('Provider')->addListener(
+                function (\SFW\Event\TransactionCommitted $event) use ($notify) {
+                    $this->notifies[] = $notify;
+                }
+            );
+        } else {
+            $this->notifies[] = $notify;
+        }
 
         return $this;
     }
@@ -74,19 +79,9 @@ class Notifier extends \SFW\Lazy\Sys
     }
 
     /**
-     * Remove all notifies from queue.
-     */
-    public function removeAll(): self
-    {
-        $this->notifies = [];
-
-        return $this;
-    }
-
-    /**
      * Sending single message.
      *
-     * @throws \SFW\Exception\Logic
+     * @throws Logic
      * @throws PHPMailerException
      */
     protected function send(\SFW\NotifyStruct $struct): void
@@ -100,7 +95,7 @@ class Notifier extends \SFW\Lazy\Sys
         $mailer->msgHTML($struct->body);
 
         if (empty($struct->sender)) {
-            throw new \SFW\Exception\Logic('No sender in notify');
+            throw new Logic('No sender in notify');
         }
 
         $mailer->setFrom(...(array) $struct->sender);
@@ -110,7 +105,7 @@ class Notifier extends \SFW\Lazy\Sys
         }
 
         if (empty($struct->recipients)) {
-            throw new \SFW\Exception\Logic('No recipients in notify');
+            throw new Logic('No recipients in notify');
         }
 
         foreach ($struct->recipients as $item) {

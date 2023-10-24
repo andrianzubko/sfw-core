@@ -91,9 +91,9 @@ abstract class Runner extends Base
             $this->sysEnvironment();
 
             // }}}
-            // {{{ registering cleanups at shutdown
+            // {{{ registering cleanups and dispatch events at shutdown
 
-            register_shutdown_function($this->cleanupAtShutdown(...));
+            register_shutdown_function($this->cleanupAndDispatchEventsAtShutdown(...));
 
             // }}}
             // {{{ initializing your configuration
@@ -128,13 +128,7 @@ abstract class Runner extends Base
         } catch (\Throwable $e) {
             // {{{ something wrong
 
-            if (isset(self::$sysLazyInstances['Notifier'])) {
-                self::sys('Notifier')->removeAll();
-            }
-
-            if (isset(self::$sysLazyInstances['Shutdown'])) {
-                self::sys('Shutdown')->unregisterAll();
-            }
+            self::sys('Provider')->removeAllListeners();
 
             self::sys('Logger')->error($e);
 
@@ -175,6 +169,44 @@ abstract class Runner extends Base
     }
 
     /**
+     * Initializes system environment.
+     *
+     * @throws Exception\BadConfiguration
+     */
+    private function sysEnvironment(): void
+    {
+        self::$sys['timestamp'] = (int) self::$sys['started'];
+
+        if (self::$sys['config']['url'] === null) {
+            self::$sys['url_scheme'] = $_SERVER['HTTP_SCHEME'];
+
+            self::$sys['url_host'] = $_SERVER['HTTP_HOST'];
+        } else {
+            $url = parse_url(self::$sys['config']['url']);
+
+            if (empty($url) || !isset($url['host'])) {
+                throw new Exception\BadConfiguration('Incorrect url in system configuration');
+            }
+
+            self::$sys['url_scheme'] = $url['scheme'] ?? 'http';
+
+            if (isset($url['port'])) {
+                self::$sys['url_host'] = $url['host'] . ':' . $url['port'];
+            } else {
+                self::$sys['url_host'] = $url['host'];
+            }
+        }
+
+        self::$sys['url'] = self::$sys['url_scheme'] . '://' . self::$sys['url_host'];
+
+        if (PHP_SAPI !== 'cli'
+            && self::$sys['config']['merger_sources'] !== null
+        ) {
+            self::$sys['merged'] = Merger::process();
+        }
+    }
+
+    /**
      * Custom error handler.
      *
      * @throws Exception\Logic
@@ -209,45 +241,9 @@ abstract class Runner extends Base
     }
 
     /**
-     * Initializes system environment.
-     *
-     * @throws Exception\BadConfiguration
+     * Cleanups and dispatch events at shutdown.
      */
-    private function sysEnvironment(): void
-    {
-        self::$sys['timestamp'] = (int) self::$sys['started'];
-
-        if (self::$sys['config']['url'] !== null) {
-            $url = parse_url(self::$sys['config']['url']);
-
-            if (empty($url) || !isset($url['host'])) {
-                throw new Exception\BadConfiguration('Incorrect url in system configuration');
-            }
-
-            self::$sys['url_scheme'] = $url['scheme'] ?? 'http';
-
-            if (isset($url['port'])) {
-                self::$sys['url_host'] = $url['host'] . ':' . $url['port'];
-            } else {
-                self::$sys['url_host'] = $url['host'];
-            }
-        } else {
-            self::$sys['url_scheme'] = $_SERVER['HTTP_SCHEME'];
-
-            self::$sys['url_host'] = $_SERVER['HTTP_HOST'];
-        }
-
-        self::$sys['url'] = self::$sys['url_scheme'] . '://' . self::$sys['url_host'];
-
-        if (PHP_SAPI !== 'cli' && self::$sys['config']['merger_sources'] !== null) {
-            self::$sys['merged'] = Merger::process();
-        }
-    }
-
-    /**
-     * Cleanups at shutdown.
-     */
-    private function cleanupAtShutdown(): void
+    private function cleanupAndDispatchEventsAtShutdown(): void
     {
         unset(self::$sysLazyInstances['Db']);
 
@@ -258,6 +254,12 @@ abstract class Runner extends Base
                 } catch (\SFW\Databaser\Exception) {
                 }
             }
+        }
+
+        try {
+            self::sys('Dispatcher')->dispatch(new Event\Shutdown(), true);
+        } catch (\Throwable $e) {
+            self::sys('Logger')->error($e);
         }
     }
 

@@ -10,11 +10,6 @@ use Psr\Log\LogLevel;
 class Transaction extends \SFW\Lazy\Sys
 {
     /**
-     * Registered events callbacks.
-     */
-    protected array $events = [];
-
-    /**
      * Just a placeholder.
      *
      * If your overrides constructor, don't forget call parent at first line! Even if it's empty!
@@ -64,18 +59,16 @@ class Transaction extends \SFW\Lazy\Sys
 
         for ($retry = 1; $retry <= self::$sys['config']['transaction_retries']; $retry++) {
             try {
-                $this->events['after_commit'] = [];
-
                 self::sys('Db')->begin($isolation);
 
                 if ($body() !== false) {
                     self::sys('Db')->commit();
 
-                    foreach ($this->events['after_commit'] as $callback) {
-                        $callback();
-                    }
+                    self::sys('Dispatcher')->dispatch(new \SFW\Event\TransactionCommitted());
                 } else {
                     self::sys('Db')->rollback();
+
+                    self::sys('Dispatcher')->dispatch(new \SFW\Event\TransactionRolledBack());
                 }
 
                 return $this->resetDriver();
@@ -84,6 +77,8 @@ class Transaction extends \SFW\Lazy\Sys
                     self::sys('Db')->rollback();
                 } catch (\SFW\Databaser\Exception) {
                 }
+
+                self::sys('Dispatcher')->dispatch(new \SFW\Event\TransactionAborted($e->getSqlState()));
 
                 if (\in_array($e->getSqlState(), $retryAt, true)
                     && $retry < self::$sys['config']['transaction_retries']
@@ -100,26 +95,6 @@ class Transaction extends \SFW\Lazy\Sys
         }
 
         return $this->resetDriver();
-    }
-
-    /**
-     * Adds event listener.
-     *
-     * @throws \SFW\Exception\Logic
-     */
-    public function addListener(string $eventName, callable $callback): self
-    {
-        if ($eventName === 'after_commit') {
-            if (self::sys('Db')->isInTrans()) {
-                $this->events[$eventName][] = $callback;
-            } else {
-                $callback();
-            }
-        } else {
-            throw new \SFW\Exception\Logic("Unknown event $eventName");
-        }
-
-        return $this;
     }
 
     /**

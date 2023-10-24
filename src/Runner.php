@@ -256,11 +256,7 @@ abstract class Runner extends Base
             }
         }
 
-        try {
-            self::sys('Dispatcher')->dispatch(new Event\Shutdown(), true);
-        } catch (\Throwable $e) {
-            self::sys('Logger')->error($e);
-        }
+        self::sys('Dispatcher')->dispatch(new Event\Shutdown(), true);
     }
 
     /**

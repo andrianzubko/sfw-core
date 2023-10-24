@@ -22,14 +22,22 @@ class Dispatcher extends \SFW\Lazy\Sys implements EventDispatcherInterface
     /**
      * Dispatches event.
      */
-    public function dispatch(object $event): object
+    public function dispatch(object $event, bool $silent = false): object
     {
         foreach (self::sys('Provider')->getListenersForEvent($event) as $listener) {
             if ($event instanceof StoppableEventInterface && $event->isPropagationStopped()) {
                 return $event;
             }
 
-            $listener($event);
+            if ($silent) {
+                try {
+                    $listener($event);
+                } catch (\Throwable $e) {
+                    self::sys('Logger')->error($e);
+                }
+            } else {
+                $listener($event);
+            }
         }
 
         return $event;

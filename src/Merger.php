@@ -145,10 +145,11 @@ class Merger extends Base
     {
         self::sys('Dir')->clear(self::$sys['config']['merger_dir']);
 
-        self::$cache = [
-            'time' => time(),
-            'debug' => self::$sys['config']['debug'],
-        ];
+        self::$cache = [];
+
+        self::$cache['time'] = time();
+
+        self::$cache['debug'] = self::$sys['config']['debug'];
 
         $sources = static::getSources();
 
@@ -175,10 +176,7 @@ class Merger extends Base
 
         if (!self::sys('File')->putVar(self::$sys['config']['merger_cache'], self::$cache)) {
             throw new Runtime(
-                sprintf(
-                    'Unable to write file %s',
-                        self::$sys['config']['merger_cache']
-                )
+                sprintf('Unable to write file %s', self::$sys['config']['merger_cache'])
             );
         }
     }

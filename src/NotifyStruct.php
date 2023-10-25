@@ -5,8 +5,7 @@ namespace SFW;
 /**
  * Message structure for Notify classes.
  */
-#[\AllowDynamicProperties]
-class NotifyStruct extends \stdClass
+class NotifyStruct
 {
     /**
      * Subject.
@@ -59,4 +58,9 @@ class NotifyStruct extends \stdClass
      * array(array('BINARY', 'FILENAME'), ...)
      */
     public array $attachmentStrings = [];
+
+    /**
+     * Any context for your needs.
+     */
+    public array $context = [];
 }

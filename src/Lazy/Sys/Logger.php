@@ -173,25 +173,20 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
     public function dbSlowQuery(float $timer, array $queries): void
     {
         if (self::$sys['config']['db_slow_queries_log'] !== null
-            || $timer < self::$sys['config']['db_slow_queries_min']
+            && $timer >= self::$sys['config']['db_slow_queries_min']
         ) {
-            return;
+            $host = idn_to_utf8($_SERVER['HTTP_HOST']) . $_SERVER['REQUEST_URI'];
+
+            $queries = implode("\n\t", array_map(fn($a) => self::sys('Text')->fTrim($a), $queries));
+
+            $message = sprintf("[%.2f] %s\n\t%s\n", $timer, $host, $queries);
+
+            $this->info($message, [
+                'destination' => self::$sys['config']['db_slow_queries_log'],
+
+                'append_file_and_line' => false,
+            ]);
         }
-
-        $message = sprintf("[%.2f] %s\n\t%s\n", $timer,
-            idn_to_utf8($_SERVER['HTTP_HOST']) . $_SERVER['REQUEST_URI'],
-            implode("\n\t",
-                array_map(
-                    fn($a) => self::sys('Text')->fTrim($a), $queries
-                )
-            )
-        );
-
-        $this->info($message, [
-            'destination' => self::$sys['config']['db_slow_queries_log'],
-
-            'append_file_and_line' => false,
-        ]);
     }
 
     /**
@@ -199,18 +194,16 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
      */
     public function transactionFail(string $level, string $state, int $retry): void
     {
-        if (self::$sys['config']['transaction_fails_log'] === null) {
-            return;
+        if (self::$sys['config']['transaction_fails_log'] !== null) {
+            $host = idn_to_utf8($_SERVER['HTTP_HOST']) . $_SERVER['REQUEST_URI'];
+
+            $message = sprintf("[%s] [%d] %s", $state, $retry, $host);
+
+            $this->log($level, $message, [
+                'destination' => self::$sys['config']['transaction_fails_log'],
+
+                'append_file_and_line' => false,
+            ]);
         }
-
-        $message = sprintf("[%s] [%d] %s", $state, $retry,
-            idn_to_utf8($_SERVER['HTTP_HOST']) . $_SERVER['REQUEST_URI']
-        );
-
-        $this->log($level, $message, [
-            'destination' => self::$sys['config']['transaction_fails_log'],
-
-            'append_file_and_line' => false,
-        ]);
     }
 }

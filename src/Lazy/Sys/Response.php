@@ -116,7 +116,9 @@ class Response extends \SFW\Lazy\Sys
                     '{TPL_T}',
                     '{ALL_T}',
                 ], [
-                    sprintf('%.3f', $timer - self::sys('Db')->getTimer() - self::sys($processor)->getTimer()),
+                    sprintf('%.3f',
+                        $timer - self::sys('Db')->getTimer() - self::sys($processor)->getTimer()
+                    ),
                     self::sys('Db')->getCounter(),
                     sprintf('%.3f', self::sys('Db')->getTimer()),
                     self::sys($processor)->getCounter(),

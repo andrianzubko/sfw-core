@@ -2,6 +2,8 @@
 
 namespace SFW\Router;
 
+use SFW\Exception\Runtime;
+
 /**
  * Routes from request url to Controller action.
  */
@@ -20,7 +22,7 @@ class Controller extends \SFW\Router
     /**
      * Gets class, method and action names.
      *
-     * @throws \SFW\Exception\Runtime
+     * @throws Runtime
      */
     public static function getTarget(): array
     {
@@ -48,11 +50,7 @@ class Controller extends \SFW\Router
             if ($action !== null) {
                 $chunks = explode('::', "App\\Controller\\$action");
 
-                return [
-                    $chunks[0],
-                    $chunks[1] ?? '__construct',
-                    $action,
-                ];
+                return [$chunks[0], $chunks[1] ?? '__construct', $action];
             }
         }
 
@@ -62,7 +60,7 @@ class Controller extends \SFW\Router
     /**
      * Generates URL by action (or FQMN) and optional parameters.
      *
-     * @throws \SFW\Exception\Runtime
+     * @throws Runtime
      */
     public static function genUrl(string $action, string|int|float|null ...$params): string
     {
@@ -92,10 +90,7 @@ class Controller extends \SFW\Router
                 );
             } else {
                 self::sys('Logger')->warning(
-                    sprintf(
-                        'Unable to make URL by action %s',
-                            $action
-                    ), debug_backtrace(2)[1]
+                    sprintf('Unable to make URL by action %s', $action), debug_backtrace(2)[1]
                 );
             }
 
@@ -152,7 +147,7 @@ class Controller extends \SFW\Router
     /**
      * Rescans controllers and rebuilds cache.
      *
-     * @throws \SFW\Exception\Runtime
+     * @throws Runtime
      */
     protected static function rebuild(): void
     {
@@ -160,13 +155,17 @@ class Controller extends \SFW\Router
             require_once $file;
         }
 
-        self::$cache = [
-            'time' => time(),
-            'static' => [],
-            'dynamic' => [],
-            'urls' => [],
-            'regex' => [],
-        ];
+        self::$cache = [];
+
+        self::$cache['time'] = time();
+
+        self::$cache['static'] = [];
+
+        self::$cache['dynamic'] = [];
+
+        self::$cache['urls'] = [];
+
+        self::$cache['regex'] = [];
 
         $objects = [];
 
@@ -222,11 +221,8 @@ class Controller extends \SFW\Router
         self::$cache['regex'] = sprintf('{^(?|%s)$}', implode('|', self::$cache['regex']));
 
         if (!self::sys('File')->putVar(self::$sys['config']['router_cache'], self::$cache, LOCK_EX)) {
-            throw new \SFW\Exception\Runtime(
-                sprintf(
-                    'Unable to write file %s',
-                        self::$sys['config']['router_cache']
-                )
+            throw new Runtime(
+                sprintf('Unable to write file %s', self::$sys['config']['router_cache'])
             );
         }
     }

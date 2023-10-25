@@ -2,6 +2,8 @@
 
 namespace SFW\Lazy\Sys;
 
+use SFW\Exception\Runtime;
+
 /**
  * Part of router.
  */
@@ -19,7 +21,7 @@ class Router extends \SFW\Lazy\Sys
     /**
      * Generates URL by action (or full namespace) and optional parameters.
      *
-     * @throws \SFW\Exception\Runtime
+     * @throws Runtime
      */
     public function genUrl(string $action, string|int|float|null ...$params): string
     {
@@ -29,7 +31,7 @@ class Router extends \SFW\Lazy\Sys
     /**
      * Generates absolute URL by action (or full namespace) and optional parameters.
      *
-     * @throws \SFW\Exception\Runtime
+     * @throws Runtime
      */
     public function genAbsoluteUrl(string $action, string|int|float|null ...$params): string
     {

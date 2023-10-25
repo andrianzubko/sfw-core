@@ -3,6 +3,7 @@
 namespace SFW\Lazy\Sys;
 
 use Psr\Log\LogLevel;
+use SFW\Event;
 
 /**
  * Transaction.
@@ -59,8 +60,8 @@ class Transaction extends \SFW\Lazy\Sys
 
         for ($retry = 1; $retry <= self::$sys['config']['transaction_retries']; $retry++) {
             self::sys('Provider')->removeListenersByType([
-                \SFW\Event\TransactionCommitted::class,
-                \SFW\Event\TransactionRolledBack::class
+                Event\TransactionCommitted::class,
+                Event\TransactionRolledBack::class
             ]);
 
             try {
@@ -69,11 +70,11 @@ class Transaction extends \SFW\Lazy\Sys
                 if ($body() !== false) {
                     self::sys('Db')->commit();
 
-                    self::sys('Dispatcher')->dispatch(new \SFW\Event\TransactionCommitted());
+                    self::sys('Dispatcher')->dispatch(new Event\TransactionCommitted());
                 } else {
                     self::sys('Db')->rollback();
 
-                    self::sys('Dispatcher')->dispatch(new \SFW\Event\TransactionRolledBack());
+                    self::sys('Dispatcher')->dispatch(new Event\TransactionRolledBack());
                 }
 
                 return $this->resetDriver();
@@ -105,7 +106,7 @@ class Transaction extends \SFW\Lazy\Sys
      */
     private function setDriver(string $driver): void
     {
-        self::$sysLazyInstances['Db'] = self::sys($driver);
+        self::$sysLazies['Db'] = self::sys($driver);
     }
 
     /**
@@ -113,7 +114,7 @@ class Transaction extends \SFW\Lazy\Sys
      */
     private function resetDriver(): self
     {
-        unset(self::$sysLazyInstances['Db']);
+        unset(self::$sysLazies['Db']);
 
         return $this;
     }

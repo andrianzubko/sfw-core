@@ -2,6 +2,8 @@
 
 namespace SFW;
 
+use SFW\Exception\{BadConfiguration, Logic};
+
 /**
  * Simplest framework runner.
  */
@@ -67,7 +69,7 @@ abstract class Runner extends Base
             // {{{ default timezone
 
             if (!date_default_timezone_set(self::$sys['config']['timezone'])) {
-                throw new Exception\BadConfiguration(
+                throw new BadConfiguration(
                     sprintf('Unable to set timezone %s', self::$sys['config']['timezone'])
                 );
             }
@@ -171,7 +173,7 @@ abstract class Runner extends Base
     /**
      * Initializes system environment.
      *
-     * @throws Exception\BadConfiguration
+     * @throws BadConfiguration
      */
     private function sysEnvironment(): void
     {
@@ -185,7 +187,7 @@ abstract class Runner extends Base
             $url = parse_url(self::$sys['config']['url']);
 
             if (empty($url) || !isset($url['host'])) {
-                throw new Exception\BadConfiguration('Incorrect url in system configuration');
+                throw new BadConfiguration('Incorrect url in system configuration');
             }
 
             self::$sys['url_scheme'] = $url['scheme'] ?? 'http';
@@ -209,7 +211,7 @@ abstract class Runner extends Base
     /**
      * Custom error handler.
      *
-     * @throws Exception\Logic
+     * @throws Logic
      */
     private function errorHandler(int $code, string $message, string $file, int $line): bool
     {
@@ -233,7 +235,7 @@ abstract class Runner extends Base
                     ]);
                     break;
                 default:
-                    throw (new Exception\Logic($message))->setFile($file)->setLine($line);
+                    throw (new Logic($message))->setFile($file)->setLine($line);
             }
         }
 
@@ -245,9 +247,9 @@ abstract class Runner extends Base
      */
     private function cleanupAndDispatchEventsAtShutdown(): void
     {
-        unset(self::$sysLazyInstances['Db']);
+        unset(self::$sysLazies['Db']);
 
-        foreach (self::$sysLazyInstances as $lazy) {
+        foreach (self::$sysLazies as $lazy) {
             if ($lazy instanceof \SFW\Databaser\Driver && $lazy->isInTrans()) {
                 try {
                     $lazy->rollback();

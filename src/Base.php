@@ -21,27 +21,27 @@ abstract class Base extends \stdClass
     /**
      * Instances of system Lazy classes.
      */
-    protected static array $sysLazyInstances = [];
+    protected static array $sysLazies = [];
 
     /**
      * Instances of your Lazy classes.
      */
-    protected static array $myLazyInstances = [];
+    protected static array $myLazies = [];
 
     /**
      * Accesses system Lazy classes from anywhere except templates.
      */
     final protected static function sys(string $name): object
     {
-        if (!isset(self::$sysLazyInstances[$name])) {
+        if (!isset(self::$sysLazies[$name])) {
             if (class_exists("App\\Lazy\\Sys\\$name")) {
-                self::$sysLazyInstances[$name] = "App\\Lazy\\Sys\\$name::getInstance"();
+                self::$sysLazies[$name] = "App\\Lazy\\Sys\\$name::getInstance"();
             } else {
-                self::$sysLazyInstances[$name] = "SFW\\Lazy\\Sys\\$name::getInstance"();
+                self::$sysLazies[$name] = "SFW\\Lazy\\Sys\\$name::getInstance"();
             }
         }
 
-        return self::$sysLazyInstances[$name];
+        return self::$sysLazies[$name];
     }
 
     /**
@@ -49,10 +49,10 @@ abstract class Base extends \stdClass
      */
     final protected static function my(string $name): object
     {
-        if (!isset(self::$myLazyInstances[$name])) {
-            self::$myLazyInstances[$name] = "App\\Lazy\\My\\$name::getInstance"();
+        if (!isset(self::$myLazies[$name])) {
+            self::$myLazies[$name] = "App\\Lazy\\My\\$name::getInstance"();
         }
 
-        return self::$myLazyInstances[$name];
+        return self::$myLazies[$name];
     }
 }

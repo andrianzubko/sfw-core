@@ -2,6 +2,8 @@
 
 namespace SFW\Lazy\Sys;
 
+use SFW\Exception\Runtime;
+
 /**
  * Dir functions.
  */
@@ -187,7 +189,7 @@ class Dir extends \SFW\Lazy\Sys
     /**
      * Makes temporary directory.
      *
-     * @throws \SFW\Exception\Runtime;
+     * @throws Runtime;
      */
     public function temporary(): string
     {
@@ -195,7 +197,7 @@ class Dir extends \SFW\Lazy\Sys
             $tempDir = realpath(sys_get_temp_dir());
 
             if ($tempDir === false) {
-                throw new \SFW\Exception\Runtime('Invalid system temporary directory');
+                throw new Runtime('Invalid system temporary directory');
             }
 
             $this->tempDir = $tempDir;
@@ -227,6 +229,6 @@ class Dir extends \SFW\Lazy\Sys
             }
         }
 
-        throw new \SFW\Exception\Runtime('Unable to create temporary subdirectory');
+        throw new Runtime('Unable to create temporary subdirectory');
     }
 }

@@ -3,6 +3,7 @@
 namespace SFW;
 
 use JSMin\JSMin;
+use SFW\Exception\{Logic, Runtime};
 
 /**
  * JS and CSS merger.
@@ -22,8 +23,8 @@ class Merger extends Base
     /**
      * Recombines if needed and returns merged paths.
      *
-     * @throws Exception\Logic
-     * @throws Exception\Runtime
+     * @throws Logic
+     * @throws Runtime
      */
     public static function process(): array
     {
@@ -137,8 +138,8 @@ class Merger extends Base
     /**
      * Recombines all.
      *
-     * @throws Exception\Logic
-     * @throws Exception\Runtime
+     * @throws Logic
+     * @throws Runtime
      */
     protected static function recombine(): void
     {
@@ -167,13 +168,13 @@ class Merger extends Base
                 }
 
                 if (!self::sys('File')->put($file, $contents)) {
-                    throw new Exception\Runtime("Unable to write file $file");
+                    throw new Runtime("Unable to write file $file");
                 }
             }
         }
 
         if (!self::sys('File')->putVar(self::$sys['config']['merger_cache'], self::$cache)) {
-            throw new Exception\Runtime(
+            throw new Runtime(
                 sprintf(
                     'Unable to write file %s',
                         self::$sys['config']['merger_cache']
@@ -185,8 +186,8 @@ class Merger extends Base
     /**
      * Merges JS.
      *
-     * @throws Exception\Logic
-     * @throws Exception\Runtime
+     * @throws Logic
+     * @throws Runtime
      */
     protected static function mergeJs(array $files): string
     {
@@ -196,7 +197,7 @@ class Merger extends Base
             try {
                 $merged = (new JSMin($merged))->min();
             } catch (\Exception $e) {
-                throw (new Exception\Logic($e->getMessage()))
+                throw (new Logic($e->getMessage()))
                     ->setFile($e->getFile())
                     ->setLine($e->getLine());
             }
@@ -208,7 +209,7 @@ class Merger extends Base
     /**
      * Merges CSS.
      *
-     * @throws Exception\Runtime
+     * @throws Runtime
      */
     protected static function mergeCss(array $files): string
     {
@@ -254,7 +255,7 @@ class Merger extends Base
     /**
      * Merges files.
      *
-     * @throws Exception\Runtime
+     * @throws Runtime
      */
     protected static function mergeFiles(array $files): string
     {
@@ -264,7 +265,7 @@ class Merger extends Base
             $contents = self::sys('File')->get($file);
 
             if ($contents === false) {
-                throw new Exception\Runtime("Unable to read file $file");
+                throw new Runtime("Unable to read file $file");
             }
 
             $merged[] = $contents;

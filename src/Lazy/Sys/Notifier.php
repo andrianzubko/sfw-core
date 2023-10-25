@@ -4,6 +4,7 @@ namespace SFW\Lazy\Sys;
 
 use PHPMailer\PHPMailer\{PHPMailer, Exception AS PHPMailerException};
 use SFW\Exception\Logic;
+use SFW\{Event, Notify, NotifyStruct};
 
 /**
  * Notifier.
@@ -13,7 +14,7 @@ class Notifier extends \SFW\Lazy\Sys
     /**
      * Default structure.
      */
-    protected \SFW\NotifyStruct $defaultStruct;
+    protected NotifyStruct $defaultStruct;
 
     /**
      * Prepared notifies.
@@ -27,14 +28,14 @@ class Notifier extends \SFW\Lazy\Sys
      */
     public function __construct()
     {
-        $this->defaultStruct = new \SFW\NotifyStruct();
+        $this->defaultStruct = new NotifyStruct();
 
         $this->defaultStruct->sender = self::$sys['config']['notifier_sender'];
 
         $this->defaultStruct->replies = self::$sys['config']['notifier_replies'];
 
         self::sys('Provider')->addListener(
-            function (\SFW\Event\Shutdown $event) {
+            function (Event\Shutdown $event) {
                 register_shutdown_function($this->processAll(...));
             }
         );
@@ -43,11 +44,11 @@ class Notifier extends \SFW\Lazy\Sys
     /**
      * Adding notify to pool.
      */
-    public function add(\SFW\Notify $notify): self
+    public function add(Notify $notify): self
     {
         if (self::sys('Db')->isInTrans()) {
             self::sys('Provider')->addListener(
-                function (\SFW\Event\TransactionCommitted $event) use ($notify) {
+                function (Event\TransactionCommitted $event) use ($notify) {
                     $this->notifies[] = $notify;
                 }
             );
@@ -84,7 +85,7 @@ class Notifier extends \SFW\Lazy\Sys
      * @throws Logic
      * @throws PHPMailerException
      */
-    protected function send(\SFW\NotifyStruct $struct): void
+    protected function send(NotifyStruct $struct): void
     {
         $mailer = new PHPMailer(true);
 

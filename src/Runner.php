@@ -46,14 +46,14 @@ abstract class Runner extends Base
             mb_internal_encoding('UTF-8');
 
             // }}}
-            // {{{ server parameters correcting
-
-            $this->correctServerParams();
-
-            // }}}
             // {{{ application dir
 
             define('APP_DIR', dirname((new \ReflectionClass(static::class))->getFileName(), 2));
+
+            // }}}
+            // {{{ server parameters correcting
+
+            $this->correctServerParams();
 
             // }}}
             // {{{ initializing system configuration
@@ -75,6 +75,20 @@ abstract class Runner extends Base
             }
 
             // }}}
+            // {{{ initializing system environment
+
+            $this->sysEnvironment();
+
+            // }}}
+            // {{{ redirecting to basic url if needed
+
+            if (self::$sys['url_scheme'] !== $_SERVER['HTTP_SCHEME']
+                || self::$sys['url_host'] !== $_SERVER['HTTP_HOST']
+            ) {
+                self::sys('Response')->redirect(self::$sys['url'] . $_SERVER['REQUEST_URI']);
+            }
+
+            // }}}
             // {{{ routing
 
             if (PHP_SAPI === 'cli') {
@@ -88,19 +102,14 @@ abstract class Runner extends Base
             }
 
             // }}}
-            // {{{ initializing system environment
+            // {{{ initializing your configuration
 
-            $this->sysEnvironment();
+            self::$my['config'] = \App\Config\My::init();
 
             // }}}
             // {{{ registering cleanups and dispatch events at shutdown
 
             register_shutdown_function($this->cleanupAndDispatchEventsAtShutdown(...));
-
-            // }}}
-            // {{{ initializing your configuration
-
-            self::$my['config'] = \App\Config\My::init();
 
             // }}}
             // {{{ initializing your environment

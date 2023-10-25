@@ -56,8 +56,6 @@ class Transaction extends \SFW\Lazy\Sys
      */
     protected function process(string $driver, \Closure $body, ?string $isolation, array $retryAt): self
     {
-        $this->setDriver($driver);
-
         for ($retry = 1; $retry <= self::$sys['config']['transaction_retries']; $retry++) {
             self::sys('Provider')->removeListenersByType([
                 Event\TransactionCommitted::class,
@@ -65,22 +63,22 @@ class Transaction extends \SFW\Lazy\Sys
             ]);
 
             try {
-                self::sys('Db')->begin($isolation);
+                self::sys($driver)->begin($isolation);
 
                 if ($body() !== false) {
-                    self::sys('Db')->commit();
+                    self::sys($driver)->commit();
 
                     self::sys('Dispatcher')->dispatch(new Event\TransactionCommitted());
                 } else {
-                    self::sys('Db')->rollback();
+                    self::sys($driver)->rollback();
 
                     self::sys('Dispatcher')->dispatch(new Event\TransactionRolledBack());
                 }
 
-                return $this->resetDriver();
+                return $this;
             } catch (\SFW\Databaser\Exception $e) {
                 try {
-                    self::sys('Db')->rollback();
+                    self::sys($driver)->rollback();
                 } catch (\SFW\Databaser\Exception) {
                 }
 
@@ -91,30 +89,10 @@ class Transaction extends \SFW\Lazy\Sys
                 } else {
                     self::sys('Logger')->transactionFail(LogLevel::ERROR, $e->getSqlState(), $retry);
 
-                    $this->resetDriver();
-
                     throw $e;
                 }
             }
         }
-
-        return $this->resetDriver();
-    }
-
-    /**
-     * Sets driver.
-     */
-    private function setDriver(string $driver): void
-    {
-        self::$sysLazies['Db'] = self::sys($driver);
-    }
-
-    /**
-     * Resets driver to default.
-     */
-    private function resetDriver(): self
-    {
-        unset(self::$sysLazies['Db']);
 
         return $this;
     }

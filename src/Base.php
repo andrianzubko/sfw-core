@@ -21,12 +21,12 @@ abstract class Base extends \stdClass
     /**
      * Instances of system Lazy classes.
      */
-    protected static array $sysLazies = [];
+    private static array $sysLazies = [];
 
     /**
      * Instances of your Lazy classes.
      */
-    protected static array $myLazies = [];
+    private static array $myLazies = [];
 
     /**
      * Accesses system Lazy classes from anywhere except templates.

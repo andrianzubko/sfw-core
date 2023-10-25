@@ -116,13 +116,14 @@ class Response extends \SFW\Lazy\Sys
                     '{TPL_T}',
                     '{ALL_T}',
                 ], [
-                    sprintf('%.3f', $timer - self::sys('Db')->getTimer() - self::sys('Templater')->getTimer()),
+                    sprintf('%.3f', $timer - self::sys('Db')->getTimer() - self::sys($processor)->getTimer()),
                     self::sys('Db')->getCounter(),
                     sprintf('%.3f', self::sys('Db')->getTimer()),
-                    self::sys('Templater')->getCounter(),
-                    sprintf('%.3f', self::sys('Templater')->getTimer()),
+                    self::sys($processor)->getCounter(),
+                    sprintf('%.3f', self::sys($processor)->getTimer()),
                     sprintf('%.3f', $timer),
-                ], self::$sys['config']['response_stats']
+                ],
+                self::$sys['config']['response_stats']
             );
         }
 
@@ -140,11 +141,11 @@ class Response extends \SFW\Lazy\Sys
         int $code = 200,
         int $expire = 0,
     ): void {
-        $contents = json_encode($contents,
-            $pretty ? JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT : JSON_UNESCAPED_UNICODE
-        );
-
-        $this->output('inline', $contents, 'application/json', $code, $expire, null);
+        $this->output('inline', json_encode($contents,
+            $pretty
+                ? JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT
+                : JSON_UNESCAPED_UNICODE
+        ), 'application/json', $code, $expire, null);
     }
 
     /**
@@ -216,8 +217,8 @@ class Response extends \SFW\Lazy\Sys
 
         if (isset($compressMimes, $_SERVER['HTTP_ACCEPT_ENCODING'])
             && \strlen($contents) > $compressMin
-                && \in_array($mime, $compressMimes, true)
-                    && preg_match('/(deflate|gzip)/', $_SERVER['HTTP_ACCEPT_ENCODING'], $M)
+            && \in_array($mime, $compressMimes, true)
+            && preg_match('/(deflate|gzip)/', $_SERVER['HTTP_ACCEPT_ENCODING'], $M)
         ) {
             if ($M[1] === 'gzip') {
                 $contents = gzencode($contents, 1);

@@ -247,10 +247,10 @@ abstract class Runner extends Base
      */
     private function cleanupAndDispatchEventsAtShutdown(): void
     {
-        unset(self::$sysLazies['Db']);
+        $sysLazies = (new \ReflectionClass(Base::class))->getStaticPropertyValue('sysLazies');
 
-        foreach (self::$sysLazies as $lazy) {
-            if ($lazy instanceof \SFW\Databaser\Driver && $lazy->isInTrans()) {
+        foreach ($sysLazies as $name => $lazy) {
+            if ($lazy instanceof \SFW\Databaser\Driver && $name !== 'Db' && $lazy->isInTrans()) {
                 try {
                     $lazy->rollback();
                 } catch (\SFW\Databaser\Exception) {

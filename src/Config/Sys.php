@@ -214,9 +214,9 @@ abstract class Sys extends \SFW\Config
 
         /* Default replies.
          *
-         * array('EMAIL' or array('EMAIL'[, 'NAME']), ...)
+         * ?array('EMAIL' or array('EMAIL'[, 'NAME']), ...)
          */
-        $config['notifier_replies'] = [];
+        $config['notifier_replies'] = null;
 
         // }}}
         // {{{ locker

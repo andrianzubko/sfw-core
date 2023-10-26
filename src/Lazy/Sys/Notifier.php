@@ -32,7 +32,7 @@ class Notifier extends \SFW\Lazy\Sys
 
         $this->defaultStruct->sender = self::$sys['config']['notifier_sender'];
 
-        $this->defaultStruct->replies = self::$sys['config']['notifier_replies'];
+        $this->defaultStruct->replies = self::$sys['config']['notifier_replies'] ?? [];
 
         self::sys('Provider')->addListener(
             function (Event\Shutdown $event) {

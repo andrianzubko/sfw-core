@@ -33,15 +33,9 @@ abstract class Base extends \stdClass
      */
     final protected static function sys(string $name): object
     {
-        if (!isset(self::$sysLazies[$name])) {
-            if (class_exists("App\\Lazy\\Sys\\$name")) {
-                self::$sysLazies[$name] = "App\\Lazy\\Sys\\$name::getInstance"();
-            } else {
-                self::$sysLazies[$name] = "SFW\\Lazy\\Sys\\$name::getInstance"();
-            }
-        }
-
-        return self::$sysLazies[$name];
+        return self::$sysLazies[$name] ??= class_exists("App\\Lazy\\Sys\\$name")
+            ? "App\\Lazy\\Sys\\$name::getInstance"()
+            : "SFW\\Lazy\\Sys\\$name::getInstance"();
     }
 
     /**
@@ -49,10 +43,6 @@ abstract class Base extends \stdClass
      */
     final protected static function my(string $name): object
     {
-        if (!isset(self::$myLazies[$name])) {
-            self::$myLazies[$name] = "App\\Lazy\\My\\$name::getInstance"();
-        }
-
-        return self::$myLazies[$name];
+        return self::$myLazies[$name] ??= "App\\Lazy\\My\\$name::getInstance"();
     }
 }

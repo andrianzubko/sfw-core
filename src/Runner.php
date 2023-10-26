@@ -17,14 +17,16 @@ abstract class Runner extends Base
         try {
             // {{{ prevent multiple initializations
 
-            if (isset(self::$sys['started'])) {
+            if (self::$sys) {
                 return;
             }
 
             // }}}
             // {{{ started time
 
-            self::$sys['started'] = gettimeofday(true);
+            self::$sys['timestamp_float'] = gettimeofday(true);
+
+            self::$sys['timestamp'] = (int) self::$sys['timestamp_float'];
 
             // }}}
             // {{{ important PHP parameters.
@@ -46,24 +48,66 @@ abstract class Runner extends Base
             mb_internal_encoding('UTF-8');
 
             // }}}
+            // {{{ some server parameters correcting
+
+            $_SERVER['HTTP_HOST'] ??= 'localhost';
+
+            $_SERVER['HTTP_SCHEME'] = empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off' ? 'http' : 'https';
+
+            $_SERVER['REMOTE_ADDR'] ??= '0.0.0.0';
+
+            $_SERVER['REQUEST_METHOD'] ??= 'GET';
+
+            $_SERVER['REQUEST_URI'] = $_SERVER['REDIRECT_REQUEST_URI'] ?? $_SERVER['REQUEST_URI'] ?? '/';
+
+            $chunks = explode('?', $_SERVER['REQUEST_URI'], 2);
+
+            $_SERVER['REQUEST_PATH'] = $chunks[0];
+
+            $_SERVER['QUERY_STRING'] = $chunks[1] ?? '';
+
+            // }}}
             // {{{ application dir
 
             define('APP_DIR', dirname((new \ReflectionClass(static::class))->getFileName(), 2));
 
             // }}}
-            // {{{ server parameters correcting
-
-            $this->correctServerParams();
-
-            // }}}
-            // {{{ initializing system configuration
+            // {{{ system configuration
 
             self::$sys['config'] = \App\Config\Sys::init();
 
             // }}}
             // {{{ custom error handler
 
-            set_error_handler($this->errorHandler(...));
+            set_error_handler(
+                function (int $code, string $message, string $file, int $line): bool {
+                    if (error_reporting() & $code) {
+                        switch ($code) {
+                            case E_NOTICE:
+                            case E_USER_NOTICE:
+                                self::sys('Logger')->notice($message, [
+                                    'file' => $file,
+                                    'line' => $line
+                                ]);
+                                break;
+                            case E_WARNING:
+                            case E_USER_WARNING:
+                            case E_DEPRECATED:
+                            case E_USER_DEPRECATED:
+                            case E_STRICT:
+                                self::sys('Logger')->warning($message, [
+                                    'file' => $file,
+                                    'line' => $line
+                                ]);
+                                break;
+                            default:
+                                throw (new Logic($message))->setFile($file)->setLine($line);
+                        }
+                    }
+
+                    return true;
+                }
+            );
 
             // }}}
             // {{{ default timezone
@@ -75,17 +119,36 @@ abstract class Runner extends Base
             }
 
             // }}}
-            // {{{ initializing system environment
+            // {{{ basic url and redirect if needed
 
-            $this->sysEnvironment();
+            if (self::$sys['config']['url'] === null) {
+                self::$sys['url_scheme'] = $_SERVER['HTTP_SCHEME'];
 
-            // }}}
-            // {{{ redirecting to basic url if needed
+                self::$sys['url_host'] = $_SERVER['HTTP_HOST'];
 
-            if (self::$sys['url_scheme'] !== $_SERVER['HTTP_SCHEME']
-                || self::$sys['url_host'] !== $_SERVER['HTTP_HOST']
-            ) {
-                self::sys('Response')->redirect(self::$sys['url'] . $_SERVER['REQUEST_URI']);
+                self::$sys['url'] = self::$sys['url_scheme'] . '://' . self::$sys['url_host'];
+            } else {
+                $url = parse_url(self::$sys['config']['url']);
+
+                if (empty($url) || !isset($url['host'])) {
+                    throw new BadConfiguration('Incorrect url in system configuration');
+                }
+
+                self::$sys['url_scheme'] = $url['scheme'] ?? 'http';
+
+                if (isset($url['port'])) {
+                    self::$sys['url_host'] = $url['host'] . ':' . $url['port'];
+                } else {
+                    self::$sys['url_host'] = $url['host'];
+                }
+
+                self::$sys['url'] = self::$sys['url_scheme'] . '://' . self::$sys['url_host'];
+
+                if (self::$sys['url_scheme'] !== $_SERVER['HTTP_SCHEME']
+                    || self::$sys['url_host'] !== $_SERVER['HTTP_HOST']
+                ) {
+                    self::sys('Response')->redirect(self::$sys['url'] . $_SERVER['REQUEST_URI']);
+                }
             }
 
             // }}}
@@ -102,19 +165,41 @@ abstract class Runner extends Base
             }
 
             // }}}
-            // {{{ initializing your configuration
+            // {{{ your configuration
 
             self::$my['config'] = \App\Config\My::init();
 
             // }}}
-            // {{{ registering cleanups and dispatch events at shutdown
+            // {{{ merging CSS and JS
 
-            register_shutdown_function($this->cleanupAndDispatchEventsAtShutdown(...));
+            if (self::$sys['config']['merger_sources'] !== null && PHP_SAPI !== 'cli') {
+                self::$sys['merged'] = Merger::process();
+            }
 
             // }}}
-            // {{{ initializing your environment
+            // {{{ cleanups and dispatching event at shutdown
 
-            $this->myEnvironment();
+            register_shutdown_function(
+                function (): void {
+                    $sysLazies = (new \ReflectionClass(Base::class))->getStaticPropertyValue('sysLazies');
+
+                    foreach ($sysLazies as $name => $lazy) {
+                        if ($lazy instanceof \SFW\Databaser\Driver && $name !== 'Db' && $lazy->isInTrans()) {
+                            try {
+                                $lazy->rollback();
+                            } catch (\SFW\Databaser\Exception) {
+                            }
+                        }
+                    }
+
+                    self::sys('Dispatcher')->dispatch(new Event\Shutdown(), true);
+                }
+            );
+
+            // }}}
+            // {{{ your environment
+
+            $this->environment();
 
             // }}}
             // {{{ calling Command or Controller action
@@ -158,120 +243,7 @@ abstract class Runner extends Base
     }
 
     /**
-     * Corrects server parameters.
-     */
-    private function correctServerParams(): void
-    {
-        $_SERVER['HTTP_HOST'] ??= 'localhost';
-
-        $_SERVER['HTTP_SCHEME'] = empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off' ? 'http' : 'https';
-
-        $_SERVER['REMOTE_ADDR'] ??= '0.0.0.0';
-
-        $_SERVER['REQUEST_METHOD'] ??= 'GET';
-
-        $_SERVER['REQUEST_URI'] = $_SERVER['REDIRECT_REQUEST_URI'] ?? $_SERVER['REQUEST_URI'] ?? '/';
-
-        $chunks = explode('?', $_SERVER['REQUEST_URI'], 2);
-
-        $_SERVER['REQUEST_PATH'] = $chunks[0];
-
-        $_SERVER['QUERY_STRING'] = $chunks[1] ?? '';
-    }
-
-    /**
-     * Initializes system environment.
-     *
-     * @throws BadConfiguration
-     */
-    private function sysEnvironment(): void
-    {
-        self::$sys['timestamp'] = (int) self::$sys['started'];
-
-        if (self::$sys['config']['url'] === null) {
-            self::$sys['url_scheme'] = $_SERVER['HTTP_SCHEME'];
-
-            self::$sys['url_host'] = $_SERVER['HTTP_HOST'];
-        } else {
-            $url = parse_url(self::$sys['config']['url']);
-
-            if (empty($url) || !isset($url['host'])) {
-                throw new BadConfiguration('Incorrect url in system configuration');
-            }
-
-            self::$sys['url_scheme'] = $url['scheme'] ?? 'http';
-
-            if (isset($url['port'])) {
-                self::$sys['url_host'] = $url['host'] . ':' . $url['port'];
-            } else {
-                self::$sys['url_host'] = $url['host'];
-            }
-        }
-
-        self::$sys['url'] = self::$sys['url_scheme'] . '://' . self::$sys['url_host'];
-
-        if (PHP_SAPI !== 'cli'
-            && self::$sys['config']['merger_sources'] !== null
-        ) {
-            self::$sys['merged'] = Merger::process();
-        }
-    }
-
-    /**
-     * Custom error handler.
-     *
-     * @throws Logic
-     */
-    private function errorHandler(int $code, string $message, string $file, int $line): bool
-    {
-        if (error_reporting() & $code) {
-            switch ($code) {
-                case E_NOTICE:
-                case E_USER_NOTICE:
-                    self::sys('Logger')->notice($message, [
-                        'file' => $file,
-                        'line' => $line
-                    ]);
-                    break;
-                case E_WARNING:
-                case E_USER_WARNING:
-                case E_DEPRECATED:
-                case E_USER_DEPRECATED:
-                case E_STRICT:
-                    self::sys('Logger')->warning($message, [
-                        'file' => $file,
-                        'line' => $line
-                    ]);
-                    break;
-                default:
-                    throw (new Logic($message))->setFile($file)->setLine($line);
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Cleanups and dispatch events at shutdown.
-     */
-    private function cleanupAndDispatchEventsAtShutdown(): void
-    {
-        $sysLazies = (new \ReflectionClass(Base::class))->getStaticPropertyValue('sysLazies');
-
-        foreach ($sysLazies as $name => $lazy) {
-            if ($lazy instanceof \SFW\Databaser\Driver && $name !== 'Db' && $lazy->isInTrans()) {
-                try {
-                    $lazy->rollback();
-                } catch (\SFW\Databaser\Exception) {
-                }
-            }
-        }
-
-        self::sys('Dispatcher')->dispatch(new Event\Shutdown(), true);
-    }
-
-    /**
      * Initializes your environment.
      */
-    abstract protected function myEnvironment(): void;
+    abstract protected function environment(): void;
 }

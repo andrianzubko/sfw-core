@@ -105,7 +105,7 @@ class Response extends \SFW\Lazy\Sys
         $mime ??= self::sys($processor)->getMime();
 
         if (self::$sys['config']['response_stats'] !== null && $mime === 'text/html') {
-            $timer = gettimeofday(true) - self::$sys['started'];
+            $timer = gettimeofday(true) - self::$sys['timestamp_float'];
 
             $contents .= str_replace(
                 [

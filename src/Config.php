@@ -30,14 +30,6 @@ abstract class Config
             }
         }
 
-        if (\array_key_exists($key, $_SERVER)) {
-            return $_SERVER[$key];
-        }
-
-        if (\array_key_exists($key, self::$env)) {
-            return self::$env[$key];
-        }
-
-        return $default;
+        return \array_key_exists($key, self::$env) ? self::$env[$key] : $default;
     }
 }

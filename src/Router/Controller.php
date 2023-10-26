@@ -24,7 +24,7 @@ class Controller extends \SFW\Router
      *
      * @throws Runtime
      */
-    public static function getTarget(): array
+    public static function getTarget(): object|false
     {
         if (self::$cache === false) {
             self::$cache = @include self::$sys['config']['router_cache'];
@@ -45,16 +45,22 @@ class Controller extends \SFW\Router
         }
 
         if ($actions !== null) {
-            $action = $actions[$_SERVER['REQUEST_METHOD']] ?? $actions[''] ?? null;
+            $target = (object) [];
 
-            if ($action !== null) {
-                $chunks = explode('::', "App\\Controller\\$action");
+            $target->action = $actions[$_SERVER['REQUEST_METHOD']] ?? $actions[''] ?? null;
 
-                return [$chunks[0], $chunks[1] ?? '__construct', $action];
+            if ($target->action !== null) {
+                $chunks = explode('::', "App\\Controller\\$target->action");
+
+                $target->class = $chunks[0];
+
+                $target->method = $chunks[1] ?? '__construct';
+
+                return $target;
             }
         }
 
-        return [false, false, false];
+        return false;
     }
 
     /**

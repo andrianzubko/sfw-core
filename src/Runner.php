@@ -128,14 +128,16 @@ abstract class Runner extends Base
             // {{{ routing
 
             if (PHP_SAPI === 'cli') {
-                [$class, $method, self::$sys['action']] = Router\Command::getTarget();
+                $target = Router\Command::getTarget();
             } else {
-                [$class, $method, self::$sys['action']] = Router\Controller::getTarget();
+                $target = Router\Controller::getTarget();
 
-                if ($class === false) {
+                if ($target === false) {
                     self::sys('Response')->error(404);
                 }
             }
+
+            self::$sys['action'] = $target->action;
 
             // }}}
             // {{{ your configuration
@@ -163,19 +165,17 @@ abstract class Runner extends Base
             // {{{ calling Command or Controller action
 
             if (PHP_SAPI === 'cli') {
-                if ($class !== false) {
-                    new $class();
+                if ($target !== false) {
+                    new ($target->class)();
+                }
+            } elseif (method_exists($target->class, $target->method)) {
+                $controller = new ($target->class)();
+
+                if ($target->method !== '__construct') {
+                    $controller->{$target->method}();
                 }
             } else {
-                if (method_exists($class, $method)) {
-                    $controller = new $class();
-
-                    if ($method !== '__construct') {
-                        $controller->$method();
-                    }
-                } else {
-                    self::sys('Response')->error(404);
-                }
+                self::sys('Response')->error(404);
             }
 
             // }}}

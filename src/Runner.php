@@ -14,74 +14,75 @@ abstract class Runner extends Base
      */
     final public function __construct()
     {
+        // {{{ prevent multiple initializations
+
+        if (self::$sys) {
+            return;
+        }
+
+        // }}}
+        // {{{ started time
+
+        self::$sys['timestamp_float'] = gettimeofday(true);
+
+        self::$sys['timestamp'] = (int) self::$sys['timestamp_float'];
+
+        // }}}
+        // {{{ important PHP parameters.
+
+        ini_set('display_errors', PHP_SAPI === 'cli');
+
+        ini_set('error_reporting', E_ALL);
+
+        ini_set('ignore_user_abort', true);
+
+        // }}}
+        // {{{ default locale
+
+        setlocale(LC_ALL, 'C');
+
+        // }}}
+        // {{{ default encoding
+
+        mb_internal_encoding('UTF-8');
+
+        // }}}
+        // {{{ application dir
+
+        define('APP_DIR', dirname((new \ReflectionClass(static::class))->getFileName(), 2));
+
+        // }}}
+        // {{{ some server parameters correcting
+
+        $_SERVER['HTTP_HOST'] ??= 'localhost';
+
+        $_SERVER['HTTP_SCHEME'] = empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off' ? 'http' : 'https';
+
+        $_SERVER['REMOTE_ADDR'] ??= '0.0.0.0';
+
+        $_SERVER['REQUEST_METHOD'] ??= 'GET';
+
+        $_SERVER['REQUEST_URI'] = $_SERVER['REDIRECT_REQUEST_URI'] ?? $_SERVER['REQUEST_URI'] ?? '/';
+
+        $chunks = explode('?', $_SERVER['REQUEST_URI'], 2);
+
+        $_SERVER['REQUEST_PATH'] = $chunks[0];
+
+        $_SERVER['QUERY_STRING'] = $chunks[1] ?? '';
+
+        // }}}
+        // {{{ system configuration
+
+        self::$sys['config'] = \App\Config\Sys::init();
+
+        // }}}
+        // {{{ custom error handler
+
+        set_error_handler($this->errorHandler(...));
+
+        // }}}
+
         try {
-            // {{{ prevent multiple initializations
-
-            if (self::$sys) {
-                return;
-            }
-
-            // }}}
-            // {{{ started time
-
-            self::$sys['timestamp_float'] = gettimeofday(true);
-
-            self::$sys['timestamp'] = (int) self::$sys['timestamp_float'];
-
-            // }}}
-            // {{{ important PHP parameters.
-
-            ini_set('display_errors', PHP_SAPI === 'cli');
-
-            ini_set('error_reporting', E_ALL);
-
-            ini_set('ignore_user_abort', true);
-
-            // }}}
-            // {{{ default locale
-
-            setlocale(LC_ALL, 'C');
-
-            // }}}
-            // {{{ default encoding
-
-            mb_internal_encoding('UTF-8');
-
-            // }}}
-            // {{{ some server parameters correcting
-
-            $_SERVER['HTTP_HOST'] ??= 'localhost';
-
-            $_SERVER['HTTP_SCHEME'] = empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === 'off' ? 'http' : 'https';
-
-            $_SERVER['REMOTE_ADDR'] ??= '0.0.0.0';
-
-            $_SERVER['REQUEST_METHOD'] ??= 'GET';
-
-            $_SERVER['REQUEST_URI'] = $_SERVER['REDIRECT_REQUEST_URI'] ?? $_SERVER['REQUEST_URI'] ?? '/';
-
-            $chunks = explode('?', $_SERVER['REQUEST_URI'], 2);
-
-            $_SERVER['REQUEST_PATH'] = $chunks[0];
-
-            $_SERVER['QUERY_STRING'] = $chunks[1] ?? '';
-
-            // }}}
-            // {{{ application dir
-
-            define('APP_DIR', dirname((new \ReflectionClass(static::class))->getFileName(), 2));
-
-            // }}}
-            // {{{ system configuration
-
-            self::$sys['config'] = \App\Config\Sys::init();
-
-            // }}}
-            // {{{ custom error handler
-
-            set_error_handler($this->errorHandler(...));
-
-            // }}}
             // {{{ default timezone
 
             if (!date_default_timezone_set(self::$sys['config']['timezone'])) {
@@ -151,22 +152,7 @@ abstract class Runner extends Base
             // }}}
             // {{{ cleanups and dispatching event at shutdown
 
-            register_shutdown_function(
-                function (): void {
-                    $sysLazies = (new \ReflectionClass(Base::class))->getStaticPropertyValue('sysLazies');
-
-                    foreach ($sysLazies as $name => $lazy) {
-                        if ($lazy instanceof \SFW\Databaser\Driver && $name !== 'Db' && $lazy->isInTrans()) {
-                            try {
-                                $lazy->rollback();
-                            } catch (\SFW\Databaser\Exception) {
-                            }
-                        }
-                    }
-
-                    self::sys('Dispatcher')->dispatch(new Event\Shutdown(), true);
-                }
-            );
+            register_shutdown_function($this->cleanupAndDispatchAtShutdown(...));
 
             // }}}
             // {{{ your environment
@@ -215,7 +201,7 @@ abstract class Runner extends Base
     }
 
     /**
-     * Custom error handler
+     * Custom error handler.
      */
     private function errorHandler(int $code, string $message, string $file, int $line): bool
     {
@@ -244,6 +230,25 @@ abstract class Runner extends Base
         }
 
         return true;
+    }
+
+    /**
+     * Cleanups and dispatching event at shutdown.
+     */
+    private function cleanupAndDispatchAtShutdown(): void
+    {
+        $sysLazies = (new \ReflectionClass(Base::class))->getStaticPropertyValue('sysLazies');
+
+        foreach ($sysLazies as $name => $lazy) {
+            if ($lazy instanceof \SFW\Databaser\Driver && $name !== 'Db' && $lazy->isInTrans()) {
+                try {
+                    $lazy->rollback();
+                } catch (\SFW\Databaser\Exception) {
+                }
+            }
+        }
+
+        self::sys('Dispatcher')->dispatch(new Event\Shutdown(), true);
     }
 
     /**

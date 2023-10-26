@@ -79,35 +79,7 @@ abstract class Runner extends Base
             // }}}
             // {{{ custom error handler
 
-            set_error_handler(
-                function (int $code, string $message, string $file, int $line): bool {
-                    if (error_reporting() & $code) {
-                        switch ($code) {
-                            case E_NOTICE:
-                            case E_USER_NOTICE:
-                                self::sys('Logger')->notice($message, [
-                                    'file' => $file,
-                                    'line' => $line
-                                ]);
-                                break;
-                            case E_WARNING:
-                            case E_USER_WARNING:
-                            case E_DEPRECATED:
-                            case E_USER_DEPRECATED:
-                            case E_STRICT:
-                                self::sys('Logger')->warning($message, [
-                                    'file' => $file,
-                                    'line' => $line
-                                ]);
-                                break;
-                            default:
-                                throw (new Logic($message))->setFile($file)->setLine($line);
-                        }
-                    }
-
-                    return true;
-                }
-            );
+            set_error_handler($this->errorHandler(...));
 
             // }}}
             // {{{ default timezone
@@ -240,6 +212,38 @@ abstract class Runner extends Base
 
             // }}}
         }
+    }
+
+    /**
+     * Custom error handler
+     */
+    private function errorHandler(int $code, string $message, string $file, int $line): bool
+    {
+        if (error_reporting() & $code) {
+            switch ($code) {
+                case E_NOTICE:
+                case E_USER_NOTICE:
+                    self::sys('Logger')->notice($message, [
+                        'file' => $file,
+                        'line' => $line
+                    ]);
+                    break;
+                case E_WARNING:
+                case E_USER_WARNING:
+                case E_DEPRECATED:
+                case E_USER_DEPRECATED:
+                case E_STRICT:
+                    self::sys('Logger')->warning($message, [
+                        'file' => $file,
+                        'line' => $line
+                    ]);
+                    break;
+                default:
+                    throw (new Logic($message))->setFile($file)->setLine($line);
+            }
+        }
+
+        return true;
     }
 
     /**

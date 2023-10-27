@@ -12,7 +12,7 @@ class Pgsql extends \SFW\Lazy\Sys
     /**
      * Options for databaser.
      */
-    protected array $options;
+    protected array $options = [];
 
     /**
      * Initializes options for databaser.
@@ -21,25 +21,23 @@ class Pgsql extends \SFW\Lazy\Sys
      */
     protected function __construct()
     {
-        $this->options = [
-            'host' => self::$sys['config']['db_pgsql_host'],
+        $this->options['host'] = self::$sys['config']['db_pgsql_host'];
 
-            'port' => self::$sys['config']['db_pgsql_port'],
+        $this->options['port'] = self::$sys['config']['db_pgsql_port'];
 
-            'db' => self::$sys['config']['db_pgsql_db'],
+        $this->options['db'] = self::$sys['config']['db_pgsql_db'];
 
-            'user' => self::$sys['config']['db_pgsql_user'],
+        $this->options['user'] = self::$sys['config']['db_pgsql_user'];
 
-            'pass' => self::$sys['config']['db_pgsql_pass'],
+        $this->options['pass'] = self::$sys['config']['db_pgsql_pass'];
 
-            'persistent' => self::$sys['config']['db_pgsql_persistent'],
+        $this->options['persistent'] = self::$sys['config']['db_pgsql_persistent'];
 
-            'charset' => self::$sys['config']['db_pgsql_charset'],
+        $this->options['charset'] = self::$sys['config']['db_pgsql_charset'];
 
-            'mode' => self::$sys['config']['db_pgsql_mode'],
+        $this->options['mode'] = self::$sys['config']['db_pgsql_mode'];
 
-            'cleanup' => false,
-        ];
+        $this->options['cleanup'] = false;
     }
 
     /**

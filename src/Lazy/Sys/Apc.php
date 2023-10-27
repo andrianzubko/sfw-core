@@ -12,7 +12,7 @@ class Apc extends \SFW\Lazy\Sys
     /**
      * Options for cacher.
      */
-    protected array $options;
+    protected array $options = [];
 
     /**
      * Initializes options for cacher.
@@ -21,11 +21,9 @@ class Apc extends \SFW\Lazy\Sys
      */
     protected function __construct()
     {
-        $this->options = [
-            'ttl' => self::$sys['config']['cacher_apc_ttl'],
+        $this->options['ttl'] = self::$sys['config']['cacher_apc_ttl'];
 
-            'ns' => self::$sys['config']['cacher_apc_ns'],
-        ];
+        $this->options['ns'] = self::$sys['config']['cacher_apc_ns'];
     }
 
     /**

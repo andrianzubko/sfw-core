@@ -12,7 +12,7 @@ class Redis extends \SFW\Lazy\Sys
     /**
      * Options for cacher.
      */
-    protected array $options;
+    protected array $options = [];
 
     /**
      * Initializes options for cacher.
@@ -21,15 +21,13 @@ class Redis extends \SFW\Lazy\Sys
      */
     protected function __construct()
     {
-        $this->options = [
-            'ttl' => self::$sys['config']['cacher_redis_ttl'],
+        $this->options['ttl'] = self::$sys['config']['cacher_redis_ttl'];
 
-            'ns' => self::$sys['config']['cacher_redis_ns'],
+        $this->options['ns'] = self::$sys['config']['cacher_redis_ns'];
 
-            'connect' => self::$sys['config']['cacher_redis_connect'],
+        $this->options['connect'] = self::$sys['config']['cacher_redis_connect'];
 
-            'options' => self::$sys['config']['cacher_redis_options'],
-        ];
+        $this->options['options'] = self::$sys['config']['cacher_redis_options'];
     }
 
     /**

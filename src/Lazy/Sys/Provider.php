@@ -43,7 +43,7 @@ class Provider extends \SFW\Lazy\Sys implements ListenerProviderInterface
     {
         $params = (new \ReflectionFunction($callback))->getParameters();
 
-        if (!$params || $params[0]->getType() === null) {
+        if (!$params || ($type = $params[0]->getType()) === null) {
             throw new InvalidArgument(
                 'Listener must have first parameter with declared object type they can accept'
             );
@@ -53,7 +53,7 @@ class Provider extends \SFW\Lazy\Sys implements ListenerProviderInterface
 
         $listener->callback = $callback;
 
-        $listener->type = (string) $params[0]->getType();
+        $listener->type = (string) $type;
 
         $listener->tag = $tag;
 

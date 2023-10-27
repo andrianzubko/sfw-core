@@ -12,7 +12,7 @@ class Xslt extends \SFW\Lazy\Sys
     /**
      * Options for templates.
      */
-    protected array $options;
+    protected array $options = [];
 
     /**
      * Initializes options for templates.
@@ -21,19 +21,15 @@ class Xslt extends \SFW\Lazy\Sys
      */
     protected function __construct()
     {
-        $this->options = [
-            'dir' => self::$sys['config']['templater_xslt_dir'],
+        $this->options['dir'] = self::$sys['config']['templater_xslt_dir'];
 
-            'root' => self::$sys['config']['templater_xslt_root'],
+        $this->options['root'] = self::$sys['config']['templater_xslt_root'];
 
-            'item' => self::$sys['config']['templater_xslt_item'],
+        $this->options['item'] = self::$sys['config']['templater_xslt_item'];
 
-            'globals' => [
-                'sys' => $this->filterConfig(self::$sys),
+        $this->options['globals']['sys'] = $this->filterConfig(self::$sys);
 
-                'my' => $this->filterConfig(self::$my),
-            ],
-        ];
+        $this->options['globals']['my'] = $this->filterConfig(self::$my);
     }
 
     /**

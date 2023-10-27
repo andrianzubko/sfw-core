@@ -12,7 +12,7 @@ class Memcached extends \SFW\Lazy\Sys
     /**
      * Options for cacher.
      */
-    protected array $options;
+    protected array $options = [];
 
     /**
      * Initializes options for cacher.
@@ -21,15 +21,13 @@ class Memcached extends \SFW\Lazy\Sys
      */
     protected function __construct()
     {
-        $this->options = [
-            'ttl' => self::$sys['config']['cacher_memcached_ttl'],
+        $this->options['ttl'] = self::$sys['config']['cacher_memcached_ttl'];
 
-            'ns' => self::$sys['config']['cacher_memcached_ns'],
+        $this->options['ns'] = self::$sys['config']['cacher_memcached_ns'];
 
-            'servers' => self::$sys['config']['cacher_memcached_servers'],
+        $this->options['servers'] = self::$sys['config']['cacher_memcached_servers'];
 
-            'options' => self::$sys['config']['cacher_memcached_options'],
-        ];
+        $this->options['options'] = self::$sys['config']['cacher_memcached_options'];
     }
 
     /**

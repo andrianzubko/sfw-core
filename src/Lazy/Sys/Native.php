@@ -12,7 +12,7 @@ class Native extends \SFW\Lazy\Sys
     /**
      * Options for templates.
      */
-    protected array $options;
+    protected array $options = [];
 
     /**
      * Initializes options for templates.
@@ -21,45 +21,41 @@ class Native extends \SFW\Lazy\Sys
      */
     protected function __construct()
     {
-        $this->options = [
-            'dir' => self::$sys['config']['templater_native_dir'],
+        $this->options['dir'] = self::$sys['config']['templater_native_dir'];
 
-            'minify' => self::$sys['config']['templater_native_minify'],
+        $this->options['minify'] = self::$sys['config']['templater_native_minify'];
 
-            'debug' => self::$sys['config']['debug'],
+        $this->options['debug'] = self::$sys['config']['debug'];
 
-            'properties' => [
-                'sys' => $this->filterConfig(self::$sys),
+        $this->options['properties']['sys'] = $this->filterConfig(self::$sys);
 
-                'my' => $this->filterConfig(self::$my),
+        $this->options['properties']['my'] = $this->filterConfig(self::$my);
 
-                'lc' => self::sys('Text')->lc(...),
+        $this->options['properties']['lc'] = self::sys('Text')->lc(...);
 
-                'lcFirst' => self::sys('Text')->lcFirst(...),
+        $this->options['properties']['lcFirst'] = self::sys('Text')->lcFirst(...);
 
-                'uc' => self::sys('Text')->uc(...),
+        $this->options['properties']['uc'] = self::sys('Text')->uc(...);
 
-                'ucFirst' => self::sys('Text')->ucFirst(...),
+        $this->options['properties']['ucFirst'] = self::sys('Text')->ucFirst(...);
 
-                'trim' => self::sys('Text')->trim(...),
+        $this->options['properties']['trim'] = self::sys('Text')->trim(...);
 
-                'rTrim' => self::sys('Text')->rTrim(...),
+        $this->options['properties']['rTrim'] = self::sys('Text')->rTrim(...);
 
-                'lTrim' => self::sys('Text')->lTrim(...),
+        $this->options['properties']['lTrim'] = self::sys('Text')->lTrim(...);
 
-                'fTrim' => self::sys('Text')->fTrim(...),
+        $this->options['properties']['fTrim'] = self::sys('Text')->fTrim(...);
 
-                'mTrim' => self::sys('Text')->mTrim(...),
+        $this->options['properties']['mTrim'] = self::sys('Text')->mTrim(...);
 
-                'cut' => self::sys('Text')->cut(...),
+        $this->options['properties']['cut'] = self::sys('Text')->cut(...);
 
-                'random' => self::sys('Text')->random(...),
+        $this->options['properties']['random'] = self::sys('Text')->random(...);
 
-                'genUrl' => self::sys('Router')->genUrl(...),
+        $this->options['properties']['genUrl'] = self::sys('Router')->genUrl(...);
 
-                'genAbsoluteUrl' => self::sys('Router')->genAbsoluteUrl(...),
-            ],
-        ];
+        $this->options['properties']['genAbsoluteUrl'] = self::sys('Router')->genAbsoluteUrl(...);
     }
 
     /**

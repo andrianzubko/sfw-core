@@ -12,7 +12,7 @@ class Twig extends \SFW\Lazy\Sys
     /**
      * Options for templates.
      */
-    protected array $options;
+    protected array $options = [];
 
     /**
      * Initializes options for templates.
@@ -21,50 +21,45 @@ class Twig extends \SFW\Lazy\Sys
      */
     protected function __construct()
     {
-        $this->options = [
-            'dir' => self::$sys['config']['templater_twig_dir'],
+        $this->options['dir'] = self::$sys['config']['templater_twig_dir'];
 
-            'cache' => self::$sys['config']['templater_twig_cache'],
+        $this->options['cache'] = self::$sys['config']['templater_twig_cache'];
 
-            'strict' => self::$sys['config']['templater_twig_strict'],
+        $this->options['strict'] = self::$sys['config']['templater_twig_strict'];
 
-            'reload' => self::$sys['config']['env'] !== 'prod',
+        $this->options['reload'] = self::$sys['config']['env'] !== 'prod';
 
-            'debug' => self::$sys['config']['debug'],
+        $this->options['debug'] = self::$sys['config']['debug'];
 
-            'globals' => [
-                'sys' => $this->filterConfig(self::$sys),
+        $this->options['globals']['sys'] = $this->filterConfig(self::$sys);
 
-                'my' => $this->filterConfig(self::$my),
-            ],
-            'functions' => [
-                'lc' => self::sys('Text')->lc(...),
+        $this->options['globals']['my'] = $this->filterConfig(self::$my);
 
-                'lcFirst' => self::sys('Text')->lcFirst(...),
+        $this->options['functions']['lc'] = self::sys('Text')->lc(...);
 
-                'uc' => self::sys('Text')->uc(...),
+        $this->options['functions']['lcFirst'] = self::sys('Text')->lcFirst(...);
 
-                'ucFirst' => self::sys('Text')->ucFirst(...),
+        $this->options['functions']['uc'] = self::sys('Text')->uc(...);
 
-                'trim' => self::sys('Text')->trim(...),
+        $this->options['functions']['ucFirst'] = self::sys('Text')->ucFirst(...);
 
-                'rTrim' => self::sys('Text')->rTrim(...),
+        $this->options['functions']['trim'] = self::sys('Text')->trim(...);
 
-                'lTrim' => self::sys('Text')->lTrim(...),
+        $this->options['functions']['rTrim'] = self::sys('Text')->rTrim(...);
 
-                'fTrim' => self::sys('Text')->fTrim(...),
+        $this->options['functions']['lTrim'] = self::sys('Text')->lTrim(...);
 
-                'mTrim' => self::sys('Text')->mTrim(...),
+        $this->options['functions']['fTrim'] = self::sys('Text')->fTrim(...);
 
-                'cut' => self::sys('Text')->cut(...),
+        $this->options['functions']['mTrim'] = self::sys('Text')->mTrim(...);
 
-                'random' => self::sys('Text')->random(...),
+        $this->options['functions']['cut'] = self::sys('Text')->cut(...);
 
-                'genUrl' => self::sys('Router')->genUrl(...),
+        $this->options['functions']['random'] = self::sys('Text')->random(...);
 
-                'genAbsoluteUrl' => self::sys('Router')->genAbsoluteUrl(...),
-            ],
-        ];
+        $this->options['functions']['genUrl'] = self::sys('Router')->genUrl(...);
+
+        $this->options['functions']['genAbsoluteUrl'] = self::sys('Router')->genAbsoluteUrl(...);
     }
 
     /**

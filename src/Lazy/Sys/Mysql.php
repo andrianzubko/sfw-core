@@ -12,7 +12,7 @@ class Mysql extends \SFW\Lazy\Sys
     /**
      * Options for databaser.
      */
-    protected array $options;
+    protected array $options = [];
 
     /**
      * Initializes options for databaser.
@@ -21,25 +21,23 @@ class Mysql extends \SFW\Lazy\Sys
      */
     protected function __construct()
     {
-        $this->options = [
-            'host' => self::$sys['config']['db_mysql_host'],
+        $this->options['host'] = self::$sys['config']['db_mysql_host'];
 
-            'port' => self::$sys['config']['db_mysql_port'],
+        $this->options['port'] = self::$sys['config']['db_mysql_port'];
 
-            'db' => self::$sys['config']['db_mysql_db'],
+        $this->options['db'] = self::$sys['config']['db_mysql_db'];
 
-            'user' => self::$sys['config']['db_mysql_user'],
+        $this->options['user'] = self::$sys['config']['db_mysql_user'];
 
-            'pass' => self::$sys['config']['db_mysql_pass'],
+        $this->options['pass'] = self::$sys['config']['db_mysql_pass'];
 
-            'persistent' => self::$sys['config']['db_mysql_persistent'],
+        $this->options['persistent'] = self::$sys['config']['db_mysql_persistent'];
 
-            'charset' => self::$sys['config']['db_mysql_charset'],
+        $this->options['charset'] = self::$sys['config']['db_mysql_charset'];
 
-            'mode' => self::$sys['config']['db_mysql_mode'],
+        $this->options['mode'] = self::$sys['config']['db_mysql_mode'];
 
-            'cleanup' => false,
-        ];
+        $this->options['cleanup'] = false;
     }
 
     /**

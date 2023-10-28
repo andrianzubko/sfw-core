@@ -8,12 +8,7 @@ namespace SFW;
 abstract class Notify extends Base
 {
     /**
-     * Builds and yields or returns structures.
-     *
-     * This method called after browser disconnect as last shutdown function.
+     * This method will be called after browser disconnect as last shutdown function.
      */
-    public function build(NotifyStruct $defaultStruct): iterable
-    {
-        return [];
-    }
+    abstract public function send(): void;
 }

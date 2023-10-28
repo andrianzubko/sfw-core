@@ -25,21 +25,31 @@ class Provider extends \SFW\Lazy\Sys implements ListenerProviderInterface
     }
 
     /**
-     * Adds persistent listener.
-     *
-     * @throws InvalidArgument
-     */
-    public function addPersistentListener(\Closure $callback, ?string $tag = null): self
-    {
-        return $this->addListener($callback, $tag, true);
-    }
-
-    /**
      * Adds listener.
      *
      * @throws InvalidArgument
      */
-    public function addListener(\Closure $callback, ?string $tag = null, bool $persistent = false): self
+    public function addListener(\Closure $callback, ?string $tag = null): self
+    {
+        return $this->addSomeListener($callback, $tag, false);
+    }
+
+    /**
+     * Adds disposable listener.
+     *
+     * @throws InvalidArgument
+     */
+    public function addDisposableListener(\Closure $callback, ?string $tag = null): self
+    {
+        return $this->addSomeListener($callback, $tag, true);
+    }
+
+    /**
+     * Adds listener base method.
+     *
+     * @throws InvalidArgument
+     */
+    protected function addSomeListener(\Closure $callback, ?string $tag, bool $disposable): self
     {
         $params = (new \ReflectionFunction($callback))->getParameters();
 
@@ -57,7 +67,7 @@ class Provider extends \SFW\Lazy\Sys implements ListenerProviderInterface
 
         $listener->tag = $tag;
 
-        $listener->persistent = $persistent;
+        $listener->disposable = $disposable;
 
         $this->listeners[] = $listener;
 
@@ -109,7 +119,7 @@ class Provider extends \SFW\Lazy\Sys implements ListenerProviderInterface
     {
         foreach ($this->listeners as $i => $listener) {
             if ($event instanceof $listener->type) {
-                if (!$listener->persistent) {
+                if ($listener->disposable) {
                     unset($this->listeners[$i]);
                 }
 

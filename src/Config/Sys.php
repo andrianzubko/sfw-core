@@ -190,33 +190,31 @@ abstract class Sys extends \SFW\Config
         $config['templater_xslt_item'] = 'item';
 
         // }}}
-        // {{{ notifier
+        // {{{ mailer
 
-        /* Enable notifier.
-         *
-         * Build() method in Notify classes will be called even if notifier disabled.
+        /* Enable mailer.
          *
          * bool
          */
-        $config['notifier_enabled'] = true;
-
-        /* Instead of disabling, you can override recipients by your email.
-         *
-         * ?array('EMAIL' or array('EMAIL'[, 'NAME']), ...)
-         */
-        $config['notifier_recipients'] = null;
+        $config['mailer'] = true;
 
         /* Default sender.
          *
          * 'EMAIL' or array('EMAIL'[, 'NAME']) or null
          */
-        $config['notifier_sender'] = null;
+        $config['mailer_sender'] = null;
+
+        /* You can override recipients by your email for testing.
+         *
+         * ?array('EMAIL' or array('EMAIL'[, 'NAME']), ...)
+         */
+        $config['mailer_recipients'] = null;
 
         /* Default replies.
          *
          * ?array('EMAIL' or array('EMAIL'[, 'NAME']), ...)
          */
-        $config['notifier_replies'] = null;
+        $config['mailer_replies'] = null;
 
         // }}}
         // {{{ locker

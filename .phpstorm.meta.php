@@ -12,6 +12,7 @@ namespace PHPSTORM_META {
         'Image',
         'Locker',
         'Logger',
+        'Mailer',
         'Memcached',
         'Mysql',
         'Native',

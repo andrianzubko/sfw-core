@@ -24,7 +24,7 @@ class Transaction extends \SFW\Lazy\Sys
      *
      * @throws \SFW\Databaser\Exception
      */
-    public function pgsql(\Closure $body, ?string $isolation = null, array $retryAt = []): self
+    public function pgsql(callable $body, ?string $isolation = null, array $retryAt = []): self
     {
         return $this->process('Pgsql', $body, $isolation, $retryAt);
     }
@@ -34,7 +34,7 @@ class Transaction extends \SFW\Lazy\Sys
      *
      * @throws \SFW\Databaser\Exception
      */
-    public function mysql(\Closure $body, ?string $isolation = null, array $retryAt = []): self
+    public function mysql(callable $body, ?string $isolation = null, array $retryAt = []): self
     {
         return $this->process('Mysql', $body, $isolation, $retryAt);
     }
@@ -44,7 +44,7 @@ class Transaction extends \SFW\Lazy\Sys
      *
      * @throws \SFW\Databaser\Exception
      */
-    public function run(\Closure $body, ?string $isolation = null, array $retryAt = []): self
+    public function run(callable $body, ?string $isolation = null, array $retryAt = []): self
     {
         return $this->process('Db', $body, $isolation, $retryAt);
     }
@@ -54,7 +54,7 @@ class Transaction extends \SFW\Lazy\Sys
      *
      * @throws \SFW\Databaser\Exception
      */
-    protected function process(string $driver, \Closure $body, ?string $isolation, array $retryAt): self
+    protected function process(string $driver, callable $body, ?string $isolation, array $retryAt): self
     {
         for ($retry = 1; $retry <= self::$sys['config']['transaction_retries']; $retry++) {
             self::sys('Provider')->removeListenersByType([

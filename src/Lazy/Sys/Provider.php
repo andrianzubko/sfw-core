@@ -29,9 +29,9 @@ class Provider extends \SFW\Lazy\Sys implements ListenerProviderInterface
      *
      * @throws InvalidArgument
      */
-    public function addListener(\Closure $callback, ?string $tag = null): self
+    public function addListener(callable $callback): self
     {
-        return $this->addSomeListener($callback, $tag, false);
+        return $this->addSomeListener($callback, false);
     }
 
     /**
@@ -39,9 +39,9 @@ class Provider extends \SFW\Lazy\Sys implements ListenerProviderInterface
      *
      * @throws InvalidArgument
      */
-    public function addDisposableListener(\Closure $callback, ?string $tag = null): self
+    public function addDisposableListener(callable $callback): self
     {
-        return $this->addSomeListener($callback, $tag, true);
+        return $this->addSomeListener($callback, true);
     }
 
     /**
@@ -49,11 +49,13 @@ class Provider extends \SFW\Lazy\Sys implements ListenerProviderInterface
      *
      * @throws InvalidArgument
      */
-    protected function addSomeListener(\Closure $callback, ?string $tag, bool $disposable): self
+    protected function addSomeListener(callable $callback, bool $disposable): self
     {
-        $params = (new \ReflectionFunction($callback))->getParameters();
+        $params = (new \ReflectionFunction($callback(...)))->getParameters();
 
-        if (!$params || ($type = $params[0]->getType()) === null) {
+        $type = $params ? $params[0]->getType() : null;
+
+        if ($type === null) {
             throw new InvalidArgument(
                 'Listener must have first parameter with declared object type they can accept'
             );
@@ -64,8 +66,6 @@ class Provider extends \SFW\Lazy\Sys implements ListenerProviderInterface
         $listener->callback = $callback;
 
         $listener->type = (string) $type;
-
-        $listener->tag = $tag;
 
         $listener->disposable = $disposable;
 
@@ -81,20 +81,6 @@ class Provider extends \SFW\Lazy\Sys implements ListenerProviderInterface
     {
         foreach ($this->listeners as $i => $listener) {
             if (\in_array($listener->type, (array) $type, true)) {
-                unset($this->listeners[$i]);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * Removes listeners by tag.
-     */
-    public function removeListenersByTag(array|string $tag): self
-    {
-        foreach ($this->listeners as $i => $listener) {
-            if (\in_array($listener->tag, (array) $tag, true)) {
                 unset($this->listeners[$i]);
             }
         }

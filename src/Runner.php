@@ -137,7 +137,7 @@ abstract class Runner extends Base
                 }
             }
 
-            self::$sys['action'] = $target->action;
+            self::$sys['action'] = $target ? $target->action : null;
 
             // }}}
             // {{{ your configuration

@@ -20,7 +20,7 @@ final class Provider extends \SFW\Base
     public const DISPOSABLE = 2;
 
     /**
-     * Listener will be called many times and can't be removed.
+     * Listener will be called many times and can be removed only with force parameter.
      */
     public const PERSISTENT = 3;
 

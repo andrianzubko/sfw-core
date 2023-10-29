@@ -148,7 +148,7 @@ abstract class Runner extends Base
             // {{{ merging CSS and JS
 
             if (self::$sys['config']['merger_sources'] !== null && PHP_SAPI !== 'cli') {
-                self::$sys['merged'] = (new Merger())->process();
+                self::$sys['merged'] = (new Merger())->merge();
             }
 
             // }}}
@@ -182,7 +182,7 @@ abstract class Runner extends Base
         } catch (\Throwable $e) {
             // {{{ something wrong
 
-            self::sys('Provider')->removeAllListeners();
+            self::sys('Provider')->removeAllListeners(true);
 
             self::sys('Logger')->error($e);
 

@@ -13,26 +13,26 @@ final class Merger extends Base
     /**
      * Internal cache.
      */
-    protected static array|false $cache = false;
+    protected array|false $cache = false;
 
     /**
      * Scanned sources files.
      */
-    protected static array $sources;
+    protected array $sources;
 
     /**
-     * Recombines if needed and returns merged paths.
+     * Merging if needed and returns merged paths.
      *
      * @throws Logic
      * @throws Runtime
      */
-    public function process(): array
+    public function merge(): array
     {
-        self::$cache = @include self::$sys['config']['merger_cache'];
+        $this->cache = @include self::$sys['config']['merger_cache'];
 
-        if (self::$cache !== false
+        if ($this->cache !== false
             && self::$sys['config']['env'] === 'prod'
-            && self::$sys['config']['debug'] === self::$cache['debug']
+            && self::$sys['config']['debug'] === $this->cache['debug']
         ) {
             return $this->getPaths();
         }
@@ -57,7 +57,7 @@ final class Merger extends Base
     {
         $paths = [];
 
-        $time = self::$cache ? self::$cache['time'] : 0;
+        $time = $this->cache ? $this->cache['time'] : 0;
 
         $location = self::$sys['config']['merger_location'];
 
@@ -73,17 +73,17 @@ final class Merger extends Base
      */
     protected function scanForSources(): void
     {
-        if (!isset(self::$sources)) {
-            self::$sources = [];
+        if (!isset($this->sources)) {
+            $this->sources = [];
 
             foreach (self::$sys['config']['merger_sources'] as $target => $sources) {
                 foreach ((array) $sources as $source) {
                     if (preg_match('/\.(css|js)$/', $source, $M)) {
-                        self::$sources[$M[1]][$target] ??= [];
+                        $this->sources[$M[1]][$target] ??= [];
 
                         foreach (glob($source) as $file) {
                             if (is_file($file)) {
-                                self::$sources[$M[1]][$target][] = $file;
+                                $this->sources[$M[1]][$target][] = $file;
                             }
                         }
                     }
@@ -97,7 +97,9 @@ final class Merger extends Base
      */
     protected function isOutdated(): bool
     {
-        if (self::$cache === false || self::$sys['config']['debug'] !== self::$cache['debug']) {
+        if ($this->cache === false
+            || self::$sys['config']['debug'] !== $this->cache['debug']
+        ) {
             return true;
         }
 
@@ -106,7 +108,7 @@ final class Merger extends Base
         foreach (self::sys('Dir')->scan(self::$sys['config']['merger_dir'], false, true) as $item) {
             if (is_file($item)
                 && preg_match('~/(\d+)\.(.+)$~', $item, $M)
-                && (int) $M[1] === self::$cache['time']
+                && (int) $M[1] === $this->cache['time']
             ) {
                 $targets[] = $M[2];
             } else {
@@ -116,14 +118,14 @@ final class Merger extends Base
 
         $this->scanForSources();
 
-        if (array_diff(array_keys(array_merge(...array_values(self::$sources))), $targets)) {
+        if (array_diff(array_keys(array_merge(...array_values($this->sources))), $targets)) {
             return true;
         }
 
-        foreach (array_keys(self::$sources) as $type) {
-            foreach (self::$sources[$type] as $files) {
+        foreach (array_keys($this->sources) as $type) {
+            foreach ($this->sources[$type] as $files) {
                 foreach ($files as $file) {
-                    if ((int) filemtime($file) > self::$cache['time']) {
+                    if ((int) filemtime($file) > $this->cache['time']) {
                         return true;
                     }
                 }
@@ -143,21 +145,20 @@ final class Merger extends Base
     {
         self::sys('Dir')->clear(self::$sys['config']['merger_dir']);
 
-        self::$cache = [];
+        $this->cache = [];
 
-        self::$cache['time'] = time();
+        $this->cache['time'] = time();
 
-        self::$cache['debug'] = self::$sys['config']['debug'];
+        $this->cache['debug'] = self::$sys['config']['debug'];
 
         $this->scanForSources();
 
-        foreach (array_keys(self::$sources) as $type) {
-            foreach (self::$sources[$type] as $target => $files) {
-                $file = sprintf(
-                    '%s/%s.%s',
-                        self::$sys['config']['merger_dir'],
-                        self::$cache['time'],
-                        $target
+        foreach (array_keys($this->sources) as $type) {
+            foreach ($this->sources[$type] as $target => $files) {
+                $file = sprintf('%s/%s.%s',
+                    self::$sys['config']['merger_dir'],
+                    $this->cache['time'],
+                    $target
                 );
 
                 if ($type === 'js') {
@@ -172,7 +173,7 @@ final class Merger extends Base
             }
         }
 
-        if (!self::sys('File')->putVar(self::$sys['config']['merger_cache'], self::$cache)) {
+        if (!self::sys('File')->putVar(self::$sys['config']['merger_cache'], $this->cache)) {
             throw new Runtime(
                 sprintf('Unable to write file %s', self::$sys['config']['merger_cache'])
             );

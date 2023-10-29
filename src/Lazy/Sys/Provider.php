@@ -93,10 +93,10 @@ class Provider extends \SFW\Lazy\Sys implements ListenerProviderInterface
     /**
      * Removes listeners by event type.
      */
-    public function removeListenersByType(array|string $type): self
+    public function removeListenersByType(array|string $type, bool $force = false): self
     {
         foreach ($this->listeners as $i => $listener) {
-            if ($listener['mode'] !== \SFW\Provider::PERSISTENT
+            if (($force || $listener['mode'] !== \SFW\Provider::PERSISTENT)
                 && \in_array($listener['type'], (array) $type, true)
             ) {
                 unset($this->listeners[$i]);
@@ -109,9 +109,17 @@ class Provider extends \SFW\Lazy\Sys implements ListenerProviderInterface
     /**
      * Removes all listeners.
      */
-    public function removeAllListeners(): self
+    public function removeAllListeners($force = false): self
     {
-        $this->listeners = [];
+        if ($force) {
+            $this->listeners = [];
+        } else {
+            foreach ($this->listeners as $i => $listener) {
+                if ($listener['mode'] !== \SFW\Provider::PERSISTENT) {
+                    unset($this->listeners[$i]);
+                }
+            }
+        }
 
         return $this;
     }

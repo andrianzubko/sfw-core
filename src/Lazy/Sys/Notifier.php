@@ -17,7 +17,7 @@ class Notifier extends \SFW\Lazy\Sys
      */
     public function __construct()
     {
-        self::sys('Provider')->addDisposableListener(
+        self::sys('Provider')->addPersistentListener(
             function (\SFW\Event\Shutdown $event) {
                 register_shutdown_function($this->sendAll(...));
             }

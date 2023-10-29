@@ -57,12 +57,12 @@ class Transaction extends \SFW\Lazy\Sys
     protected function process(string $driver, callable $body, ?string $isolation, array $retryAt): self
     {
         for ($retry = 1; $retry <= self::$sys['config']['transaction_retries']; $retry++) {
-            self::sys('Provider')->removeListenersByType([
-                Event\TransactionCommitted::class,
-                Event\TransactionRolledBack::class
-            ]);
-
             try {
+                self::sys('Provider')->removeListenersByType([
+                    Event\TransactionCommitted::class,
+                    Event\TransactionRolledBack::class
+                ]);
+
                 self::sys($driver)->begin($isolation);
 
                 if ($body() !== false) {

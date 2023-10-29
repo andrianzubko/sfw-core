@@ -321,6 +321,15 @@ abstract class Sys extends \SFW\Config
         $config['merger_cache'] = APP_DIR . '/var/cache/merger.php';
 
         // }}}
+        // {{{ listeners provider
+
+        /* Cache file with listeners provider internal data.
+         *
+         * string
+         */
+        $config['provider_cache'] = APP_DIR . '/var/cache/provider.php';
+
+        // }}}
         // {{{ router
 
         /* Cache file with router internal data.

@@ -8,7 +8,7 @@ use SFW\Exception\{Logic, Runtime};
 /**
  * JS and CSS merger.
  */
-class Merger extends Base
+final class Merger extends Base
 {
     /**
      * Internal cache.
@@ -26,7 +26,7 @@ class Merger extends Base
      * @throws Logic
      * @throws Runtime
      */
-    public static function process(): array
+    public function process(): array
     {
         self::$cache = @include self::$sys['config']['merger_cache'];
 
@@ -34,26 +34,26 @@ class Merger extends Base
             && self::$sys['config']['env'] === 'prod'
             && self::$sys['config']['debug'] === self::$cache['debug']
         ) {
-            return static::getPaths();
+            return $this->getPaths();
         }
 
         if (!self::sys('Locker')->lock('merger')) {
-            return static::getPaths();
+            return $this->getPaths();
         }
 
-        if (static::isOutdated()) {
-            static::recombine();
+        if ($this->isOutdated()) {
+            $this->recombine();
         }
 
         self::sys('Locker')->unlock('merger');
 
-        return static::getPaths();
+        return $this->getPaths();
     }
 
     /**
      * Gets merged paths.
      */
-    protected static function getPaths(): array
+    protected function getPaths(): array
     {
         $paths = [];
 
@@ -71,7 +71,7 @@ class Merger extends Base
     /**
      * Gets sources files.
      */
-    protected static function getSources(): array
+    protected function scanForSources(): void
     {
         if (!isset(self::$sources)) {
             self::$sources = [];
@@ -90,14 +90,12 @@ class Merger extends Base
                 }
             }
         }
-
-        return self::$sources;
     }
 
     /**
      * Rechecks of the needs for recombination.
      */
-    protected static function isOutdated(): bool
+    protected function isOutdated(): bool
     {
         if (self::$cache === false || self::$sys['config']['debug'] !== self::$cache['debug']) {
             return true;
@@ -108,7 +106,7 @@ class Merger extends Base
         foreach (self::sys('Dir')->scan(self::$sys['config']['merger_dir'], false, true) as $item) {
             if (is_file($item)
                 && preg_match('~/(\d+)\.(.+)$~', $item, $M)
-                    && (int) $M[1] === self::$cache['time']
+                && (int) $M[1] === self::$cache['time']
             ) {
                 $targets[] = $M[2];
             } else {
@@ -116,14 +114,14 @@ class Merger extends Base
             }
         }
 
-        $sources = static::getSources();
+        $this->scanForSources();
 
-        if (array_diff(array_keys(array_merge(...array_values($sources))), $targets)) {
+        if (array_diff(array_keys(array_merge(...array_values(self::$sources))), $targets)) {
             return true;
         }
 
-        foreach (array_keys($sources) as $type) {
-            foreach ($sources[$type] as $files) {
+        foreach (array_keys(self::$sources) as $type) {
+            foreach (self::$sources[$type] as $files) {
                 foreach ($files as $file) {
                     if ((int) filemtime($file) > self::$cache['time']) {
                         return true;
@@ -141,7 +139,7 @@ class Merger extends Base
      * @throws Logic
      * @throws Runtime
      */
-    protected static function recombine(): void
+    protected function recombine(): void
     {
         self::sys('Dir')->clear(self::$sys['config']['merger_dir']);
 
@@ -151,10 +149,10 @@ class Merger extends Base
 
         self::$cache['debug'] = self::$sys['config']['debug'];
 
-        $sources = static::getSources();
+        $this->scanForSources();
 
-        foreach (array_keys($sources) as $type) {
-            foreach ($sources[$type] as $target => $files) {
+        foreach (array_keys(self::$sources) as $type) {
+            foreach (self::$sources[$type] as $target => $files) {
                 $file = sprintf(
                     '%s/%s.%s',
                         self::$sys['config']['merger_dir'],
@@ -163,9 +161,9 @@ class Merger extends Base
                 );
 
                 if ($type === 'js') {
-                    $contents = static::mergeJs($files);
+                    $contents = $this->mergeJs($files);
                 } else {
-                    $contents = static::mergeCss($files);
+                    $contents = $this->mergeCss($files);
                 }
 
                 if (!self::sys('File')->put($file, $contents)) {
@@ -187,17 +185,15 @@ class Merger extends Base
      * @throws Logic
      * @throws Runtime
      */
-    protected static function mergeJs(array $files): string
+    protected function mergeJs(array $files): string
     {
-        $merged = static::mergeFiles($files);
+        $merged = $this->mergeFiles($files);
 
         if (!self::$sys['config']['debug']) {
             try {
                 $merged = (new JSMin($merged))->min();
             } catch (\Exception $e) {
-                throw (new Logic($e->getMessage()))
-                    ->setFile($e->getFile())
-                    ->setLine($e->getLine());
+                throw (new Logic($e->getMessage()))->setFile($e->getFile())->setLine($e->getLine());
             }
         }
 
@@ -209,9 +205,9 @@ class Merger extends Base
      *
      * @throws Runtime
      */
-    protected static function mergeCss(array $files): string
+    protected function mergeCss(array $files): string
     {
-        $merged = static::mergeFiles($files);
+        $merged = $this->mergeFiles($files);
 
         if (!self::$sys['config']['debug']) {
             $merged = self::sys('Text')->fTrim(preg_replace('~/\*(.*?)\*/~us', '', $merged));
@@ -223,8 +219,8 @@ class Merger extends Base
 
                 if (preg_match('/\.(gif|png|jpg|jpeg|svg|woff|woff2)$/ui', $M[1], $N)
                     && str_starts_with($M[1], '/')
-                        && !str_starts_with($M[1], '//')
-                            && !str_contains($M[1], '..')
+                    && !str_starts_with($M[1], '//')
+                    && !str_contains($M[1], '..')
                 ) {
                     $type = strtolower($N[1]);
 
@@ -255,7 +251,7 @@ class Merger extends Base
      *
      * @throws Runtime
      */
-    protected static function mergeFiles(array $files): string
+    protected function mergeFiles(array $files): string
     {
         $merged = [];
 

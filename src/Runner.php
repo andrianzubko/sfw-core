@@ -128,9 +128,9 @@ abstract class Runner extends Base
             // {{{ routing
 
             if (PHP_SAPI === 'cli') {
-                $target = Router\Command::getTarget();
+                $target = (new Router\Command())->getTarget();
             } else {
-                $target = Router\Controller::getTarget();
+                $target = (new Router\Controller())->getTarget();
 
                 if ($target === false) {
                     self::sys('Response')->error(404);
@@ -148,7 +148,7 @@ abstract class Runner extends Base
             // {{{ merging CSS and JS
 
             if (self::$sys['config']['merger_sources'] !== null && PHP_SAPI !== 'cli') {
-                self::$sys['merged'] = Merger::process();
+                self::$sys['merged'] = (new Merger())->process();
             }
 
             // }}}

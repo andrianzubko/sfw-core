@@ -7,12 +7,12 @@ use SFW\Exception\Runtime;
 /**
  * Routes from request url to Controller action.
  */
-class Controller extends \SFW\Router
+final class Controller extends \SFW\Router
 {
     /**
      * Internal cache.
      */
-    protected static array|false $cache = false;
+    protected static array|false $cache;
 
     /**
      * Controller files.
@@ -20,20 +20,26 @@ class Controller extends \SFW\Router
     protected static array $cFiles;
 
     /**
+     * Checks and actualize cache if needed.
+     */
+    public function __construct()
+    {
+        if (!isset(self::$cache)) {
+            self::$cache = @include self::$sys['config']['router_cache'];
+
+            if (self::$cache === false || self::$sys['config']['env'] !== 'prod' && $this->isOutdated()) {
+                $this->rebuild();
+            }
+        }
+    }
+
+    /**
      * Gets class, method and action names.
      *
      * @throws Runtime
      */
-    public static function getTarget(): object|false
+    public function getTarget(): object|false
     {
-        if (self::$cache === false) {
-            self::$cache = @include self::$sys['config']['router_cache'];
-
-            if (self::$cache === false || self::$sys['config']['env'] !== 'prod' && static::isOutdated()) {
-                static::rebuild();
-            }
-        }
-
         $actions = self::$cache['static'][$_SERVER['REQUEST_PATH']] ?? null;
 
         if ($actions === null && preg_match(self::$cache['regex'], $_SERVER['REQUEST_PATH'], $M)) {
@@ -68,20 +74,12 @@ class Controller extends \SFW\Router
      *
      * @throws Runtime
      */
-    public static function genUrl(string $action, string|int|float|null ...$params): string
+    public function genUrl(string $action, string|int|float|null ...$params): string
     {
-        if (self::$cache === false) {
-            self::$cache = @include self::$sys['config']['router_cache'];
-
-            if (self::$cache === false) {
-                static::rebuild();
-            }
-        }
-
         $pCount = \count($params);
 
         $url = self::$cache['urls'][$action][$pCount]
-            ?? self::$cache['urls'][static::FullToAction($action)][$pCount]
+            ?? self::$cache['urls'][$this->FullToAction($action)][$pCount]
             ?? null;
 
         if ($url === null) {
@@ -119,7 +117,7 @@ class Controller extends \SFW\Router
     /**
      * Gets controller files.
      */
-    protected static function getControllerFiles(): array
+    protected function scanForControllerFiles(): void
     {
         if (!isset(self::$cFiles)) {
             self::$cFiles = [];
@@ -130,18 +128,20 @@ class Controller extends \SFW\Router
                 }
             }
         }
-
-        return self::$cFiles;
     }
 
     /**
      * Rechecks of the needs for rescanning.
-     *
-     * Note: no checks for cache existence!
      */
-    protected static function isOutdated(): bool
+    protected function isOutdated(): bool
     {
-        foreach (static::getControllerFiles() as $file) {
+        $this->scanForControllerFiles();
+
+        if (self::$cache['count'] !== \count(self::$cFiles)) {
+            return true;
+        }
+
+        foreach (self::$cFiles as $file) {
             if ((int) filemtime($file) > self::$cache['time']) {
                 return true;
             }
@@ -155,15 +155,19 @@ class Controller extends \SFW\Router
      *
      * @throws Runtime
      */
-    protected static function rebuild(): void
+    protected function rebuild(): void
     {
-        foreach (static::getControllerFiles() as $file) {
+        $this->scanForControllerFiles();
+
+        foreach (self::$cFiles as $file) {
             require_once $file;
         }
 
         self::$cache = [];
 
         self::$cache['time'] = time();
+
+        self::$cache['count'] = \count(self::$cFiles);
 
         self::$cache['static'] = [];
 
@@ -176,26 +180,24 @@ class Controller extends \SFW\Router
         $objects = [];
 
         foreach (get_declared_classes() as $class) {
-            if (str_starts_with($class, 'App\\Controller\\')) {
+            if (str_starts_with($class, 'App\Controller\\')) {
                 $rClass = new \ReflectionClass($class);
 
                 $objects[] = [$rClass, $class];
 
                 foreach ($rClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $rMethod) {
-                    if ($rMethod->class === $class) {
-                        $objects[] = [$rMethod, "$class::$rMethod->name"];
-                    }
+                    $objects[] = [$rMethod, "$class::$rMethod->name"];
                 }
             }
         }
 
         foreach ($objects as [$object, $name]) {
-            foreach ($object->getAttributes('SFW\\Route') as $attribute) {
+            foreach ($object->getAttributes(\SFW\Route::class) as $attribute) {
                 $route = $attribute->newInstance();
 
                 foreach ($route->url as $url) {
                     foreach ($route->method as $method) {
-                        self::$cache['static'][$url][$method] = static::FullToAction($name);
+                        self::$cache['static'][$url][$method] = $this->FullToAction($name);
                     }
                 }
             }
@@ -236,7 +238,7 @@ class Controller extends \SFW\Router
     /**
      * Makes action from fully qualified method name.
      */
-    protected static function FullToAction(string $name): string
+    protected function FullToAction(string $name): string
     {
         return preg_replace('/(?:^App\\\\Controller\\\\|::__construct$)/', '', $name);
     }

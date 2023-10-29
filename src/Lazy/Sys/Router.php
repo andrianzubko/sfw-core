@@ -10,12 +10,18 @@ use SFW\Exception\Runtime;
 class Router extends \SFW\Lazy\Sys
 {
     /**
-     * Just a placeholder.
+     * Controllers router instance.
+     */
+    protected \SFW\Router\Controller $router;
+
+    /**
+     * Instantiate the router.
      *
-     * If your overrides constructor, don't forget call parent at first line! Even if it's empty!
+     * If your overrides constructor, don't forget call parent at first line!
      */
     public function __construct()
     {
+        $this->router = new \SFW\Router\Controller();
     }
 
     /**
@@ -25,7 +31,7 @@ class Router extends \SFW\Lazy\Sys
      */
     public function genUrl(string $action, string|int|float|null ...$params): string
     {
-        return \SFW\Router\Controller::genUrl($action, ...$params);
+        return $this->router->genUrl($action, ...$params);
     }
 
     /**
@@ -35,6 +41,6 @@ class Router extends \SFW\Lazy\Sys
      */
     public function genAbsoluteUrl(string $action, string|int|float|null ...$params): string
     {
-        return self::$sys['url'] . \SFW\Router\Controller::genUrl($action, ...$params);
+        return self::$sys['url'] . $this->router->genUrl($action, ...$params);
     }
 }

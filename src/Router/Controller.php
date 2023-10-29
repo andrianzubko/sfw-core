@@ -27,7 +27,9 @@ final class Controller extends \SFW\Router
         if (!isset(self::$cache)) {
             self::$cache = @include self::$sys['config']['router_cache'];
 
-            if (self::$cache === false || self::$sys['config']['env'] !== 'prod' && $this->isOutdated()) {
+            if (self::$cache === false
+                || self::$sys['config']['env'] !== 'prod' && $this->isOutdated()
+            ) {
                 $this->rebuild();
             }
         }
@@ -42,7 +44,9 @@ final class Controller extends \SFW\Router
     {
         $actions = self::$cache['static'][$_SERVER['REQUEST_PATH']] ?? null;
 
-        if ($actions === null && preg_match(self::$cache['regex'], $_SERVER['REQUEST_PATH'], $M)) {
+        if ($actions === null
+            && preg_match(self::$cache['regex'], $_SERVER['REQUEST_PATH'], $M)
+        ) {
             [$actions, $keys] = self::$cache['dynamic'][$M['MARK']];
 
             foreach ($keys as $i => $key) {
@@ -115,7 +119,7 @@ final class Controller extends \SFW\Router
     }
 
     /**
-     * Gets controller files.
+     * Scanning for controller files.
      */
     protected function scanForControllerFiles(): void
     {
@@ -131,7 +135,7 @@ final class Controller extends \SFW\Router
     }
 
     /**
-     * Rechecks of the needs for rescanning.
+     * Rechecks of the needs for cache rebuild.
      */
     protected function isOutdated(): bool
     {

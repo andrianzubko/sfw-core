@@ -33,13 +33,13 @@ class Provider extends \SFW\Lazy\Sys implements ListenerProviderInterface
     }
 
     /**
-     * Adds regular listener.
+     * Adds listener.
      *
      * @throws InvalidArgument
      */
-    public function addRegularListener(callable $callback): self
+    public function addListener(callable $callback): self
     {
-        return $this->addListener($callback, \SFW\Provider::REGULAR);
+        return $this->addSomeListener($callback, \SFW\Provider::REGULAR);
     }
 
     /**
@@ -49,7 +49,7 @@ class Provider extends \SFW\Lazy\Sys implements ListenerProviderInterface
      */
     public function addDisposableListener(callable $callback): self
     {
-        return $this->addListener($callback, \SFW\Provider::DISPOSABLE);
+        return $this->addSomeListener($callback, \SFW\Provider::DISPOSABLE);
     }
 
     /**
@@ -59,15 +59,15 @@ class Provider extends \SFW\Lazy\Sys implements ListenerProviderInterface
      */
     public function addPersistentListener(callable $callback): self
     {
-        return $this->addListener($callback, \SFW\Provider::PERSISTENT);
+        return $this->addSomeListener($callback, \SFW\Provider::PERSISTENT);
     }
 
     /**
-     * Adds listener base method.
+     * Adds some listener.
      *
      * @throws InvalidArgument
      */
-    protected function addListener(callable $callback, int $mode): self
+    protected function addSomeListener(callable $callback, int $mode): self
     {
         $params = (new \ReflectionFunction($callback(...)))->getParameters();
 

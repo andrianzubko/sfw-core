@@ -3,9 +3,10 @@
 namespace SFW;
 
 /**
- * Registers listener abstraction.
+ * Registers listener.
  */
-abstract class AsListener
+#[\Attribute(\Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
+class AsListener
 {
     /**
      * Registers listener.

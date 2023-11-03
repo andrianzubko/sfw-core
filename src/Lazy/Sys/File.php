@@ -28,9 +28,8 @@ class File extends \SFW\Lazy\Sys
      */
     public function put(string $file, mixed $contents, int $flags = 0, bool $createDir = true): bool
     {
-        if ($createDir
-            && !self::sys('Dir')->create(dirname($file))
-                || file_put_contents($file, $contents, $flags) === false
+        if ($createDir && !self::sys('Dir')->create(dirname($file))
+            || file_put_contents($file, $contents, $flags) === false
         ) {
             return false;
         }
@@ -73,10 +72,7 @@ class File extends \SFW\Lazy\Sys
      */
     public function copy(string $source, string $target, bool $createDir = true): bool
     {
-        if ($createDir
-            && !self::sys('Dir')->create(dirname($target))
-                || !copy($source, $target)
-        ) {
+        if ($createDir && !self::sys('Dir')->create(dirname($target)) || !copy($source, $target)) {
             return false;
         }
 
@@ -90,10 +86,7 @@ class File extends \SFW\Lazy\Sys
      */
     public function move(string $source, string $target, bool $createDir = true): bool
     {
-        if ($createDir
-            && !self::sys('Dir')->create(dirname($target))
-                || !rename($source, $target)
-        ) {
+        if ($createDir && !self::sys('Dir')->create(dirname($target)) || !rename($source, $target)) {
             return false;
         }
 
@@ -105,26 +98,36 @@ class File extends \SFW\Lazy\Sys
      */
     public function stats(string $file): array
     {
-        $stat = @stat($file) ?: [];
+        $fileStats = @stat($file);
 
-        $imageSize = @getimagesize($file) ?: [];
+        if ($fileStats === false) {
+            $fileStats = [];
+        }
 
-        return [
-            'name' => basename($file),
+        $imageSize = @getimagesize($file);
 
-            'size' => $stat['size'] ?? 0,
+        if ($imageSize === false) {
+            $imageSize = [];
+        }
 
-            'w' => $imageSize[0] ?? 0,
+        $stats = [];
 
-            'h' => $imageSize[1] ?? 0,
+        $stats['name'] = basename($file);
 
-            'mime' => $imageSize['mime'] ?? false,
+        $stats['size'] = $fileStats['size'] ?? 0;
 
-            'modified' => $stat['mtime'] ?? 0,
+        $stats['w'] = $imageSize[0] ?? 0;
 
-            'created' => $stat['ctime'] ?? 0,
+        $stats['h'] = $imageSize[1] ?? 0;
 
-            'exists' => isset($stat['ctime']),
-        ];
+        $stats['mime'] = $imageSize['mime'] ?? false;
+
+        $stats['modified'] = $fileStats['mtime'] ?? 0;
+
+        $stats['created'] = $fileStats['ctime'] ?? 0;
+
+        $stats['exists'] = isset($fileStats['ctime']);
+
+        return $stats;
     }
 }

@@ -180,7 +180,8 @@ class Text extends \SFW\Lazy\Sys
                 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
                 'abcdefghijklmnopqrstuvwxyz',
                 '0123456789',
-            ], $chars
+            ],
+            $chars
         );
 
         $string = str_repeat(' ', $size);

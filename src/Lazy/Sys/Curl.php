@@ -63,9 +63,7 @@ class Curl extends \SFW\Lazy\Sys
             return false;
         }
 
-        $this->headers = preg_split('/\r\n/', array_pop($this->headers),
-            flags: PREG_SPLIT_NO_EMPTY
-        );
+        $this->headers = preg_split('/\r\n/', array_pop($this->headers), flags: PREG_SPLIT_NO_EMPTY);
 
         if ($this->info['header_size'] >= \strlen($response)) {
             return '';

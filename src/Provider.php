@@ -41,9 +41,7 @@ final class Provider extends \SFW\Base
     {
         $this->cache = @include self::$sys['config']['provider_cache'];
 
-        if ($this->cache === false
-            || self::$sys['config']['env'] !== 'prod' && $this->isOutdated()
-        ) {
+        if ($this->cache === false || self::$sys['config']['env'] !== 'prod' && $this->isOutdated()) {
             $this->rebuild();
         }
     }
@@ -63,13 +61,15 @@ final class Provider extends \SFW\Base
      */
     protected function scanForListenerFiles(): void
     {
-        if (!isset($this->lFiles)) {
-            $this->lFiles = [];
+        if (isset($this->lFiles)) {
+            return;
+        }
 
-            foreach (self::sys('Dir')->scan(APP_DIR . '/src/Listener', true, true) as $item) {
-                if (is_file($item) && str_ends_with($item, '.php')) {
-                    $this->lFiles[] = $item;
-                }
+        $this->lFiles = [];
+
+        foreach (self::sys('Dir')->scan(APP_DIR . '/src/Listener', true, true) as $item) {
+            if (is_file($item) && str_ends_with($item, '.php')) {
+                $this->lFiles[] = $item;
             }
         }
     }
@@ -125,7 +125,7 @@ final class Provider extends \SFW\Base
                             as $attribute
                     ) {
                         if ($rMethod->isConstructor()) {
-                            self::sys('Logger')->warning('Constructor cannot be a listener', [
+                            self::sys('Logger')->warning('Constructor cannot be a listener', options: [
                                 'file' => $rMethod->getFileName(),
                                 'line' => $rMethod->getStartLine()
                             ]);
@@ -138,7 +138,7 @@ final class Provider extends \SFW\Base
                         $type = $params ? $params[0]->getType() : null;
 
                         if ($type === null) {
-                            self::sys('Logger')->warning('Listener must have one parameter with declared type', [
+                            self::sys('Logger')->warning('Listener must have one parameter with declared type', options: [
                                 'file' => $rMethod->getFileName(),
                                 'line' => $rMethod->getStartLine()
                             ]);
@@ -168,7 +168,7 @@ final class Provider extends \SFW\Base
             }
         }
 
-        usort($this->cache['listeners'], fn($a,$b) => $a['priority'] <=> $b['priority']);
+        usort($this->cache['listeners'], fn($a, $b) => $a['priority'] <=> $b['priority']);
 
         foreach (array_keys($this->cache['listeners']) as $i) {
             unset($this->cache['listeners'][$i]['priority']);

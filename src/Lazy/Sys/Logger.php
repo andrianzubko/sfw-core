@@ -21,9 +21,9 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
     /**
      * System is unusable.
      */
-    public function emergency(string|\Stringable $message, array $context = []): void
+    public function emergency(string|\Stringable $message, array $context = [], array $options = []): void
     {
-        $this->log(LogLevel::EMERGENCY, $message, $context);
+        $this->log(LogLevel::EMERGENCY, $message, $context, $options);
     }
 
     /**
@@ -32,9 +32,9 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
      * Example: Entire website down, database unavailable, etc. This should
      * trigger the SMS alerts and wake you up.
      */
-    public function alert(string|\Stringable $message, array $context = []): void
+    public function alert(string|\Stringable $message, array $context = [], array $options = []): void
     {
-        $this->log(LogLevel::ALERT, $message, $context);
+        $this->log(LogLevel::ALERT, $message, $context, $options);
     }
 
     /**
@@ -42,18 +42,18 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
      *
      * Example: Application component unavailable, unexpected exception.
      */
-    public function critical(string|\Stringable $message, array $context = []): void
+    public function critical(string|\Stringable $message, array $context = [], array $options = []): void
     {
-        $this->log(LogLevel::CRITICAL, $message, $context);
+        $this->log(LogLevel::CRITICAL, $message, $context, $options);
     }
 
     /**
      * Runtime errors that do not require immediate action but should typically
      * be logged and monitored.
      */
-    public function error(string|\Stringable $message, array $context = []): void
+    public function error(string|\Stringable $message, array $context = [], array $options = []): void
     {
-        $this->log(LogLevel::ERROR, $message, $context);
+        $this->log(LogLevel::ERROR, $message, $context, $options);
     }
 
     /**
@@ -62,17 +62,17 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
      * Example: Use of deprecated APIs, poor use of an API, undesirable things
      * that are not necessarily wrong.
      */
-    public function warning(string|\Stringable $message, array $context = []): void
+    public function warning(string|\Stringable $message, array $context = [], array $options = []): void
     {
-        $this->log(LogLevel::WARNING, $message, $context);
+        $this->log(LogLevel::WARNING, $message, $context, $options);
     }
 
     /**
      * Normal but significant events.
      */
-    public function notice(string|\Stringable $message, array $context = []): void
+    public function notice(string|\Stringable $message, array $context = [], array $options = []): void
     {
-        $this->log(LogLevel::NOTICE, $message, $context);
+        $this->log(LogLevel::NOTICE, $message, $context, $options);
     }
 
     /**
@@ -80,23 +80,23 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
      *
      * Example: User logs in, SQL logs.
      */
-    public function info(string|\Stringable $message, array $context = []): void
+    public function info(string|\Stringable $message, array $context = [], array $options = []): void
     {
-        $this->log(LogLevel::INFO, $message, $context);
+        $this->log(LogLevel::INFO, $message, $context, $options);
     }
 
     /**
      * Detailed debug information.
      */
-    public function debug(string|\Stringable $message, array $context = []): void
+    public function debug(string|\Stringable $message, array $context = [], array $options = []): void
     {
-        $this->log(LogLevel::DEBUG, $message, $context);
+        $this->log(LogLevel::DEBUG, $message, $context, $options);
     }
 
     /**
      * Logs with an arbitrary level.
      */
-    public function log(mixed $level, string|\Stringable $message, array $context = []): void
+    public function log(mixed $level, string|\Stringable $message, array $context = [], array $options = []): void
     {
         set_error_handler(fn() => true);
 
@@ -106,31 +106,35 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
 
         if ($message instanceof \Throwable) {
             $message = (string) $message;
-        } elseif (
-            $context['append_file_and_line'] ?? true
-        ) {
-            if (isset($context['file'], $context['line'])) {
-                $message = sprintf('%s in %s:%s',
-                    $message,
-                    $context['file'],
-                    $context['line']
-                );
-            } elseif (isset($context['trace'])) {
-                $message = sprintf('%s in %s:%s',
-                    $message,
-                    $context['trace'][0]['file'],
-                    $context['trace'][0]['line']
-                );
-            } else {
-                foreach (debug_backtrace(2) as $item) {
-                    if ($item['file'] !== __FILE__) {
-                        $message = sprintf('%s in %s:%s',
-                            $message,
-                            $item['file'],
-                            $item['line']
-                        );
+        } else {
+            if ($context !== null) {
+                $message .= ' ' . json_encode($context, JSON_UNESCAPED_UNICODE);
+            }
 
-                        break;
+            if ($options['append_file_and_line'] ?? true) {
+                if (isset($options['file'], $options['line'])) {
+                    $message = sprintf('%s in %s:%s',
+                        $message,
+                        $options['file'],
+                        $options['line']
+                    );
+                } elseif (isset($options['trace'])) {
+                    $message = sprintf('%s in %s:%s',
+                        $message,
+                        $options['trace'][0]['file'],
+                        $options['trace'][0]['line']
+                    );
+                } else {
+                    foreach (debug_backtrace(2) as $item) {
+                        if ($item['file'] !== __FILE__) {
+                            $message = sprintf('%s in %s:%s',
+                                $message,
+                                $item['file'],
+                                $item['line']
+                            );
+
+                            break;
+                        }
                     }
                 }
             }
@@ -138,30 +142,30 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
 
         $message = sprintf("[SFW %s] %s", ucfirst($level), $message);
 
-        $context['timezone'] ??= self::$sys['config']['timezone'];
+        $options['timezone'] ??= self::$sys['config']['timezone'];
 
-        $tzPrev = date_default_timezone_get();
+        $timezonePrev = date_default_timezone_get();
 
-        if ($tzPrev === $context['timezone'] || !date_default_timezone_set($context['timezone'])) {
-            $tzPrev = null;
+        if ($timezonePrev === $options['timezone'] || !date_default_timezone_set($options['timezone'])) {
+            $timezonePrev = null;
         }
 
-        if (!isset($context['destination'])) {
+        if (!isset($options['destination'])) {
             error_log($message);
 
             if (self::$sys['config']['logger_file'] !== null) {
-                $context['destination'] = self::$sys['config']['logger_file'];
+                $options['destination'] = self::$sys['config']['logger_file'];
             }
         }
 
-        if (isset($context['destination'])) {
-            self::sys('File')->put($context['destination'],
-                sprintf("[%s] %s\n", date('d-M-Y H:i:s e'), $message), FILE_APPEND
-            );
+        if (isset($options['destination'])) {
+            $message = sprintf("[%s] %s\n", date('d-M-Y H:i:s e'), $message);
+
+            self::sys('File')->put($options['destination'], $message, FILE_APPEND);
         }
 
-        if ($tzPrev !== null) {
-            date_default_timezone_set($tzPrev);
+        if ($timezonePrev !== null) {
+            date_default_timezone_set($timezonePrev);
         }
 
         restore_error_handler();
@@ -172,21 +176,22 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
      */
     public function dbSlowQuery(float $timer, array $queries): void
     {
-        if (self::$sys['config']['db_slow_queries_log'] !== null
-            && $timer >= self::$sys['config']['db_slow_queries_min']
+        if (self::$sys['config']['db_slow_queries_log'] === null
+            || $timer <= self::$sys['config']['db_slow_queries_min']
         ) {
-            $host = idn_to_utf8($_SERVER['HTTP_HOST']) . $_SERVER['REQUEST_URI'];
-
-            $queries = implode("\n\t", array_map(fn($a) => self::sys('Text')->fTrim($a), $queries));
-
-            $message = sprintf("[%.2f] %s\n\t%s\n", $timer, $host, $queries);
-
-            $this->info($message, [
-                'destination' => self::$sys['config']['db_slow_queries_log'],
-
-                'append_file_and_line' => false,
-            ]);
+            return;
         }
+
+        $host = idn_to_utf8($_SERVER['HTTP_HOST']) . $_SERVER['REQUEST_URI'];
+
+        $queries = implode("\n\t", array_map(fn($a) => self::sys('Text')->fTrim($a), $queries));
+
+        $message = sprintf("[%.2f] %s\n\t%s\n", $timer, $host, $queries);
+
+        $this->info($message, options: [
+            'destination' => self::$sys['config']['db_slow_queries_log'],
+            'append_file_and_line' => false,
+        ]);
     }
 
     /**
@@ -194,16 +199,17 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
      */
     public function transactionFail(string $level, string $state, int $retry): void
     {
-        if (self::$sys['config']['transaction_fails_log'] !== null) {
-            $host = idn_to_utf8($_SERVER['HTTP_HOST']) . $_SERVER['REQUEST_URI'];
-
-            $message = sprintf("[%s] [%d] %s", $state, $retry, $host);
-
-            $this->log($level, $message, [
-                'destination' => self::$sys['config']['transaction_fails_log'],
-
-                'append_file_and_line' => false,
-            ]);
+        if (self::$sys['config']['transaction_fails_log'] === null) {
+            return;
         }
+
+        $host = idn_to_utf8($_SERVER['HTTP_HOST']) . $_SERVER['REQUEST_URI'];
+
+        $message = sprintf("[%s] [%d] %s", $state, $retry, $host);
+
+        $this->log($level, $message, options: [
+            'destination' => self::$sys['config']['transaction_fails_log'],
+            'append_file_and_line' => false,
+        ]);
     }
 }

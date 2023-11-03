@@ -14,20 +14,18 @@ final class Command extends \SFW\Router
      */
     public function getTarget(): object|false
     {
-        if (isset($_SERVER['argv'][1])) {
-            $target = (object) [];
-
-            $target->action = preg_replace_callback('/(?:^|:)(.)/', fn($M) => strtoupper($M[1]),
-                $_SERVER['argv'][1]
-            );
-
-            $target->class = "App\\Command\\$target->action";
-
-            $target->method = '__construct';
-
-            return $target;
+        if (!isset($_SERVER['argv'][1])) {
+            return false;
         }
 
-        return false;
+        $target = (object) [];
+
+        $target->action = preg_replace_callback('/(?:^|:)(.)/', fn($M) => strtoupper($M[1]), $_SERVER['argv'][1]);
+
+        $target->class = "App\\Command\\$target->action";
+
+        $target->method = '__construct';
+
+        return $target;
     }
 }

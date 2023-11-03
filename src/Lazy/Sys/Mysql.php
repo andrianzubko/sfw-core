@@ -47,7 +47,8 @@ class Mysql extends \SFW\Lazy\Sys
      */
     public static function getInstance(): \SFW\Databaser\Driver
     {
-        return (new \SFW\Databaser\Mysql((new static())->options))
-            ->setProfiler(self::sys('Logger')->dbSlowQuery(...));
+        $profiler = self::sys('Logger')->dbSlowQuery(...);
+
+        return (new \SFW\Databaser\Mysql((new static())->options))->setProfiler($profiler);
     }
 }

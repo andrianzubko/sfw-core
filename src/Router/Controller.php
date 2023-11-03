@@ -24,14 +24,14 @@ final class Controller extends \SFW\Router
      */
     public function __construct()
     {
-        if (!isset(self::$cache)) {
-            self::$cache = @include self::$sys['config']['router_cache'];
+        if (isset(self::$cache)) {
+            return;
+        }
 
-            if (self::$cache === false
-                || self::$sys['config']['env'] !== 'prod' && $this->isOutdated()
-            ) {
-                $this->rebuild();
-            }
+        self::$cache = @include self::$sys['config']['router_cache'];
+
+        if (self::$cache === false || self::$sys['config']['env'] !== 'prod' && $this->isOutdated()) {
+            $this->rebuild();
         }
     }
 
@@ -44,9 +44,7 @@ final class Controller extends \SFW\Router
     {
         $actions = self::$cache['static'][$_SERVER['REQUEST_PATH']] ?? null;
 
-        if ($actions === null
-            && preg_match(self::$cache['regex'], $_SERVER['REQUEST_PATH'], $M)
-        ) {
+        if ($actions === null && preg_match(self::$cache['regex'], $_SERVER['REQUEST_PATH'], $M)) {
             [$actions, $keys] = self::$cache['dynamic'][$M['MARK']];
 
             foreach ($keys as $i => $key) {
@@ -54,23 +52,25 @@ final class Controller extends \SFW\Router
             }
         }
 
-        if ($actions !== null) {
-            $target = (object) [];
-
-            $target->action = $actions[$_SERVER['REQUEST_METHOD']] ?? $actions[''] ?? null;
-
-            if ($target->action !== null) {
-                $chunks = explode('::', "App\\Controller\\$target->action");
-
-                $target->class = $chunks[0];
-
-                $target->method = $chunks[1] ?? '__construct';
-
-                return $target;
-            }
+        if ($actions === null) {
+            return false;
         }
 
-        return false;
+        $target = (object) [];
+
+        $target->action = $actions[$_SERVER['REQUEST_METHOD']] ?? $actions[''] ?? null;
+
+        if ($target->action === null) {
+            return false;
+        }
+
+        $chunks = explode('::', "App\\Controller\\$target->action");
+
+        $target->class = $chunks[0];
+
+        $target->method = $chunks[1] ?? '__construct';
+
+        return $target;
     }
 
     /**
@@ -89,17 +89,15 @@ final class Controller extends \SFW\Router
         if ($url === null) {
             if ($pCount) {
                 self::sys('Logger')->warning(
-                    sprintf(
-                        'Unable to make URL with %d parameter%s by action %s',
-                            $pCount,
-                            $pCount === 1 ? '' : 's',
-                            $action
-                    ), debug_backtrace(2)[1]
+                    sprintf('Unable to make URL with %d parameter%s by action %s',
+                        $pCount,
+                        $pCount === 1 ? '' : 's',
+                        $action
+                    ),
+                    options: debug_backtrace(2)[1]
                 );
             } else {
-                self::sys('Logger')->warning(
-                    sprintf('Unable to make URL by action %s', $action), debug_backtrace(2)[1]
-                );
+                self::sys('Logger')->warning("Unable to make URL by action $action", options: debug_backtrace(2)[1]);
             }
 
             return '/';
@@ -123,13 +121,15 @@ final class Controller extends \SFW\Router
      */
     protected function scanForControllerFiles(): void
     {
-        if (!isset(self::$cFiles)) {
-            self::$cFiles = [];
+        if (isset(self::$cFiles)) {
+            return;
+        }
 
-            foreach (self::sys('Dir')->scan(APP_DIR . '/src/Controller', true, true) as $item) {
-                if (is_file($item) && str_ends_with($item, '.php')) {
-                    self::$cFiles[] = $item;
-                }
+        self::$cFiles = [];
+
+        foreach (self::sys('Dir')->scan(APP_DIR . '/src/Controller', true, true) as $item) {
+            if (is_file($item) && str_ends_with($item, '.php')) {
+                self::$cFiles[] = $item;
             }
         }
     }

@@ -18,16 +18,30 @@ abstract class Config
     abstract public static function init(): array;
 
     /**
-     * Gets parameter from server environment or env file.
+     * Gets parameter from env file.
      */
     protected static function env(string $key, mixed $default = null): mixed
     {
         if (!isset(self::$env)) {
             if (isset($_SERVER['APP_ENV'])) {
-                self::$env = require APP_DIR . sprintf('/.env.%s.php', $_SERVER['APP_ENV']);
+                $main = @include APP_DIR . "/.env.{$_SERVER['APP_ENV']}.php";
+
+                $local = @include APP_DIR . "/.env.{$_SERVER['APP_ENV']}.local.php";
             } else {
-                self::$env = require APP_DIR . '/.env.php';
+                $main = @include APP_DIR . '/.env.php';
+
+                $local = @include APP_DIR . '/.env.local.php';
             }
+
+            if (!\is_array($main)) {
+                $main = [];
+            }
+
+            if (!\is_array($local)) {
+                $local = [];
+            }
+
+            self::$env = [...$main, ...$local];
         }
 
         return \array_key_exists($key, self::$env) ? self::$env[$key] : $default;

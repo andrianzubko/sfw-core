@@ -186,7 +186,7 @@ abstract class Runner extends Base
 
             self::sys('Logger')->error($e);
 
-            self::sys('Logger')->emergency('Application terminated!', [
+            self::sys('Logger')->emergency('Application terminated!', options: [
                 'append_file_and_line' => false
             ]);
 
@@ -209,20 +209,22 @@ abstract class Runner extends Base
             switch ($code) {
                 case E_NOTICE:
                 case E_USER_NOTICE:
-                    self::sys('Logger')->notice($message, [
+                    self::sys('Logger')->notice($message, options: [
                         'file' => $file,
                         'line' => $line
                     ]);
+
                     break;
                 case E_WARNING:
                 case E_USER_WARNING:
                 case E_DEPRECATED:
                 case E_USER_DEPRECATED:
                 case E_STRICT:
-                    self::sys('Logger')->warning($message, [
+                    self::sys('Logger')->warning($message, options: [
                         'file' => $file,
                         'line' => $line
                     ]);
+
                     break;
                 default:
                     throw (new Logic($message))->setFile($file)->setLine($line);

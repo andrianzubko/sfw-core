@@ -21,15 +21,17 @@ class Paginator extends \SFW\Lazy\Sys
     {
         $param = self::$sys['config']['paginator_param'];
 
-        if ($param !== null) {
-            parse_str($_SERVER['QUERY_STRING'], $query);
-
-            unset($query[$param]);
-
-            $query[$param] = '';
-
-            $this->url = $_SERVER['REQUEST_PATH'] . '?' . http_build_query($query);
+        if ($param === null) {
+            return;
         }
+
+        parse_str($_SERVER['QUERY_STRING'], $query);
+
+        unset($query[$param]);
+
+        $query[$param] = '';
+
+        $this->url = $_SERVER['REQUEST_PATH'] . '?' . http_build_query($query);
     }
 
     /**

@@ -77,15 +77,11 @@ class Provider extends \SFW\Lazy\Sys implements ListenerProviderInterface
             throw new InvalidArgument('Listener must have one parameter with declared type');
         }
 
-        $listener = [];
-
-        $listener['callback'] = $callback;
-
-        $listener['type'] = (string) $type;
-
-        $listener['mode'] = $mode;
-
-        $this->listeners[] = $listener;
+        $this->listeners[] = [
+            'callback' => $callback,
+            'type' => (string) $type,
+            'mode' => $mode,
+        ];
 
         return $this;
     }
@@ -131,9 +127,7 @@ class Provider extends \SFW\Lazy\Sys implements ListenerProviderInterface
     {
         foreach ($this->listeners as $i => &$listener) {
             if ($event instanceof $listener['type']) {
-                if (\is_array($listener['callback'])
-                    && \is_string($listener['callback'][0])
-                ) {
+                if (\is_array($listener['callback']) && \is_string($listener['callback'][0])) {
                     $listener['callback'][0] = $this->instances[$listener['callback'][0]]
                         ??= new $listener['callback'][0];
                 }

@@ -143,11 +143,13 @@ class Response extends \SFW\Lazy\Sys
         int $code = 200,
         int $expire = 0,
     ): void {
-        $this->output('inline', json_encode($contents,
+        $contents = json_encode($contents,
             $pretty
                 ? JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT
                 : JSON_UNESCAPED_UNICODE
-        ), 'application/json', $code, $expire, null);
+        );
+
+        $this->output('inline', $contents, 'application/json', $code, $expire, null);
     }
 
     /**

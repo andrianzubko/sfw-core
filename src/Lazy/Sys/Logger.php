@@ -10,12 +10,18 @@ use Psr\Log\{LoggerInterface, LogLevel};
 class Logger extends \SFW\Lazy\Sys implements LoggerInterface
 {
     /**
-     * Just a placeholder.
+     * Timezone.
+     */
+    protected string $timezone;
+
+    /**
+     * Sets default timezone.
      *
-     * If your overrides constructor, don't forget call parent at first line! Even if it's empty!
+     * If your overrides constructor, don't forget call parent at first line!
      */
     public function __construct()
     {
+        $this->timezone = self::$sys['config']['timezone'];
     }
 
     /**
@@ -113,40 +119,31 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
 
             if ($options['append_file_and_line'] ?? true) {
                 if (isset($options['file'], $options['line'])) {
-                    $message = sprintf('%s in %s:%s',
-                        $message,
-                        $options['file'],
-                        $options['line']
-                    );
+                    $file = $options['file'];
+                    $line = $options['line'];
                 } elseif (isset($options['trace'])) {
-                    $message = sprintf('%s in %s:%s',
-                        $message,
-                        $options['trace'][0]['file'],
-                        $options['trace'][0]['line']
-                    );
+                    $file = $options['trace'][0]['file'];
+                    $line = $options['trace'][0]['line'];
                 } else {
                     foreach (debug_backtrace(2) as $item) {
                         if ($item['file'] !== __FILE__) {
-                            $message = sprintf('%s in %s:%s',
-                                $message,
-                                $item['file'],
-                                $item['line']
-                            );
+                            $file = $item['file'];
+                            $line = $item['line'];
 
                             break;
                         }
                     }
                 }
+
+                $message .= " in $file:$line";
             }
         }
 
         $message = sprintf("[SFW %s] %s", ucfirst($level), $message);
 
-        $options['timezone'] ??= self::$sys['config']['timezone'];
-
         $timezonePrev = date_default_timezone_get();
 
-        if ($timezonePrev === $options['timezone'] || !date_default_timezone_set($options['timezone'])) {
+        if ($timezonePrev === $this->timezone || !date_default_timezone_set($this->timezone)) {
             $timezonePrev = null;
         }
 
@@ -211,5 +208,23 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
             'destination' => self::$sys['config']['transaction_fails_log'],
             'append_file_and_line' => false,
         ]);
+    }
+
+    /**
+     * Sets timezone.
+     */
+    public function setTimezone(string $timezone): self
+    {
+        $this->timezone = $timezone;
+
+        return $this;
+    }
+
+    /**
+     * Gets timezone.
+     */
+    public function getTimezone(): string
+    {
+        return $this->timezone;
     }
 }

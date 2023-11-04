@@ -24,24 +24,24 @@ abstract class Config
     {
         if (!isset(self::$env)) {
             if (isset($_SERVER['APP_ENV'])) {
-                $main = @include APP_DIR . "/.env.{$_SERVER['APP_ENV']}.php";
+                $primary = @include APP_DIR . "/.env.{$_SERVER['APP_ENV']}.php";
 
-                $local = @include APP_DIR . "/.env.{$_SERVER['APP_ENV']}.local.php";
+                $secondary = @include APP_DIR . "/.env.{$_SERVER['APP_ENV']}.local.php";
             } else {
-                $main = @include APP_DIR . '/.env.php';
+                $primary = @include APP_DIR . '/.env.php';
 
-                $local = @include APP_DIR . '/.env.local.php';
+                $secondary = @include APP_DIR . '/.env.local.php';
             }
 
-            if (!\is_array($main)) {
-                $main = [];
+            if (!\is_array($primary)) {
+                $primary = [];
             }
 
-            if (!\is_array($local)) {
-                $local = [];
+            if (!\is_array($secondary)) {
+                $secondary = [];
             }
 
-            self::$env = [...$main, ...$local];
+            self::$env = [...$primary, ...$secondary];
         }
 
         return \array_key_exists($key, self::$env) ? self::$env[$key] : $default;

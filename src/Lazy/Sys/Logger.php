@@ -21,7 +21,7 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
      */
     public function __construct()
     {
-        $this->timezone = self::$sys['config']['timezone'];
+        $this->setTimezone(self::$sys['config']['timezone']);
     }
 
     /**

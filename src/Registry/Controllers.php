@@ -83,11 +83,15 @@ final class Controllers extends \SFW\Registry
 
                 $this->cache['dynamic'][] = [$actions, $M[1]];
 
-                $this->cache['urls'][][\count($M[1])] = preg_split('/({[^}]+})/', $url,
+                $this->cache['urls'][] = preg_split('/({[^}]+})/', $url,
                     flags: PREG_SPLIT_DELIM_CAPTURE
                 );
+
+                $pCount = \count($M[1]);
             } else {
-                $this->cache['urls'][][0] = $url;
+                $this->cache['urls'][] = $url;
+
+                $pCount = 0;
             }
 
             foreach ($actions as $action) {
@@ -97,7 +101,7 @@ final class Controllers extends \SFW\Registry
 
                 foreach ([$action[0], basename(strtr($action[0], '\\', '/')), $action[1]] as $name) {
                     if ($name !== null) {
-                        $this->cache['actions'][$name] = \count($this->cache['urls']) - 1;
+                        $this->cache['actions']["$name $pCount"] = \count($this->cache['urls']) - 1;
                     }
                 }
             }

@@ -68,19 +68,18 @@ final class Controller extends \SFW\Router
      */
     public function genUrl(string $action, string|int|float|null ...$params): string
     {
-        $index = self::$cache['actions'][$action]
-            ?? self::$cache['actions'][$action . '::' . lcfirst($action)]
+        $pCount = \count($params);
+
+        $index = self::$cache['actions']["$action $pCount"]
+            ?? self::$cache['actions']["$action::" . lcfirst($action) . " $pCount"]
             ?? null;
 
-        $url = self::$cache['urls'][$index][\count($params)] ?? null;
-
-        if ($url === null) {
+        if ($index === null) {
             $message = "Unable to make URL by action $action";
 
-            if (\count($params)) {
-                $message .= sprintf(" and %d %s",
-                    \count($params),
-                    \count($params) === 1 ? 'parameter' : 'parameters'
+            if ($pCount) {
+                $message .= sprintf(" and $pCount %s",
+                    $pCount === 1 ? 'parameter' : 'parameters'
                 );
             }
 
@@ -88,6 +87,8 @@ final class Controller extends \SFW\Router
 
             return '/';
         }
+
+        $url = self::$cache['urls'][$index];
 
         if ($params) {
             foreach ($params as $i => $value) {

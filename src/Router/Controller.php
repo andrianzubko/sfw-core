@@ -68,7 +68,11 @@ final class Controller extends \SFW\Router
      */
     public function genUrl(string $action, string|int|float|null ...$params): string
     {
-        $url = self::$cache['urls'][self::$cache['actions'][$action] ?? null][\count($params)] ?? null;
+        $index = self::$cache['actions'][$action]
+            ?? self::$cache['actions'][$action . '::' . lcfirst($action)]
+            ?? null;
+
+        $url = self::$cache['urls'][$index][\count($params)] ?? null;
 
         if ($url === null) {
             $message = "Unable to make URL by action $action";

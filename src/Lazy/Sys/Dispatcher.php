@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SFW\Lazy\Sys;
@@ -15,9 +16,7 @@ class Dispatcher extends \SFW\Lazy\Sys implements EventDispatcherInterface
      *
      * If your overrides constructor, don't forget call parent at first line! Even if it's empty!
      */
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     /**
      * Dispatches event.

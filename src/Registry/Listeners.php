@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SFW\Registry;
@@ -44,7 +45,7 @@ final class Listeners extends \SFW\Registry
                     if ($rMethod->isConstructor()) {
                         self::sys('Logger')->warning("Constructor can't be a listener", options: [
                             'file' => $rMethod->getFileName(),
-                            'line' => $rMethod->getStartLine()
+                            'line' => $rMethod->getStartLine(),
                         ]);
 
                         continue;
@@ -57,7 +58,7 @@ final class Listeners extends \SFW\Registry
                     if ($type === null) {
                         self::sys('Logger')->warning('Listener must have first parameter with declared type', options: [
                             'file' => $rMethod->getFileName(),
-                            'line' => $rMethod->getStartLine()
+                            'line' => $rMethod->getStartLine(),
                         ]);
 
                         continue;
@@ -74,7 +75,7 @@ final class Listeners extends \SFW\Registry
                     $listener['mode'] = match ($instance::class) {
                         \SFW\AsPersistentListener::class => 'persistent',
                         \SFW\AsDisposableListener::class => 'disposable',
-                        default => 'regular'
+                        default => 'regular',
                     };
 
                     $listener['priority'] = $instance->priority;

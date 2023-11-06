@@ -1,9 +1,8 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SFW\Lazy\Sys;
-
-use SFW\Exception\Logic;
 
 /**
  * Response.
@@ -16,11 +15,18 @@ class Response extends \SFW\Lazy\Sys
     protected bool $exit = true;
 
     /**
+     * Just a placeholder.
+     *
+     * If your overrides constructor, don't forget call parent at first line! Even if it's empty!
+     */
+    public function __construct() {}
+
+    /**
      * Process and output native template.
      *
      * If context is an object, then only public non-static properties will be taken.
      *
-     * @throws Logic
+     * @throws \SFW\Exception\Logic
      * @throws \SFW\Templater\Exception
      */
     public function native(
@@ -38,7 +44,7 @@ class Response extends \SFW\Lazy\Sys
      *
      * If context is an object, then only public non-static properties will be taken.
      *
-     * @throws Logic
+     * @throws \SFW\Exception\Logic
      * @throws \SFW\Templater\Exception
      */
     public function twig(
@@ -56,7 +62,7 @@ class Response extends \SFW\Lazy\Sys
      *
      * If context is an object, then only public non-static properties will be taken.
      *
-     * @throws Logic
+     * @throws \SFW\Exception\Logic
      * @throws \SFW\Templater\Exception
      */
     public function xslt(
@@ -74,7 +80,7 @@ class Response extends \SFW\Lazy\Sys
      *
      * If context is an object, then only public non-static properties will be taken.
      *
-     * @throws Logic
+     * @throws \SFW\Exception\Logic
      * @throws \SFW\Templater\Exception
      */
     public function template(
@@ -90,7 +96,7 @@ class Response extends \SFW\Lazy\Sys
     /**
      * Base method for template transformation.
      *
-     * @throws Logic
+     * @throws \SFW\Exception\Logic
      * @throws \SFW\Templater\Exception
      */
     protected function transform(
@@ -136,7 +142,7 @@ class Response extends \SFW\Lazy\Sys
     /**
      * Output json as inline.
      *
-     * @throws Logic
+     * @throws \SFW\Exception\Logic
      */
     public function json(
         mixed $contents,
@@ -156,7 +162,7 @@ class Response extends \SFW\Lazy\Sys
     /**
      * Output contents as inline.
      *
-     * @throws Logic
+     * @throws \SFW\Exception\Logic
      */
     public function inline(
         string $contents,
@@ -171,7 +177,7 @@ class Response extends \SFW\Lazy\Sys
     /**
      * Output contents as attachment.
      *
-     * @throws Logic
+     * @throws \SFW\Exception\Logic
      */
     public function attachment(
         string $contents,
@@ -186,7 +192,7 @@ class Response extends \SFW\Lazy\Sys
     /**
      * Base method for outputs.
      *
-     * @throws Logic
+     * @throws \SFW\Exception\Logic
      */
     protected function output(
         string $disposition,
@@ -197,7 +203,7 @@ class Response extends \SFW\Lazy\Sys
         ?string $filename,
     ): void {
         if (headers_sent()) {
-            throw new Logic('Headers already sent');
+            throw new \SFW\Exception\Logic('Headers already sent');
         }
 
         ini_set('zlib.output_compression', false);
@@ -264,12 +270,12 @@ class Response extends \SFW\Lazy\Sys
     /**
      * Redirect.
      *
-     * @throws Logic
+     * @throws \SFW\Exception\Logic
      */
     public function redirect(string $uri, int $code = 302): void
     {
         if (headers_sent()) {
-            throw new Logic('Headers already sent');
+            throw new \SFW\Exception\Logic('Headers already sent');
         }
 
         header("Location: $uri", response_code: $code);

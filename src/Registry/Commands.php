@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SFW\Registry;
@@ -41,17 +42,16 @@ final class Commands extends \SFW\Registry
                     if ($rMethod->isConstructor()) {
                         self::sys('Logger')->warning("Constructor can't be a command", options: [
                             'file' => $rMethod->getFileName(),
-                            'line' => $rMethod->getStartLine()
+                            'line' => $rMethod->getStartLine(),
                         ]);
 
                         continue;
                     }
 
-                    $name = strtolower(
-                        implode(':', [
-                            $rClass->getShortName(), ...preg_split('/(?=[A-Z])/', $rMethod->name)
-                        ])
-                    );
+                    $name = strtolower(implode(':', [
+                        $rClass->getShortName(),
+                        ...preg_split('/(?=[A-Z])/', $rMethod->name),
+                    ]));
 
                     $this->cache['commands'][$name] = "$class::$rMethod->name";
                 }

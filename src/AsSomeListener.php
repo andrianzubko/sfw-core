@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SFW;
@@ -11,7 +12,5 @@ abstract class AsSomeListener
     /**
      * Registers some listener.
      */
-    public function __construct(public float $priority = 0.0)
-    {
-    }
+    public function __construct(public float $priority = 0.0) {}
 }

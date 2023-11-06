@@ -1,9 +1,8 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SFW\Lazy\Sys;
-
-use SFW\Exception\Runtime;
 
 /**
  * Dir functions.
@@ -25,9 +24,7 @@ class Dir extends \SFW\Lazy\Sys
      *
      * If your overrides constructor, don't forget call parent at first line! Even if it's empty!
      */
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     /**
      * Directory scanning.
@@ -36,7 +33,7 @@ class Dir extends \SFW\Lazy\Sys
         string $dir,
         bool $recursive = false,
         bool $withDir = false,
-        int $order = SCANDIR_SORT_ASCENDING
+        int $order = SCANDIR_SORT_ASCENDING,
     ): array {
         $scanned = [];
 
@@ -190,7 +187,7 @@ class Dir extends \SFW\Lazy\Sys
     /**
      * Makes temporary directory.
      *
-     * @throws Runtime;
+     * @throws \SFW\Exception\Runtime;
      */
     public function temporary(): string
     {
@@ -198,7 +195,7 @@ class Dir extends \SFW\Lazy\Sys
             $tempDir = realpath(sys_get_temp_dir());
 
             if ($tempDir === false) {
-                throw new Runtime('Invalid system temporary directory');
+                throw new \SFW\Exception\Runtime('Invalid system temporary directory');
             }
 
             $this->tempDir = $tempDir;
@@ -230,6 +227,6 @@ class Dir extends \SFW\Lazy\Sys
             }
         }
 
-        throw new Runtime('Unable to create temporary subdirectory');
+        throw new \SFW\Exception\Runtime('Unable to create temporary subdirectory');
     }
 }

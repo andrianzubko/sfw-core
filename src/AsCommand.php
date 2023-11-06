@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SFW;
@@ -12,7 +13,5 @@ final class AsCommand
     /**
      * Registers command.
      */
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 }

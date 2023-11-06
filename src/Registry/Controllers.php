@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SFW\Registry;
@@ -49,7 +50,7 @@ final class Controllers extends \SFW\Registry
                     if ($rMethod->isConstructor()) {
                         self::sys('Logger')->warning("Constructor can't be a controller", options: [
                             'file' => $rMethod->getFileName(),
-                            'line' => $rMethod->getStartLine()
+                            'line' => $rMethod->getStartLine(),
                         ]);
 
                         continue;
@@ -61,7 +62,7 @@ final class Controllers extends \SFW\Registry
                         foreach ($instance->method as $method) {
                             if ($instance->alias !== null) {
                                 $this->cache['static'][$url][$method] = [
-                                    "$class::$rMethod->name", $instance->alias
+                                    "$class::$rMethod->name", $instance->alias,
                                 ];
                             } else {
                                 $this->cache['static'][$url][$method] = "$class::$rMethod->name";
@@ -78,13 +79,13 @@ final class Controllers extends \SFW\Registry
 
                 $this->cache['regex'][] = sprintf("%s(*:%d)",
                     preg_replace('/\\\\{[^}]+}/', '([^/]+)', preg_quote($url)),
-                        \count($this->cache['dynamic'])
+                        \count($this->cache['dynamic']),
                 );
 
                 $this->cache['dynamic'][] = [$actions, $M[1]];
 
                 $this->cache['urls'][] = preg_split('/({[^}]+})/', $url,
-                    flags: PREG_SPLIT_DELIM_CAPTURE
+                    flags: PREG_SPLIT_DELIM_CAPTURE,
                 );
 
                 $pCount = \count($M[1]);

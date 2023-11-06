@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SFW\Event;
@@ -8,6 +9,4 @@ namespace SFW\Event;
  *
  * Listener will be ignored if provided outside of transaction.
  */
-class TransactionRolledBack extends \SFW\Event
-{
-}
+class TransactionRolledBack extends \SFW\Event {}

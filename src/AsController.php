@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SFW;
@@ -15,7 +16,7 @@ final class AsController
     public function __construct(
         public string|array $url,
         public string|array $method = [],
-        public ?string $alias = null
+        public ?string $alias = null,
     ) {
         $this->url = (array) $this->url;
 

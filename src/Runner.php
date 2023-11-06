@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SFW;
@@ -202,7 +203,6 @@ abstract class Runner extends Base
                         'file' => $file,
                         'line' => $line
                     ]);
-
                     break;
                 case E_WARNING:
                 case E_USER_WARNING:
@@ -213,7 +213,6 @@ abstract class Runner extends Base
                         'file' => $file,
                         'line' => $line
                     ]);
-
                     break;
                 default:
                     throw (new Exception\Logic($message))->setFile($file)->setLine($line);
@@ -234,8 +233,7 @@ abstract class Runner extends Base
             if ($lazy instanceof \SFW\Databaser\Driver && $name !== 'Db' && $lazy->isInTrans()) {
                 try {
                     $lazy->rollback();
-                } catch (\SFW\Databaser\Exception) {
-                }
+                } catch (\SFW\Databaser\Exception) {}
             }
         }
 

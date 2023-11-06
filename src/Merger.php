@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SFW;
@@ -175,7 +176,7 @@ final class Merger extends Base
 
         if (!self::sys('File')->putVar(self::$sys['config']['merger_cache'], $this->cache)) {
             throw new Exception\Runtime(
-                sprintf('Unable to write file %s', self::$sys['config']['merger_cache'])
+                'Unable to write file' . self::$sys['config']['merger_cache']
             );
         }
     }
@@ -194,7 +195,9 @@ final class Merger extends Base
             try {
                 $merged = (new JSMin($merged))->min();
             } catch (\Exception $e) {
-                throw (new Exception\Logic($e->getMessage()))->setFile($e->getFile())->setLine($e->getLine());
+                throw (new Exception\Logic($e->getMessage()))
+                    ->setFile($e->getFile())
+                    ->setLine($e->getLine());
             }
         }
 

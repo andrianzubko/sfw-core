@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SFW\Lazy\Sys;
@@ -23,9 +24,7 @@ class Curl extends \SFW\Lazy\Sys
      *
      * If your overrides constructor, don't forget call parent at first line! Even if it's empty!
      */
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     /**
      * Do Curl request with optional conversion to utf-8.
@@ -57,7 +56,7 @@ class Curl extends \SFW\Lazy\Sys
         }
 
         $this->headers = preg_split('/\r\n\r\n/', substr($response, 0, $this->info['header_size']),
-            flags: PREG_SPLIT_NO_EMPTY
+            flags: PREG_SPLIT_NO_EMPTY,
         );
 
         if (!$this->headers) {

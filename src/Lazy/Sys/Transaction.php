@@ -1,10 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SFW\Lazy\Sys;
 
 use Psr\Log\LogLevel;
-use SFW\Event;
 
 /**
  * Transaction.
@@ -16,9 +16,7 @@ class Transaction extends \SFW\Lazy\Sys
      *
      * If your overrides constructor, don't forget call parent at first line! Even if it's empty!
      */
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     /**
      * Processes Pgsql transaction with retries at expected errors.
@@ -60,8 +58,8 @@ class Transaction extends \SFW\Lazy\Sys
         for ($retry = 1; $retry <= self::$sys['config']['transaction_retries']; $retry++) {
             try {
                 self::sys('Provider')->removeListenersByType([
-                    Event\TransactionCommitted::class,
-                    Event\TransactionRolledBack::class
+                    \SFW\Event\TransactionCommitted::class,
+                    \SFW\Event\TransactionRolledBack::class
                 ]);
 
                 self::sys($driver)->begin($isolation);
@@ -69,19 +67,18 @@ class Transaction extends \SFW\Lazy\Sys
                 if ($body() !== false) {
                     self::sys($driver)->commit();
 
-                    self::sys('Dispatcher')->dispatch(new Event\TransactionCommitted());
+                    self::sys('Dispatcher')->dispatch(new \SFW\Event\TransactionCommitted());
                 } else {
                     self::sys($driver)->rollback();
 
-                    self::sys('Dispatcher')->dispatch(new Event\TransactionRolledBack());
+                    self::sys('Dispatcher')->dispatch(new \SFW\Event\TransactionRolledBack());
                 }
 
                 return $this;
             } catch (\SFW\Databaser\Exception $e) {
                 try {
                     self::sys($driver)->rollback();
-                } catch (\SFW\Databaser\Exception) {
-                }
+                } catch (\SFW\Databaser\Exception) {}
 
                 if (\in_array($e->getSqlState(), $retryAt, true)
                     && $retry < self::$sys['config']['transaction_retries']

@@ -1,8 +1,7 @@
 <?php
+declare(strict_types=1);
 
 namespace SFW;
-
-use SFW\Exception\{BadConfiguration, Logic};
 
 /**
  * Simplest framework runner.
@@ -86,9 +85,7 @@ abstract class Runner extends Base
             // {{{ default timezone
 
             if (!date_default_timezone_set(self::$sys['config']['timezone'])) {
-                throw new BadConfiguration(
-                    sprintf('Unable to set timezone %s', self::$sys['config']['timezone'])
-                );
+                throw new Exception\BadConfiguration('Unable to set timezone ' . self::$sys['config']['timezone']);
             }
 
             // }}}
@@ -104,7 +101,7 @@ abstract class Runner extends Base
                 $url = parse_url(self::$sys['config']['url']);
 
                 if (empty($url) || !isset($url['host'])) {
-                    throw new BadConfiguration('Incorrect url in system configuration');
+                    throw new Exception\BadConfiguration('Incorrect url in system configuration');
                 }
 
                 self::$sys['url_scheme'] = $url['scheme'] ?? 'http';
@@ -128,16 +125,18 @@ abstract class Runner extends Base
             // {{{ routing
 
             if (PHP_SAPI === 'cli') {
-                $target = (new Router\Command())->getTarget();
-            } else {
-                $target = (new Router\Controller())->getTarget();
+                self::$sys['action'] = (new Router\Command())->getAction();
 
-                if ($target === false) {
+                if (self::$sys['action'] === false) {
+                    throw new Exception\UnexpectedValue('Command not found');
+                }
+            } else {
+                self::$sys['action'] = (new Router\Controller())->getAction();
+
+                if (self::$sys['action'] === false) {
                     self::sys('Response')->error(404);
                 }
             }
-
-            self::$sys['action'] = $target ? $target->action : null;
 
             // }}}
             // {{{ your configuration
@@ -164,18 +163,8 @@ abstract class Runner extends Base
             // }}}
             // {{{ calling Command or Controller action
 
-            if (PHP_SAPI === 'cli') {
-                if ($target !== false) {
-                    new ($target->class)();
-                }
-            } elseif (method_exists($target->class, $target->method)) {
-                $controller = new ($target->class)();
-
-                if ($target->method !== '__construct') {
-                    $controller->{$target->method}();
-                }
-            } else {
-                self::sys('Response')->error(404);
+            if (self::$sys['action'] !== null) {
+                Callback::normalize(self::$sys['action']['full'])();
             }
 
             // }}}
@@ -227,7 +216,7 @@ abstract class Runner extends Base
 
                     break;
                 default:
-                    throw (new Logic($message))->setFile($file)->setLine($line);
+                    throw (new Exception\Logic($message))->setFile($file)->setLine($line);
             }
         }
 

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace SFW\Router;
 
@@ -8,24 +9,43 @@ namespace SFW\Router;
 final class Command extends \SFW\Router
 {
     /**
-     * Gets class, method and action names.
+     * Cache.
+     */
+    protected static array $cache;
+
+    /**
+     * Gets cache.
+     */
+    public function __construct()
+    {
+        if (!isset(self::$cache)) {
+            self::$cache = (new \SFW\Registry\Commands())->getCache();
+        }
+    }
+
+    /**
+     * Gets action.
      *
      * Very poor implementation. Will be better soon.
      */
-    public function getTarget(): object|false
+    public function getAction(): array|null|false
     {
         if (!isset($_SERVER['argv'][1])) {
+            return null;
+        }
+
+        $action = [];
+
+        $action['full'] = self::$cache['commands'][$_SERVER['argv'][1]] ?? false;
+
+        if ($action['full'] === false) {
             return false;
         }
 
-        $target = (object) [];
+        $action['short'] = basename(strtr($action['full'], '\\', '/'));
 
-        $target->action = preg_replace_callback('/(?:^|:)(.)/', fn($M) => strtoupper($M[1]), $_SERVER['argv'][1]);
+        $action['alias'] = null;
 
-        $target->class = "App\\Command\\$target->action";
-
-        $target->method = '__construct';
-
-        return $target;
+        return $action;
     }
 }

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace SFW;
 
@@ -8,7 +9,7 @@ namespace SFW;
 abstract class Router extends Base
 {
     /**
-     * Gets class, method and action names.
+     * Gets action.
      */
-    abstract public function getTarget(): object|false;
+    abstract public function getAction(): array|null|false;
 }

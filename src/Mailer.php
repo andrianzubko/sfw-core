@@ -1,9 +1,9 @@
 <?php
+declare(strict_types=1);
 
 namespace SFW;
 
 use PHPMailer\PHPMailer\{PHPMailer, Exception AS PHPMailerException};
-use SFW\Exception\{BadConfiguration, InvalidArgument, Logic, Runtime};
 
 /**
  * Mailer.
@@ -25,7 +25,7 @@ class Mailer extends Base
      *
      * In strict mode adding recipients, cc, replies and sending message will throw errors.
      *
-     * @throws BadConfiguration
+     * @throws Exception\BadConfiguration
      */
     public function __construct(bool $strict = false)
     {
@@ -45,8 +45,8 @@ class Mailer extends Base
             if (self::$sys['config']['mailer_replies'] !== null) {
                 $this->addReplies(self::$sys['config']['mailer_replies']);
             }
-        } catch (InvalidArgument $e) {
-            throw new BadConfiguration($e->getMessage());
+        } catch (Exception\InvalidArgument $e) {
+            throw new Exception\BadConfiguration($e->getMessage());
         }
 
         $this->strict = $strict;
@@ -55,14 +55,14 @@ class Mailer extends Base
     /**
      * Sets from.
      *
-     * @throws InvalidArgument
+     * @throws Exception\InvalidArgument
      */
     public function setFrom(string $email, ?string $name = null): self
     {
         try {
             $this->mailer->setFrom($email, $name ?? '');
         } catch (PHPMailerException $e) {
-            throw new InvalidArgument($e->getMessage());
+            throw new Exception\InvalidArgument($e->getMessage());
         }
 
         return $this;
@@ -71,7 +71,7 @@ class Mailer extends Base
     /**
      * Adds recipient.
      *
-     * @throws InvalidArgument
+     * @throws Exception\InvalidArgument
      */
     public function addRecipient(string $email, ?string $name = null): self
     {
@@ -79,7 +79,7 @@ class Mailer extends Base
             $this->mailer->addAddress($email, $name ?? '');
         } catch (PHPMailerException $e) {
             if ($this->strict) {
-                throw new InvalidArgument($e->getMessage());
+                throw new Exception\InvalidArgument($e->getMessage());
             }
         }
 
@@ -89,7 +89,7 @@ class Mailer extends Base
     /**
      * Sets recipient.
      *
-     * @throws InvalidArgument
+     * @throws Exception\InvalidArgument
      */
     public function setRecipient(string $email, ?string $name = null): self
     {
@@ -101,7 +101,7 @@ class Mailer extends Base
     /**
      * Adds recipients.
      *
-     * @throws InvalidArgument
+     * @throws Exception\InvalidArgument
      */
     public function addRecipients(array $recipients): self
     {
@@ -115,7 +115,7 @@ class Mailer extends Base
     /**
      * Sets recipients.
      *
-     * @throws InvalidArgument
+     * @throws Exception\InvalidArgument
      */
     public function setRecipients(array $recipients = []): self
     {
@@ -127,7 +127,7 @@ class Mailer extends Base
     /**
      * Adds CC.
      *
-     * @throws InvalidArgument
+     * @throws Exception\InvalidArgument
      */
     public function addCC(string $email, ?string $name = null): self
     {
@@ -135,7 +135,7 @@ class Mailer extends Base
             $this->mailer->addCC($email, $name ?? '');
         } catch (PHPMailerException $e) {
             if ($this->strict) {
-                throw new InvalidArgument($e->getMessage());
+                throw new Exception\InvalidArgument($e->getMessage());
             }
         }
 
@@ -145,7 +145,7 @@ class Mailer extends Base
     /**
      * Sets CC.
      *
-     * @throws InvalidArgument
+     * @throws Exception\InvalidArgument
      */
     public function setCC(string $email, ?string $name = null): self
     {
@@ -157,7 +157,7 @@ class Mailer extends Base
     /**
      * Adds CC's.
      *
-     * @throws InvalidArgument
+     * @throws Exception\InvalidArgument
      */
     public function addCCs(array $copies): self
     {
@@ -171,7 +171,7 @@ class Mailer extends Base
     /**
      * Sets CC's.
      *
-     * @throws InvalidArgument
+     * @throws Exception\InvalidArgument
      */
     public function setCCs(array $copies = []): self
     {
@@ -183,7 +183,7 @@ class Mailer extends Base
     /**
      * Adds reply.
      *
-     * @throws InvalidArgument
+     * @throws Exception\InvalidArgument
      */
     public function addReply(string $email, ?string $name = null): self
     {
@@ -191,7 +191,7 @@ class Mailer extends Base
             $this->mailer->addReplyTo($email, $name ?? '');
         } catch (PHPMailerException $e) {
             if ($this->strict) {
-                throw new InvalidArgument($e->getMessage());
+                throw new Exception\InvalidArgument($e->getMessage());
             }
         }
 
@@ -201,7 +201,7 @@ class Mailer extends Base
     /**
      * Sets reply.
      *
-     * @throws InvalidArgument
+     * @throws Exception\InvalidArgument
      */
     public function setReply(string $email, ?string $name = null): self
     {
@@ -213,7 +213,7 @@ class Mailer extends Base
     /**
      * Adds replies.
      *
-     * @throws InvalidArgument
+     * @throws Exception\InvalidArgument
      */
     public function addReplies(array $replies): self
     {
@@ -227,7 +227,7 @@ class Mailer extends Base
     /**
      * Sets replies.
      *
-     * @throws InvalidArgument
+     * @throws Exception\InvalidArgument
      */
     public function setReplies(array $replies = []): self
     {
@@ -239,14 +239,14 @@ class Mailer extends Base
     /**
      * Adds custom header.
      *
-     * @throws InvalidArgument
+     * @throws Exception\InvalidArgument
      */
     public function addCustomHeader(string $name, ?string $value = null): self
     {
         try {
             $this->mailer->addCustomHeader($name, $value);
         } catch (PHPMailerException $e) {
-            throw new InvalidArgument($e->getMessage());
+            throw new Exception\InvalidArgument($e->getMessage());
         }
 
         return $this;
@@ -255,7 +255,7 @@ class Mailer extends Base
     /**
      * Sets custom header.
      *
-     * @throws InvalidArgument
+     * @throws Exception\InvalidArgument
      */
     public function setCustomHeader(string $name, ?string $value = null): self
     {
@@ -267,7 +267,7 @@ class Mailer extends Base
     /**
      * Adds custom headers.
      *
-     * @throws InvalidArgument
+     * @throws Exception\InvalidArgument
      */
     public function addCustomHeaders(array $headers): self
     {
@@ -281,7 +281,7 @@ class Mailer extends Base
     /**
      * Sets custom headers.
      *
-     * @throws InvalidArgument
+     * @throws Exception\InvalidArgument
      */
     public function setCustomHeaders(array $headers = []): self
     {
@@ -303,7 +303,7 @@ class Mailer extends Base
     /**
      * Sets body.
      *
-     * @throws InvalidArgument
+     * @throws Exception\InvalidArgument
      */
     public function setBody(string $body, bool $isHtml = true): self
     {
@@ -311,7 +311,7 @@ class Mailer extends Base
             try {
                 $this->mailer->msgHTML($body);
             } catch (PHPMailerException $e) {
-                throw new InvalidArgument($e->getMessage());
+                throw new Exception\InvalidArgument($e->getMessage());
             }
         } else {
             $this->mailer->Body = $body;
@@ -323,14 +323,14 @@ class Mailer extends Base
     /**
      * Adds attachment file.
      *
-     * @throws InvalidArgument
+     * @throws Exception\InvalidArgument
      */
     public function addAttachmentFile(string $path, ?string $name = null, ?string $type = null): self
     {
         try {
             $this->mailer->addAttachment($path, $name ?? '', type: $type ?? '');
         } catch (PHPMailerException $e) {
-            throw new InvalidArgument($e->getMessage());
+            throw new Exception\InvalidArgument($e->getMessage());
         }
 
         return $this;
@@ -339,7 +339,7 @@ class Mailer extends Base
     /**
      * Sets attachment file.
      *
-     * @throws InvalidArgument
+     * @throws Exception\InvalidArgument
      */
     public function setAttachmentFile(string $path, ?string $name = null, ?string $type = null): self
     {
@@ -351,7 +351,7 @@ class Mailer extends Base
     /**
      * Adds attachment files.
      *
-     * @throws InvalidArgument
+     * @throws Exception\InvalidArgument
      */
     public function addAttachmentFiles(array $attachments): self
     {
@@ -365,7 +365,7 @@ class Mailer extends Base
     /**
      * Sets attachment files.
      *
-     * @throws InvalidArgument
+     * @throws Exception\InvalidArgument
      */
     public function setAttachmentFiles(array $attachments = []): self
     {
@@ -377,14 +377,14 @@ class Mailer extends Base
     /**
      * Adds attachment string as file.
      *
-     * @throws InvalidArgument
+     * @throws Exception\InvalidArgument
      */
     public function addAttachmentString(string $contents, string $filename, ?string $type = null): self
     {
         try {
             $this->mailer->addStringAttachment($contents, $filename, type: $type ?? '');
         } catch (PHPMailerException $e) {
-            throw new InvalidArgument($e->getMessage());
+            throw new Exception\InvalidArgument($e->getMessage());
         }
 
         return $this;
@@ -393,7 +393,7 @@ class Mailer extends Base
     /**
      * Sets attachment string as file.
      *
-     * @throws InvalidArgument
+     * @throws Exception\InvalidArgument
      */
     public function setAttachmentString(string $contents, string $filename, ?string $type = null): self
     {
@@ -405,7 +405,7 @@ class Mailer extends Base
     /**
      * Adds attachment strings as files.
      *
-     * @throws InvalidArgument
+     * @throws Exception\InvalidArgument
      */
     public function addAttachmentStrings(array $attachments): self
     {
@@ -419,7 +419,7 @@ class Mailer extends Base
     /**
      * Sets attachment strings as files.
      *
-     * @throws InvalidArgument
+     * @throws Exception\InvalidArgument
      */
     public function setAttachmentStrings(array $attachments): self
     {
@@ -431,14 +431,14 @@ class Mailer extends Base
     /**
      * Creates message and sends it.
      *
-     * @throws Logic
-     * @throws Runtime
+     * @throws Exception\Logic
+     * @throws Exception\Runtime
      */
     public function send(): bool
     {
         if (!$this->mailer->getToAddresses()) {
             if ($this->strict) {
-                throw new Logic('Must be at least one recipient');
+                throw new Exception\Logic('Must be at least one recipient');
             } else {
                 return false;
             }
@@ -449,7 +449,7 @@ class Mailer extends Base
                 return $this->mailer->send();
             } catch (PHPMailerException $e) {
                 if ($this->strict) {
-                    throw new Runtime($e->getMessage());
+                    throw new Exception\Runtime($e->getMessage());
                 } else {
                     return false;
                 }

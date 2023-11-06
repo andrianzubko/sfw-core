@@ -1,9 +1,9 @@
 <?php
+declare(strict_types=1);
 
 namespace SFW\Lazy\Sys;
 
 use Psr\EventDispatcher\ListenerProviderInterface;
-use SFW\Exception\{InvalidArgument, Runtime};
 
 /**
  * Listeners provider.
@@ -16,72 +16,71 @@ class Provider extends \SFW\Lazy\Sys implements ListenerProviderInterface
     protected array $listeners;
 
     /**
-     * Instances of same Listener classes.
-     */
-    protected array $instances = [];
-
-    /**
-     * Gets and actualize listeners if needed.
+     * Gets registered listeners.
      *
      * If your overrides constructor, don't forget call parent at first line!
      *
-     * @throws Runtime
+     * @throws \SFW\Exception\Runtime
      */
     public function __construct()
     {
-        $this->listeners = (new \SFW\Provider())->getFileBasedListeners();
+        $this->listeners = (new \SFW\Registry\Listeners())->getCache()['listeners'];
     }
 
     /**
      * Adds listener.
      *
-     * @throws InvalidArgument
+     * @throws \SFW\Exception\InvalidArgument
      */
     public function addListener(callable $callback): self
     {
-        return $this->addSomeListener($callback, \SFW\Provider::REGULAR);
+        return $this->addSomeListener($callback, 'regular');
     }
 
     /**
      * Adds disposable listener.
      *
-     * @throws InvalidArgument
+     * @throws \SFW\Exception\InvalidArgument
      */
     public function addDisposableListener(callable $callback): self
     {
-        return $this->addSomeListener($callback, \SFW\Provider::DISPOSABLE);
+        return $this->addSomeListener($callback, 'disposable');
     }
 
     /**
      * Adds persistent listener.
      *
-     * @throws InvalidArgument
+     * @throws \SFW\Exception\InvalidArgument
      */
     public function addPersistentListener(callable $callback): self
     {
-        return $this->addSomeListener($callback, \SFW\Provider::PERSISTENT);
+        return $this->addSomeListener($callback, 'persistent');
     }
 
     /**
      * Adds some listener.
      *
-     * @throws InvalidArgument
+     * @throws \SFW\Exception\InvalidArgument
      */
-    protected function addSomeListener(callable $callback, int $mode): self
+    protected function addSomeListener(callable $callback, string $mode): self
     {
         $params = (new \ReflectionFunction($callback(...)))->getParameters();
 
         $type = $params ? $params[0]->getType() : null;
 
         if ($type === null) {
-            throw new InvalidArgument('Listener must have one parameter with declared type');
+            throw new \SFW\Exception\InvalidArgument('Listener must have first parameter with declared type');
         }
 
-        $this->listeners[] = [
-            'callback' => $callback,
-            'type' => (string) $type,
-            'mode' => $mode,
-        ];
+        $listener = [];
+
+        $listener['callback'] = $callback;
+
+        $listener['type'] = (string) $type;
+
+        $listener['mode'] = $mode;
+
+        $this->listeners[] = $listener;
 
         return $this;
     }
@@ -92,7 +91,7 @@ class Provider extends \SFW\Lazy\Sys implements ListenerProviderInterface
     public function removeListenersByType(array|string $type, bool $force = false): self
     {
         foreach ($this->listeners as $i => $listener) {
-            if (($force || $listener['mode'] !== \SFW\Provider::PERSISTENT)
+            if (($force || $listener['mode'] !== 'persistent')
                 && \in_array($listener['type'], (array) $type, true)
             ) {
                 unset($this->listeners[$i]);
@@ -111,7 +110,7 @@ class Provider extends \SFW\Lazy\Sys implements ListenerProviderInterface
             $this->listeners = [];
         } else {
             foreach ($this->listeners as $i => $listener) {
-                if ($listener['mode'] !== \SFW\Provider::PERSISTENT) {
+                if ($listener['mode'] !== 'persistent') {
                     unset($this->listeners[$i]);
                 }
             }
@@ -127,12 +126,9 @@ class Provider extends \SFW\Lazy\Sys implements ListenerProviderInterface
     {
         foreach ($this->listeners as $i => &$listener) {
             if ($event instanceof $listener['type']) {
-                if (\is_array($listener['callback']) && \is_string($listener['callback'][0])) {
-                    $listener['callback'][0] = $this->instances[$listener['callback'][0]]
-                        ??= new $listener['callback'][0];
-                }
+                $listener['callback'] = \SFW\Callback::normalize($listener['callback']);
 
-                if ($listener['mode'] === \SFW\Provider::DISPOSABLE) {
+                if ($listener['mode'] === 'disposable') {
                     unset($this->listeners[$i]);
                 }
 

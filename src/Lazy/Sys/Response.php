@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace SFW\Lazy\Sys;
 
@@ -289,7 +290,7 @@ class Response extends \SFW\Lazy\Sys
             $errorDocument = self::$sys['config']['response_error_document'];
 
             if ($errorDocument !== null) {
-                $errorDocument = str_replace('{CODE}', $code, $errorDocument);
+                $errorDocument = str_replace('{CODE}', (string) $code, $errorDocument);
 
                 if (is_file($errorDocument)) {
                     include $errorDocument;

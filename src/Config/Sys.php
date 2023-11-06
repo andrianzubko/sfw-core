@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace SFW\Config;
 
@@ -50,7 +51,7 @@ abstract class Sys extends \SFW\Config
         $config['timezone'] = 'UTC';
 
         // }}}
-        // {{{ databaser
+        // {{{ db
 
         /* Default database.
          *
@@ -274,24 +275,6 @@ abstract class Sys extends \SFW\Config
         $config['response_stats'] = '<!-- script {SCR_T} + sql({SQL_C}) {SQL_T} + tpl({TPL_C}) {TPL_T} = {ALL_T} -->';
 
         // }}}
-        // {{{ dir
-
-        /* Default mode for new directories.
-         *
-         * int
-         */
-        $config['dir_mode'] = 0777;
-
-        // }}}
-        // {{{ file
-
-        /* Default mode for new/updated files.
-         *
-         * int
-         */
-        $config['file_mode'] = 0666;
-
-        // }}}
         // {{{ merger
 
         /* Sources to merge (sources are absolute, targets are just filenames).
@@ -318,16 +301,52 @@ abstract class Sys extends \SFW\Config
          *
          * string
          */
-        $config['merger_cache'] = APP_DIR . '/var/cache/merger.php';
+        $config['merger_cache'] = APP_DIR . '/var/cache/merged.php';
 
         // }}}
-        // {{{ listeners provider
+        // {{{ dir
 
-        /* Cache file with listeners provider internal data.
+        /* Default mode for new directories.
+         *
+         * int
+         */
+        $config['dir_mode'] = 0777;
+
+        // }}}
+        // {{{ file
+
+        /* Default mode for new/updated files.
+         *
+         * int
+         */
+        $config['file_mode'] = 0666;
+
+        // }}}
+        // {{{ listeners
+
+        /* Registered listeners cache file.
          *
          * string
          */
-        $config['provider_cache'] = APP_DIR . '/var/cache/provider.php';
+        $config['listeners_cache'] = APP_DIR . '/var/cache/listeners.php';
+
+        // }}}
+        // {{{ controllers
+
+        /* Registered controllers cache file.
+         *
+         * string
+         */
+        $config['controllers_cache'] = APP_DIR . '/var/cache/controllers.php';
+
+        // }}}
+        // {{{ commands
+
+        /* Registered commands cache file.
+         *
+         * string
+         */
+        $config['commands_cache'] = APP_DIR . '/var/cache/commands.php';
 
         // }}}
         // {{{ router

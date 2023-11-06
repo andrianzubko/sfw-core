@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace SFW\Lazy\Sys;
 
@@ -113,7 +114,7 @@ class Logger extends \SFW\Lazy\Sys implements LoggerInterface
         if ($message instanceof \Throwable) {
             $message = (string) $message;
         } else {
-            if ($context !== null) {
+            if ($context) {
                 $message .= ' ' . json_encode($context, JSON_UNESCAPED_UNICODE);
             }
 

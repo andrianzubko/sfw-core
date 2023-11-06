@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace SFW;
 
@@ -6,12 +7,6 @@ namespace SFW;
  * Registers listener.
  */
 #[\Attribute(\Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
-class AsListener
+final class AsListener extends AsSomeListener
 {
-    /**
-     * Registers listener.
-     */
-    public function __construct(public float $priority = 0.0)
-    {
-    }
 }

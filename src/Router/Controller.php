@@ -48,10 +48,6 @@ final class Controller extends \SFW\Router
             return false;
         }
 
-        if (\is_string($match)) {
-            $match = [$match, null];
-        }
-
         $action = [];
 
         $action['full'] = \is_array($match) ? $match[0] : $match;
@@ -70,20 +66,25 @@ final class Controller extends \SFW\Router
     {
         $pCount = \count($params);
 
-        $index = self::$cache['actions']["$action $pCount"]
-            ?? self::$cache['actions']["$action::" . lcfirst($action) . " $pCount"]
-            ?? null;
+        $index = self::$cache['actions']["$action $pCount"] ?? null;
+
+        if ($index === null) {
+            $lcAction = lcfirst($action);
+
+            $index = self::$cache['actions']["$action::$lcAction $pCount"] ?? null;
+        }
 
         if ($index === null) {
             $message = "Unable to make URL by action $action";
 
-            if ($pCount) {
-                $message .= sprintf(" and $pCount %s",
-                    $pCount === 1 ? 'parameter' : 'parameters'
-                );
-            }
-
-            self::sys('Logger')->warning($message, options: debug_backtrace(2)[1]);
+            self::sys('Logger')->warning(
+                $pCount
+                    ? sprintf("$message and $pCount %s",
+                        $pCount === 1 ? 'parameter' : 'parameters'
+                    )
+                    : $message,
+                options: debug_backtrace(2)[1],
+            );
 
             return '/';
         }

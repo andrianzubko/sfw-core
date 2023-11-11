@@ -26,9 +26,9 @@ abstract class Config
     {
         if (!isset(self::$env)) {
             if (isset($_SERVER['APP_ENV'])) {
-                $primary = @include APP_DIR . "/.env.{$_SERVER['APP_ENV']}.php";
+                $primary = @include APP_DIR . sprintf('/.env.%s.php', $_SERVER['APP_ENV']);
 
-                $secondary = @include APP_DIR . "/.env.{$_SERVER['APP_ENV']}.local.php";
+                $secondary = @include APP_DIR . sprintf('/.env.%s.local.php', $_SERVER['APP_ENV']);
             } else {
                 $primary = @include APP_DIR . '/.env.php';
 

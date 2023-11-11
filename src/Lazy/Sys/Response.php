@@ -111,7 +111,9 @@ class Response extends \SFW\Lazy\Sys
 
         $mime ??= self::sys($processor)->getMime();
 
-        if (self::$sys['config']['response_stats'] !== null && $mime === 'text/html') {
+        if ($mime === 'text/html'
+            && self::$sys['config']['response_stats'] !== null
+        ) {
             $timer = gettimeofday(true) - self::$sys['timestamp_float'];
 
             $contents .= str_replace(
@@ -210,14 +212,14 @@ class Response extends \SFW\Lazy\Sys
 
         http_response_code($code);
 
-        header('Last-Modified: ' . gmdate('D, d M Y H:i:s \G\M\T', self::$sys['timestamp']));
+        header(sprintf('Last-Modified: %s', gmdate('D, d M Y H:i:s \G\M\T', self::$sys['timestamp'])));
 
         header("Cache-Control: private, max-age=$expire");
 
         header("Content-Type: $mime; charset=utf-8");
 
         if ($filename !== null) {
-            header("Content-Disposition: $disposition; filename=\"$filename\"");
+            header(sprintf('Content-Disposition: %s; filename="%s"', $disposition, $filename));
         } else {
             header("Content-Disposition: $disposition");
         }
@@ -244,7 +246,7 @@ class Response extends \SFW\Lazy\Sys
             header('Content-Encoding: none');
         }
 
-        header('Content-Length: ' . \strlen($contents));
+        header(sprintf('Content-Length: %s', \strlen($contents)));
 
         if (!function_exists('fastcgi_finish_request')) {
             header('Connection: close');

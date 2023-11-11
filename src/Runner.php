@@ -126,13 +126,13 @@ abstract class Runner extends Base
             // {{{ routing
 
             if (PHP_SAPI === 'cli') {
-                self::$sys['action'] = (new Router\Command())->getAction();
+                self::$sys['action'] = (new Router\Command())->getCurrentAction();
 
                 if (self::$sys['action'] === false) {
                     throw new Exception\UnexpectedValue('Command not found');
                 }
             } else {
-                self::$sys['action'] = (new Router\Controller())->getAction();
+                self::$sys['action'] = (new Router\Controller())->getCurrentAction();
 
                 if (self::$sys['action'] === false) {
                     self::sys('Response')->error(404);

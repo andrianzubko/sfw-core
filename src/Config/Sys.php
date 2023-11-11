@@ -302,7 +302,7 @@ abstract class Sys extends \SFW\Config
          *
          * string
          */
-        $config['merger_cache'] = APP_DIR . '/var/cache/merged.php';
+        $config['merger_cache'] = APP_DIR . '/var/cache/merger.php';
 
         // }}}
         // {{{ dir
@@ -323,40 +323,25 @@ abstract class Sys extends \SFW\Config
         $config['file_mode'] = 0666;
 
         // }}}
-        // {{{ listeners
-
-        /* Registered listeners cache file.
-         *
-         * string
-         */
-        $config['listeners_cache'] = APP_DIR . '/var/cache/listeners.php';
-
-        // }}}
-        // {{{ controllers
-
-        /* Registered controllers cache file.
-         *
-         * string
-         */
-        $config['controllers_cache'] = APP_DIR . '/var/cache/controllers.php';
-
-        // }}}
-        // {{{ commands
-
-        /* Registered commands cache file.
-         *
-         * string
-         */
-        $config['commands_cache'] = APP_DIR . '/var/cache/commands.php';
-
-        // }}}
         // {{{ router
 
-        /* Cache file with router internal data.
+        /* File with cached listeners.
          *
          * string
          */
-        $config['router_cache'] = APP_DIR . '/var/cache/router.php';
+        $config['router_listeners_cache'] = APP_DIR . '/var/cache/router.listeners.php';
+
+        /* File with cached controllers.
+         *
+         * string
+         */
+        $config['router_controllers_cache'] = APP_DIR . '/var/cache/router.controllers.php';
+
+        /* File with cached commands.
+         *
+         * string
+         */
+        $config['router_commands_cache'] = APP_DIR . '/var/cache/router.commands.php';
 
         // }}}
         // {{{ paginator

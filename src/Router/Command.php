@@ -5,31 +5,33 @@ declare(strict_types=1);
 namespace SFW\Router;
 
 /**
- * Routes from command line arguments to Command action.
+ * Commands router.
  */
 final class Command extends \SFW\Router
 {
     /**
-     * Cache.
+     * Internal cache.
      */
-    protected static array $cache;
+    protected static array|false $cache;
 
     /**
-     * Gets cache.
+     * Reads and actualizes cache if needed.
+     *
+     * @throws \SFW\Exception\Runtime
      */
     public function __construct()
     {
         if (!isset(self::$cache)) {
-            self::$cache = (new \SFW\Registry\Commands())->getCache();
+            $this->readCache(self::$sys['config']['router_commands_cache']);
         }
     }
 
     /**
-     * Gets action.
+     * Gets current action.
      *
      * Very poor implementation. Will be better soon.
      */
-    public function getAction(): array|null|false
+    public function getCurrentAction(): array|null|false
     {
         if (!isset($_SERVER['argv'][1])) {
             return null;
@@ -48,5 +50,45 @@ final class Command extends \SFW\Router
         $action['alias'] = null;
 
         return $action;
+    }
+
+    /**
+     * Rebuilds cache.
+     */
+    protected function rebuildCache(array $initialCache): void
+    {
+        self::$cache = $initialCache;
+
+        self::$cache['commands'] = [];
+
+        foreach (get_declared_classes() as $class) {
+            if (!str_starts_with($class, 'App\\')) {
+                continue;
+            }
+
+            $rClass = new \ReflectionClass($class);
+
+            foreach ($rClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $rMethod) {
+                foreach ($rMethod->getAttributes(\SFW\AsCommand::class) as $rAttribute) {
+                    if ($rMethod->isConstructor()) {
+                        self::sys('Logger')->warning("Constructor can't be a command", options: [
+                            'file' => $rMethod->getFileName(),
+                            'line' => $rMethod->getStartLine(),
+                        ]);
+
+                        continue;
+                    }
+
+                    $name = strtolower(
+                        implode(':', [
+                            $rClass->getShortName(),
+                            ...preg_split('/(?=[A-Z])/', $rMethod->name),
+                        ]),
+                    );
+
+                    self::$cache['commands'][$name] = "$class::$rMethod->name";
+                }
+            }
+        }
     }
 }

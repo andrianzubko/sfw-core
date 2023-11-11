@@ -12,76 +12,52 @@ use Psr\EventDispatcher\ListenerProviderInterface;
 class Provider extends \SFW\Lazy\Sys implements ListenerProviderInterface
 {
     /**
-     * Listeners.
+     * Listeners router instance.
      */
-    protected array $listeners;
+    protected \SFW\Router\Listener $listenersRouter;
 
     /**
-     * Gets registered listeners.
+     * Instantiates the listeners' router.
      *
      * If your overrides constructor, don't forget call parent at first line!
-     *
-     * @throws \SFW\Exception\Runtime
      */
     public function __construct()
     {
-        $this->listeners = (new \SFW\Registry\Listeners())->getCache()['listeners'];
+        $this->listenersRouter = new \SFW\Router\Listener();
     }
 
     /**
-     * Adds listener.
-     *
-     * @throws \SFW\Exception\InvalidArgument
-     */
-    public function addListener(callable $callback): self
-    {
-        return $this->addSomeListener($callback, 'regular');
-    }
-
-    /**
-     * Adds disposable listener.
+     * Adds disposable listener (can be called only once).
      *
      * @throws \SFW\Exception\InvalidArgument
      */
     public function addDisposableListener(callable $callback): self
     {
-        return $this->addSomeListener($callback, 'disposable');
+        $this->listenersRouter->add($callback, \SFW\Router\Listener::DISPOSABLE);
+
+        return $this;
     }
 
     /**
-     * Adds persistent listener.
+     * Adds listener (can be called many times).
+     *
+     * @throws \SFW\Exception\InvalidArgument
+     */
+    public function addListener(callable $callback): self
+    {
+        $this->listenersRouter->add($callback, \SFW\Router\Listener::REGULAR);
+
+        return $this;
+    }
+
+    /**
+     * Adds persistent listener (can be called many times and can only be removed with the force parameter).
      *
      * @throws \SFW\Exception\InvalidArgument
      */
     public function addPersistentListener(callable $callback): self
     {
-        return $this->addSomeListener($callback, 'persistent');
-    }
-
-    /**
-     * Adds some listener.
-     *
-     * @throws \SFW\Exception\InvalidArgument
-     */
-    protected function addSomeListener(callable $callback, string $mode): self
-    {
-        $params = (new \ReflectionFunction($callback(...)))->getParameters();
-
-        $type = $params ? $params[0]->getType() : null;
-
-        if ($type === null) {
-            throw new \SFW\Exception\InvalidArgument('Listener must have first parameter with declared type');
-        }
-
-        $listener = [];
-
-        $listener['callback'] = $callback;
-
-        $listener['type'] = (string) $type;
-
-        $listener['mode'] = $mode;
-
-        $this->listeners[] = $listener;
+        $this->listenersRouter->add($callback, \SFW\Router\Listener::PERSISTENT);
 
         return $this;
     }
@@ -91,13 +67,7 @@ class Provider extends \SFW\Lazy\Sys implements ListenerProviderInterface
      */
     public function removeListenersByType(array|string $type, bool $force = false): self
     {
-        foreach ($this->listeners as $i => $listener) {
-            if (($force || $listener['mode'] !== 'persistent')
-                && \in_array($listener['type'], (array) $type, true)
-            ) {
-                unset($this->listeners[$i]);
-            }
-        }
+        $this->listenersRouter->removeByType($type, $force);
 
         return $this;
     }
@@ -107,15 +77,7 @@ class Provider extends \SFW\Lazy\Sys implements ListenerProviderInterface
      */
     public function removeAllListeners($force = false): self
     {
-        if ($force) {
-            $this->listeners = [];
-        } else {
-            foreach ($this->listeners as $i => $listener) {
-                if ($listener['mode'] !== 'persistent') {
-                    unset($this->listeners[$i]);
-                }
-            }
-        }
+        $this->listenersRouter->removeAll($force);
 
         return $this;
     }
@@ -125,16 +87,6 @@ class Provider extends \SFW\Lazy\Sys implements ListenerProviderInterface
      */
     public function getListenersForEvent(object $event): iterable
     {
-        foreach ($this->listeners as $i => &$listener) {
-            if ($event instanceof $listener['type']) {
-                $listener['callback'] = \SFW\Callback::normalize($listener['callback']);
-
-                if ($listener['mode'] === 'disposable') {
-                    unset($this->listeners[$i]);
-                }
-
-                yield $listener['callback'];
-            }
-        }
+        yield from $this->listenersRouter->getForEvent($event);
     }
 }

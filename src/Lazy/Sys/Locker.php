@@ -36,7 +36,9 @@ class Locker extends \SFW\Lazy\Sys
         $file = str_replace('{KEY}', $key, self::$sys['config']['locker_file']);
 
         if (!self::sys('Dir')->create(dirname($file))) {
-            throw new \SFW\Exception\Runtime('Unable to create directory ' . dirname($file));
+            throw new \SFW\Exception\Runtime(
+                sprintf('Unable to create directory %s', dirname($file))
+            );
         }
 
         $handle = fopen($file, 'cb+');
@@ -67,7 +69,9 @@ class Locker extends \SFW\Lazy\Sys
         }
 
         if (!fclose($this->locks[$key])) {
-            throw new \SFW\Exception\Runtime("Unable to close file {$this->locks[$key]}");
+            throw new \SFW\Exception\Runtime(
+                sprintf('Unable to close file %s', $this->locks[$key])
+            );
         }
 
         unset($this->locks[$key]);

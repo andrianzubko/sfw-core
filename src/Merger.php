@@ -14,12 +14,12 @@ final class Merger extends Base
     /**
      * Internal cache.
      */
-    protected array|false $cache = false;
+    private array|false $cache = false;
 
     /**
      * Scanned sources files.
      */
-    protected array $sources;
+    private array $sources;
 
     /**
      * Merging if needed and returns merged paths.
@@ -54,7 +54,7 @@ final class Merger extends Base
     /**
      * Gets merged paths.
      */
-    protected function getPaths(): array
+    private function getPaths(): array
     {
         $paths = [];
 
@@ -72,7 +72,7 @@ final class Merger extends Base
     /**
      * Gets sources files.
      */
-    protected function scanForSources(): void
+    private function scanForSources(): void
     {
         if (!isset($this->sources)) {
             $this->sources = [];
@@ -96,7 +96,7 @@ final class Merger extends Base
     /**
      * Rechecks of the needs for recombination.
      */
-    protected function isOutdated(): bool
+    private function isOutdated(): bool
     {
         if ($this->cache === false
             || self::$sys['config']['debug'] !== $this->cache['debug']
@@ -142,7 +142,7 @@ final class Merger extends Base
      * @throws Exception\Logic
      * @throws Exception\Runtime
      */
-    protected function recombine(): void
+    private function recombine(): void
     {
         self::sys('Dir')->clear(self::$sys['config']['merger_dir']);
 
@@ -176,7 +176,7 @@ final class Merger extends Base
 
         if (!self::sys('File')->putVar(self::$sys['config']['merger_cache'], $this->cache)) {
             throw new Exception\Runtime(
-                'Unable to write file' . self::$sys['config']['merger_cache']
+                sprintf('Unable to write file %s', self::$sys['config']['merger_cache'])
             );
         }
     }
@@ -187,7 +187,7 @@ final class Merger extends Base
      * @throws Exception\Logic
      * @throws Exception\Runtime
      */
-    protected function mergeJs(array $files): string
+    private function mergeJs(array $files): string
     {
         $merged = $this->mergeFiles($files);
 
@@ -209,7 +209,7 @@ final class Merger extends Base
      *
      * @throws Exception\Runtime
      */
-    protected function mergeCss(array $files): string
+    private function mergeCss(array $files): string
     {
         $merged = $this->mergeFiles($files);
 
@@ -255,7 +255,7 @@ final class Merger extends Base
      *
      * @throws Exception\Runtime
      */
-    protected function mergeFiles(array $files): string
+    private function mergeFiles(array $files): string
     {
         $merged = [];
 

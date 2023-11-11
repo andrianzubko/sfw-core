@@ -86,7 +86,9 @@ abstract class Runner extends Base
             // {{{ default timezone
 
             if (!date_default_timezone_set(self::$sys['config']['timezone'])) {
-                throw new Exception\BadConfiguration('Unable to set timezone ' . self::$sys['config']['timezone']);
+                throw new Exception\BadConfiguration(
+                    sprintf('Unable to set timezone %s', self::$sys['config']['timezone'])
+                );
             }
 
             // }}}

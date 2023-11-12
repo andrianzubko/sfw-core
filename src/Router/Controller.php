@@ -63,6 +63,8 @@ final class Controller extends \SFW\Router
 
         $action['short'] = basename(strtr($action['full'], '\\', '/'));
 
+        $action['class'] = strtok($action['short'], '::');
+
         $action['alias'] = $match[1];
 
         return $action;

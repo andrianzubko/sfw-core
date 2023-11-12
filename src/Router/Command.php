@@ -47,6 +47,8 @@ final class Command extends \SFW\Router
 
         $action['short'] = basename(strtr($action['full'], '\\', '/'));
 
+        $action['class'] = strtok($action['short'], '::');
+
         $action['alias'] = null;
 
         return $action;

@@ -167,7 +167,7 @@ abstract class Runner extends Base
             // {{{ calling Command or Controller action
 
             if (self::$sys['action'] !== null) {
-                Callback::normalize(self::$sys['action']['full'])();
+                Utility::normalizeCallback(self::$sys['action']['full'])();
             }
 
             // }}}

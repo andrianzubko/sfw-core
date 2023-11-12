@@ -104,7 +104,7 @@ final class Listener extends \SFW\Router
     {
         foreach (self::$cache['listeners'] as $i => &$listener) {
             if ($event instanceof $listener['type']) {
-                $listener['callback'] = \SFW\Callback::normalize($listener['callback']);
+                $listener['callback'] = \SFW\Utility::normalizeCallback($listener['callback']);
 
                 if ($listener['mode'] === self::DISPOSABLE) {
                     unset(self::$cache['listeners'][$i]);

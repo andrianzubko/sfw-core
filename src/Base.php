@@ -7,8 +7,7 @@ namespace SFW;
 /**
  * Abstraction for almost all framework classes.
  */
-#[\AllowDynamicProperties]
-abstract class Base extends \stdClass
+abstract class Base
 {
     /**
      * System environment.

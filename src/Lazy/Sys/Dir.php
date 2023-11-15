@@ -35,27 +35,35 @@ class Dir extends \SFW\Lazy\Sys
         bool $withDir = false,
         int $order = SCANDIR_SORT_ASCENDING,
     ): array {
+        if (!is_dir($dir)) {
+            return [];
+        }
+
+        $items = scandir($dir, $order);
+
+        if ($items === false) {
+            return [];
+        }
+
         $scanned = [];
 
-        if (is_dir($dir) && ($items = scandir($dir, $order)) !== false) {
-            foreach ($items as $item) {
-                if ($item === '.' || $item === '..') {
-                    continue;
-                }
+        foreach ($items as $item) {
+            if ($item === '.' || $item === '..') {
+                continue;
+            }
 
-                if (!$recursive || is_file("$dir/$item")) {
-                    if ($withDir) {
-                        $scanned[] = "$dir/$item";
-                    } else {
-                        $scanned[] = $item;
-                    }
+            if (!$recursive || is_file("$dir/$item")) {
+                if ($withDir) {
+                    $scanned[] = "$dir/$item";
                 } else {
-                    foreach ($this->scan("$dir/$item", true, false, $order) as $subItem) {
-                        if ($withDir) {
-                            $scanned[] = "$dir/$item/$subItem";
-                        } else {
-                            $scanned[] = "$item/$subItem";
-                        }
+                    $scanned[] = $item;
+                }
+            } else {
+                foreach ($this->scan("$dir/$item", true, false, $order) as $subItem) {
+                    if ($withDir) {
+                        $scanned[] = "$dir/$item/$subItem";
+                    } else {
+                        $scanned[] = "$item/$subItem";
                     }
                 }
             }
@@ -87,35 +95,39 @@ class Dir extends \SFW\Lazy\Sys
      */
     public function remove(string $dir, bool $recursive = true): bool
     {
+        if (!is_dir($dir)) {
+            return false;
+        }
+
         $success = true;
 
-        if (is_dir($dir)) {
-            if ($recursive) {
-                if (($items = scandir($dir)) !== false) {
-                    foreach ($items as $item) {
-                        if ($item === '.' || $item === '..') {
-                            continue;
-                        }
+        if ($recursive) {
+            $items = scandir($dir);
 
-                        if (is_dir("$dir/$item")) {
-                            if (!$this->remove("$dir/$item")) {
-                                $success = false;
-                            }
-                        } elseif (!unlink("$dir/$item")) {
-                            $success = false;
-                        }
+            if ($items === false) {
+                return false;
+            }
+
+            foreach ($items as $item) {
+                if ($item === '.' || $item === '..') {
+                    continue;
+                }
+
+                if (is_dir("$dir/$item")) {
+                    if (!$this->remove("$dir/$item")) {
+                        $success = false;
                     }
-                } else {
+                } elseif (!unlink("$dir/$item")) {
                     $success = false;
                 }
             }
-
-            if ($success && !rmdir($dir)) {
-                $success = false;
-            }
         }
 
-        return $success;
+        if ($success) {
+            return rmdir($dir);
+        }
+
+        return false;
     }
 
     /**
@@ -123,24 +135,28 @@ class Dir extends \SFW\Lazy\Sys
      */
     public function clear(string $dir, bool $recursive = true): bool
     {
+        if (!is_dir($dir)) {
+            return false;
+        }
+
+        $items = scandir($dir);
+
+        if ($items === false) {
+            return false;
+        }
+
         $success = true;
 
-        if (is_dir($dir)) {
-            if (($items = scandir($dir)) !== false) {
-                foreach ($items as $item) {
-                    if ($item === '.' || $item === '..') {
-                        continue;
-                    }
+        foreach ($items as $item) {
+            if ($item === '.' || $item === '..') {
+                continue;
+            }
 
-                    if (is_dir("$dir/$item")) {
-                        if (!$this->remove("$dir/$item", $recursive)) {
-                            $success = false;
-                        }
-                    } elseif (!unlink("$dir/$item")) {
-                        $success = false;
-                    }
+            if (is_dir("$dir/$item")) {
+                if (!$this->remove("$dir/$item", $recursive)) {
+                    $success = false;
                 }
-            } else {
+            } elseif (!unlink("$dir/$item")) {
                 $success = false;
             }
         }
@@ -153,24 +169,30 @@ class Dir extends \SFW\Lazy\Sys
      */
     public function copy(string $source, string $target): bool
     {
+        if (!$this->create($target)) {
+            return false;
+        }
+
+        $items = scandir($source);
+
+        if ($items === false) {
+            return false;
+        }
+
         $success = true;
 
-        if ($this->create($target) && ($items = scandir($source)) !== false) {
-            foreach ($items as $item) {
-                if ($item === '.' || $item === '..') {
-                    continue;
-                }
+        foreach ($items as $item) {
+            if ($item === '.' || $item === '..') {
+                continue;
+            }
 
-                if (is_dir("$source/$item")) {
-                    if (!$this->copy("$source/$item", "$target/$item")) {
-                        $success = false;
-                    }
-                } elseif (!self::sys('File')->copy("$source/$item", "$target/$item", false)) {
+            if (is_dir("$source/$item")) {
+                if (!$this->copy("$source/$item", "$target/$item")) {
                     $success = false;
                 }
+            } elseif (!self::sys('File')->copy("$source/$item", "$target/$item", false)) {
+                $success = false;
             }
-        } else {
-            $success = false;
         }
 
         return $success;

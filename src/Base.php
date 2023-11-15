@@ -7,7 +7,7 @@ namespace SFW;
 /**
  * Abstraction for almost all framework classes.
  */
-abstract class Base
+abstract class Base extends \stdClass
 {
     /**
      * System environment.

@@ -79,13 +79,15 @@ final class Merger extends Base
 
             foreach (self::$sys['config']['merger_sources'] as $target => $sources) {
                 foreach ((array) $sources as $source) {
-                    if (preg_match('/\.(css|js)$/', $source, $M)) {
-                        $this->sources[$M[1]][$target] ??= [];
+                    if (!preg_match('/\.(css|js)$/', $source, $M)) {
+                        continue;
+                    }
 
-                        foreach (glob($source) as $file) {
-                            if (is_file($file)) {
-                                $this->sources[$M[1]][$target][] = $file;
-                            }
+                    $this->sources[$M[1]][$target] ??= [];
+
+                    foreach (glob($source) as $file) {
+                        if (is_file($file)) {
+                            $this->sources[$M[1]][$target][] = $file;
                         }
                     }
                 }
@@ -156,11 +158,7 @@ final class Merger extends Base
 
         foreach (array_keys($this->sources) as $type) {
             foreach ($this->sources[$type] as $target => $files) {
-                $file = sprintf('%s/%s.%s',
-                    self::$sys['config']['merger_dir'],
-                    $this->cache['time'],
-                    $target
-                );
+                $file = sprintf('%s/%s.%s', self::$sys['config']['merger_dir'], $this->cache['time'], $target);
 
                 if ($type === 'js') {
                     $contents = $this->mergeJs($files);

@@ -87,7 +87,7 @@ abstract class Runner extends Base
 
             if (!date_default_timezone_set(self::$sys['config']['timezone'])) {
                 throw new Exception\BadConfiguration(
-                    sprintf('Unable to set timezone %s', self::$sys['config']['timezone'])
+                    sprintf('Unable to set timezone %s', self::$sys['config']['timezone']),
                 );
             }
 
@@ -179,7 +179,7 @@ abstract class Runner extends Base
             self::sys('Logger')->error($e);
 
             self::sys('Logger')->emergency('Application terminated!', options: [
-                'append_file_and_line' => false
+                'append_file_and_line' => false,
             ]);
 
             if (PHP_SAPI === 'cli') {
@@ -203,7 +203,7 @@ abstract class Runner extends Base
                 case E_USER_NOTICE:
                     self::sys('Logger')->notice($message, options: [
                         'file' => $file,
-                        'line' => $line
+                        'line' => $line,
                     ]);
                     break;
                 case E_WARNING:
@@ -213,7 +213,7 @@ abstract class Runner extends Base
                 case E_STRICT:
                     self::sys('Logger')->warning($message, options: [
                         'file' => $file,
-                        'line' => $line
+                        'line' => $line,
                     ]);
                     break;
                 default:

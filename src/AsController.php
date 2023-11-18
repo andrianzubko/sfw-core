@@ -8,7 +8,7 @@ namespace SFW;
  * Registers controller.
  */
 #[\Attribute(\Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
-final class AsController
+class AsController
 {
     /**
      * Registers controller.

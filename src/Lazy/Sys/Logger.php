@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace SFW\Lazy\Sys;
 
-use Psr\Log\{LoggerInterface, LogLevel};
+use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
 
 /**
  * Logger.

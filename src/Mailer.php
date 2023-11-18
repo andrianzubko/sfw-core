@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace SFW;
 
-use PHPMailer\PHPMailer\{PHPMailer, Exception AS PHPMailerException};
+use PHPMailer\PHPMailer\Exception AS PHPMailerException;
+use PHPMailer\PHPMailer\PHPMailer;
 
 /**
  * Mailer.

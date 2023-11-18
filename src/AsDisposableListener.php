@@ -8,4 +8,4 @@ namespace SFW;
  * Registers disposable listener (can be called only once).
  */
 #[\Attribute(\Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
-final class AsDisposableListener extends AsSomeListener {}
+class AsDisposableListener extends AsListener {}

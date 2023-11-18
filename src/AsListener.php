@@ -8,4 +8,10 @@ namespace SFW;
  * Registers listener (can be called many times).
  */
 #[\Attribute(\Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
-final class AsListener extends AsSomeListener {}
+class AsListener
+{
+    /**
+     * Registers some listener.
+     */
+    public function __construct(public float $priority = 0.0) {}
+}

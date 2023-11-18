@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace SFW\Lazy\Sys;
 
-use Psr\EventDispatcher\{EventDispatcherInterface, StoppableEventInterface};
+use Psr\EventDispatcher\EventDispatcherInterface;
+use Psr\EventDispatcher\StoppableEventInterface;
 
 /**
  * Events dispatcher.

@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace SFW\Router;
 
+use SFW\AsCommand;
+use SFW\Exception;
+use SFW\Router;
+
 /**
  * Commands router.
  */
-final class Command extends \SFW\Router
+final class Command extends Router
 {
     /**
      * Internal cache.
@@ -17,7 +21,7 @@ final class Command extends \SFW\Router
     /**
      * Reads and actualizes cache if needed.
      *
-     * @throws \SFW\Exception\Runtime
+     * @throws Exception\Runtime
      */
     public function __construct()
     {
@@ -71,7 +75,7 @@ final class Command extends \SFW\Router
             $rClass = new \ReflectionClass($class);
 
             foreach ($rClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $rMethod) {
-                foreach ($rMethod->getAttributes(\SFW\AsCommand::class) as $rAttribute) {
+                foreach ($rMethod->getAttributes(AsCommand::class) as $rAttribute) {
                     if ($rMethod->isConstructor()) {
                         self::sys('Logger')->warning("Constructor can't be a command", options: [
                             'file' => $rMethod->getFileName(),

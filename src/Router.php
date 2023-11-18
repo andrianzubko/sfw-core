@@ -27,7 +27,7 @@ abstract class Router extends Base
     /**
      * Reads and actualizes cache if needed.
      *
-     * @throws \SFW\Exception\Runtime
+     * @throws Exception\Runtime
      */
     protected function readCache(string $cacheFile): void
     {
@@ -88,12 +88,12 @@ abstract class Router extends Base
     /**
      * Saves cache.
      *
-     * @throws \SFW\Exception\Runtime
+     * @throws Exception\Runtime
      */
     private function saveCache(string $cacheFile): void
     {
         if (!self::sys('File')->putVar($cacheFile, static::$cache, LOCK_EX)) {
-            throw new \SFW\Exception\Runtime("Unable to write file $cacheFile");
+            throw new Exception\Runtime("Unable to write file $cacheFile");
         }
     }
 

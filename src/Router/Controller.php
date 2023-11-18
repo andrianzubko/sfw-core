@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace SFW\Router;
 
+use SFW\AsController;
+use SFW\Exception;
+use SFW\Router;
+
 /**
  * Controllers router.
  */
-final class Controller extends \SFW\Router
+final class Controller extends Router
 {
     /**
      * Internal cache.
@@ -17,7 +21,7 @@ final class Controller extends \SFW\Router
     /**
      * Reads and actualizes cache if needed.
      *
-     * @throws \SFW\Exception\Runtime
+     * @throws Exception\Runtime
      */
     public function __construct()
     {
@@ -140,7 +144,7 @@ final class Controller extends \SFW\Router
             $rClass = new \ReflectionClass($class);
 
             foreach ($rClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $rMethod) {
-                foreach ($rMethod->getAttributes(\SFW\AsController::class) as $rAttribute) {
+                foreach ($rMethod->getAttributes(AsController::class) as $rAttribute) {
                     if ($rMethod->isConstructor()) {
                         self::sys('Logger')->warning("Constructor can't be a controller", options: [
                             'file' => $rMethod->getFileName(),

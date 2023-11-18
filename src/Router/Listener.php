@@ -4,10 +4,17 @@ declare(strict_types=1);
 
 namespace SFW\Router;
 
+use SFW\AsDisposableListener;
+use SFW\AsListener;
+use SFW\AsPersistentListener;
+use SFW\Exception;
+use SFW\Router;
+use SFW\Utility;
+
 /**
  * Listeners router.
  */
-final class Listener extends \SFW\Router
+final class Listener extends Router
 {
     /**
      * Listener can be called only once.
@@ -32,7 +39,7 @@ final class Listener extends \SFW\Router
     /**
      * Reads and actualizes cache if needed.
      *
-     * @throws \SFW\Exception\Runtime
+     * @throws Exception\Runtime
      */
     public function __construct()
     {
@@ -44,7 +51,7 @@ final class Listener extends \SFW\Router
     /**
      * Adds listener.
      *
-     * @throws \SFW\Exception\InvalidArgument
+     * @throws Exception\InvalidArgument
      */
     public function add(callable $callback, string $mode): void
     {
@@ -53,7 +60,7 @@ final class Listener extends \SFW\Router
         $type = $params ? $params[0]->getType() : null;
 
         if ($type === null) {
-            throw new \SFW\Exception\InvalidArgument('Listener must have first parameter with declared type');
+            throw new Exception\InvalidArgument('Listener must have first parameter with declared type');
         }
 
         $listener = [];
@@ -104,7 +111,7 @@ final class Listener extends \SFW\Router
     {
         foreach (self::$cache['listeners'] as $i => &$listener) {
             if ($event instanceof $listener['type']) {
-                $listener['callback'] = \SFW\Utility::normalizeCallback($listener['callback']);
+                $listener['callback'] = Utility::normalizeCallback($listener['callback']);
 
                 if ($listener['mode'] === self::DISPOSABLE) {
                     unset(self::$cache['listeners'][$i]);
@@ -133,7 +140,7 @@ final class Listener extends \SFW\Router
 
             foreach ($rClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $rMethod) {
                 foreach (
-                    $rMethod->getAttributes(\SFW\AsListener::class,
+                    $rMethod->getAttributes(AsListener::class,
                         \ReflectionAttribute::IS_INSTANCEOF) as $rAttribute
                 ) {
                     if ($rMethod->isConstructor()) {
@@ -167,8 +174,8 @@ final class Listener extends \SFW\Router
                     $listener['type'] = (string) $type;
 
                     $listener['mode'] = match ($instance::class) {
-                        \SFW\AsPersistentListener::class => self::PERSISTENT,
-                        \SFW\AsDisposableListener::class => self::DISPOSABLE,
+                        AsPersistentListener::class => self::PERSISTENT,
+                        AsDisposableListener::class => self::DISPOSABLE,
                         default => self::REGULAR,
                     };
 

@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace SFW\Lazy;
 
+use SFW\Lazy;
+
 /**
  * Abstraction for system Lazy classes.
  */
-abstract class Sys extends \SFW\Lazy
+abstract class Sys extends Lazy
 {
     /**
      * Leave only allowed configuration parameters.

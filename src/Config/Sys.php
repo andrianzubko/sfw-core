@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace SFW\Config;
 
+use SFW\Config;
+use SFW\Databaser;
+
 /**
  * Abstraction for system configuration.
  */
-abstract class Sys extends \SFW\Config
+abstract class Sys extends Config
 {
     /**
      * Default system configuration.
@@ -77,7 +80,7 @@ abstract class Sys extends \SFW\Config
 
         $config['db_pgsql_charset'] = 'utf-8';
 
-        $config['db_pgsql_mode'] = \SFW\Databaser::ASSOC;
+        $config['db_pgsql_mode'] = Databaser::ASSOC;
 
         /**
          * Mysql.
@@ -96,7 +99,7 @@ abstract class Sys extends \SFW\Config
 
         $config['db_mysql_charset'] = 'utf8mb4';
 
-        $config['db_mysql_mode'] = \SFW\Databaser::ASSOC;
+        $config['db_mysql_mode'] = Databaser::ASSOC;
 
         /* Log slow queries.
          *

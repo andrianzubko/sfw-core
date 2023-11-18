@@ -133,7 +133,7 @@ final class Listener extends \SFW\Router
 
             foreach ($rClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $rMethod) {
                 foreach (
-                    $rMethod->getAttributes(\SFW\AsSomeListener::class,
+                    $rMethod->getAttributes(\SFW\AsListener::class,
                         \ReflectionAttribute::IS_INSTANCEOF) as $rAttribute
                 ) {
                     if ($rMethod->isConstructor()) {

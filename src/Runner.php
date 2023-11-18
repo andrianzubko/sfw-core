@@ -232,10 +232,10 @@ abstract class Runner extends Base
         $sysLazies = (new \ReflectionClass(Base::class))->getStaticPropertyValue('sysLazies');
 
         foreach ($sysLazies as $name => $lazy) {
-            if ($lazy instanceof \SFW\Databaser\Driver && $name !== 'Db' && $lazy->isInTrans()) {
+            if ($lazy instanceof Databaser\Driver && $name !== 'Db' && $lazy->isInTrans()) {
                 try {
                     $lazy->rollback();
-                } catch (\SFW\Databaser\Exception) {}
+                } catch (Databaser\Exception) {}
             }
         }
 
